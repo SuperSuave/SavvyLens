@@ -41,7 +41,8 @@ public:
                                       const QColor& bg,
                                       qreal minContrast = 4.5);
 
-    static qreal contrastRatio(const QColor& a, const QColor& b);
+    static qreal contrastRatio(const QColor &a, const QColor &b);
+    static QString logListStyleSheet();
 
 private:
     static QPalette darkPalette();

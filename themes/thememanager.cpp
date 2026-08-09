@@ -188,3 +188,19 @@ QColor ThemeManager::adjustedForContrast(const QColor& fg,
 
     return bgIsDark ? QColor("#f0f0f0") : QColor("#101010");
 }
+
+QString ThemeManager::logListStyleSheet()
+{
+    const ThemeColors c = colors();
+
+    return QStringLiteral(R"(
+        QListWidget::item:selected,
+        QListWidget::item:selected:active,
+        QListWidget::item:selected:!active {
+            background-color: %1;
+            color: %2;
+        }
+    )")
+        .arg(c.selectionBg.name(),
+             c.selectionText.name());
+}

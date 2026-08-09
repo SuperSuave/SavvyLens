@@ -2051,9 +2051,12 @@ void MainWindow::showScriptingWindow()
 {
     if (!scriptingWindow)
     {
-        scriptingWindow = new ScriptingWindow(model->getListReference());
+        scriptingWindow = new ScriptingWindow(model->getListReference(), this);
     }
+
     scriptingWindow->show();
+    scriptingWindow->raise();
+    scriptingWindow->activateWindow();
 }
 
 void MainWindow::showRangeWindow()

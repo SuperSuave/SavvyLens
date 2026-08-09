@@ -1,200 +1,18 @@
-#include <QJSValueIterator>
 #include <QDebug>
+#include <QJSValueIterator>
+#include <QTableWidget>
 
 #include "scriptcontainer.h"
 #include "connections/canconmanager.h"
 
-ScriptContainer::ScriptContainer()
+/* -------------------------------------------------------------------------
+ * CANScriptHelper
+ * ------------------------------------------------------------------------- */
+
+CANScriptHelper::CANScriptHelper(QJSEngine *engine, QObject *parent)
+    : QObject(parent),
+      scriptEngine(engine)
 {
-    qDebug() << "Script Container Constructor";
-    scriptEngine = new QJSEngine();
-    canHelper = new CANScriptHelper(scriptEngine);
-    isoHelper = new ISOTPScriptHelper(scriptEngine);
-    udsHelper = new UDSScriptHelper(scriptEngine);
-    connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
-}
-
-ScriptContainer::~ScriptContainer()
-{
-    qDebug() << "Script Container Destructor " << (uint64_t)this << "c: " << (uint64_t)canHelper;
-    timer.stop();
-    disconnect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
-    if (scriptEngine)
-    {
-        scriptText = "";
-        compileScript();
-        //delete scriptEngine;   //doing this here seems to cause a crash. No crash if you don't.
-        //scriptEngine = nullptr;
-    }
-    if (canHelper)
-    {
-        delete canHelper;
-        canHelper = nullptr;
-    }
-    if (isoHelper)
-    {
-        delete isoHelper;
-        isoHelper = nullptr;
-    }
-    if (udsHelper)
-    {
-        delete udsHelper;
-        udsHelper = nullptr;
-    }
-    qDebug() << "end of destruct";
-}
-
-void ScriptContainer::compileScript()
-{
-    QJSValue result = scriptEngine->evaluate(scriptText, fileName);
-
-    emit sendLog("Compiling script...");
-
-    canHelper->clearFilters();
-    isoHelper->clearFilters();
-    udsHelper->clearFilters();
-
-    if (result.isError())
-    {
-
-        emit sendLog("SCRIPT EXCEPTION!");
-        emit sendLog("Line: " + result.property("lineNumber").toString());
-        emit sendLog(result.property("message").toString());
-        emit sendLog("Stack:");
-        emit sendLog(result.property("stack").toString());
-    }
-    else
-    {
-        compiledScript = result;
-
-        //Add a bunch of helper objects into javascript that the scripts
-        //can use to interact with the CAN buses
-        QJSValue hostObj = scriptEngine->newQObject(this);
-        scriptEngine->globalObject().setProperty("host", hostObj);
-        QJSValue canObj = scriptEngine->newQObject(canHelper);
-        scriptEngine->globalObject().setProperty("can", canObj);
-        QJSValue isoObj = scriptEngine->newQObject(isoHelper);
-        scriptEngine->globalObject().setProperty("isotp", isoObj);
-        QJSValue udsObj = scriptEngine->newQObject(udsHelper);
-        scriptEngine->globalObject().setProperty("uds", udsObj);
-
-        //Find out which callbacks the script has created.
-        setupFunction = scriptEngine->globalObject().property("setup");
-        canHelper->setRxCallback(scriptEngine->globalObject().property("gotCANFrame"));
-        isoHelper->setRxCallback(scriptEngine->globalObject().property("gotISOTPMessage"));
-        udsHelper->setRxCallback(scriptEngine->globalObject().property("gotUDSMessage"));
-
-        tickFunction = scriptEngine->globalObject().property("tick");
-
-        if (setupFunction.isCallable())
-        {
-            qDebug() << "setup exists";
-            QJSValue res = setupFunction.call();
-            if (res.isError())
-            {
-                emit sendLog("Error in setup function on line " + res.property("lineNumber").toString());
-                emit sendLog(res.property("message").toString());
-            }
-        }
-        if (tickFunction.isCallable()) qDebug() << "tick exists";
-    }
-}
-
-void ScriptContainer::setScriptWindow(ScriptingWindow *win)
-{
-    window = win;
-    connect(this, &ScriptContainer::sendLog, window, &ScriptingWindow::log);
-}
-
-void ScriptContainer::log(QJSValue logString)
-{
-    QString val = logString.toString();
-    emit sendLog(val);
-}
-
-void ScriptContainer::setTickInterval(QJSValue interval)
-{
-    int intervalValue = interval.toInt();
-    qDebug() << "called set tick interval with value " << intervalValue;
-    if (intervalValue > 0)
-    {
-        timer.setInterval(intervalValue);
-        timer.start();
-    }
-    else timer.stop();
-}
-
-void ScriptContainer::tick()
-{
-    if (tickFunction.isCallable())
-    {
-        //qDebug() << "Calling tick function";
-        QJSValue res = tickFunction.call();
-        if (res.isError())
-        {
-            emit sendLog("Error in tick function on line " + res.property("lineNumber").toString());
-            emit sendLog(res.property("message").toString());
-        }
-    }
-}
-
-void ScriptContainer::addParameter(QJSValue name)
-{
-    scriptParams.append(name.toString());
-}
-
-void ScriptContainer::updateValuesTable(QTableWidget *widget)
-{
-    QString value;
-
-    foreach (QString paramName, scriptParams)
-    {
-        value = scriptEngine->globalObject().property(paramName).toString();
-        qDebug() << paramName << " - " << value;
-        bool found = false;
-        for (int i = 0; i < widget->rowCount(); i++)
-        {
-            if (widget->item(i, 0) && widget->item(i, 0)->text().compare(paramName) == 0)
-            {
-                found = true;
-                if (!widget->item(i, 1)->isSelected())
-                {
-                    widget->item(i,1)->setText(value);
-                }
-                break;
-            }
-        }
-        if (!found)
-        {
-            int row = widget->rowCount();
-            widget->insertRow(widget->rowCount());
-            QTableWidgetItem *item;
-            item = new QTableWidgetItem();
-            item->setText(paramName);
-            item->setFlags(Qt::ItemIsEnabled);
-            widget->setItem(row, 0, item);
-            item = new QTableWidgetItem();
-            item->setText(value);
-            widget->setItem(row, 1, item);
-        }
-    }
-}
-
-void ScriptContainer::updateParameter(QString name, QString value)
-{
-    qDebug() << name << " * " << value;
-    QJSValue val(value);
-    scriptEngine->globalObject().setProperty(name, val);
-}
-
-
-
-
-/* CANScriptHandler Methods */
-
-CANScriptHelper::CANScriptHelper(QJSEngine *engine)
-{
-    scriptEngine = engine;
 }
 
 void CANScriptHelper::setRxCallback(QJSValue cb)
@@ -204,11 +22,10 @@ void CANScriptHelper::setRxCallback(QJSValue cb)
 
 void CANScriptHelper::setFilter(QJSValue id, QJSValue mask, QJSValue bus)
 {
-    uint32_t idVal = id.toUInt();
-    uint32_t maskVal = mask.toUInt();
-    int busVal = bus.toInt();
-    qDebug() << "Called set filter";
-    qDebug() << idVal << "*" << maskVal << "*" << busVal;
+    const uint32_t idVal = id.toUInt();
+    const uint32_t maskVal = mask.toUInt();
+    const int busVal = bus.toInt();
+
     CANFilter filter;
     filter.setFilter(idVal, maskVal, busVal);
     filters.append(filter);
@@ -218,115 +35,127 @@ void CANScriptHelper::setFilter(QJSValue id, QJSValue mask, QJSValue bus)
 
 void CANScriptHelper::clearFilters()
 {
-    qDebug() << "Called clear filters";
-    foreach (CANFilter filter, filters)
+    for (CANFilter &filter : filters)
     {
-        CANConManager::getInstance()->removeTargettedFrame(filter.bus, filter.ID, filter.mask, this);
+        CANConManager::getInstance()->removeTargettedFrame(
+            filter.bus, filter.ID, filter.mask, this);
     }
 
     filters.clear();
+    gotFrameFunction = QJSValue();
 }
 
-void CANScriptHelper::sendFrame(QJSValue bus, QJSValue id, QJSValue length, QJSValue data)
+void CANScriptHelper::sendFrame(QJSValue bus, QJSValue id,
+                                QJSValue length, QJSValue data)
 {
+    if (!data.isArray())
+    {
+        qWarning() << "Script sendFrame data argument is not an array";
+        return;
+    }
+
+    const int requestedLength = length.toInt();
+    if (requestedLength < 0 || requestedLength > 64)
+    {
+        qWarning() << "Script sendFrame invalid payload length:" << requestedLength;
+        return;
+    }
+
     CANFrame frame;
     frame.setExtendedFrameFormat(false);
-    frame.setFrameId(static_cast<uint32_t>(id.toInt()));
-    QByteArray bytes(length.toUInt(), 0);
+    frame.setFrameId(id.toUInt());
 
-    if (!data.isArray()) qDebug() << "data isn't an array";
-
+    QByteArray bytes(requestedLength, 0);
     for (int i = 0; i < bytes.length(); i++)
     {
-        bytes[i] = (uint8_t)data.property(i).toInt();
+        bytes[i] = static_cast<char>(data.property(i).toInt() & 0xFF);
     }
+
     frame.setPayload(bytes);
-    frame.bus = (uint32_t)bus.toInt();
-    //if (frame.bus > 1) frame.bus = 1;
+    frame.bus = bus.toUInt();
 
-    if (frame.frameId() > 0x7FF) frame.setExtendedFrameFormat(true);
+    if (frame.frameId() > 0x7FF)
+    {
+        frame.setExtendedFrameFormat(true);
+    }
 
-    qDebug() << "sending frame from script";
     CANConManager::getInstance()->sendFrame(frame);
 }
 
 void CANScriptHelper::gotTargettedFrame(const CANFrame &frame)
 {
-    if (!gotFrameFunction.isCallable()) return; //nothing to do if we can't even call the function
-    //qDebug() << "Got frame in script interface";
-
-    const unsigned char *data = reinterpret_cast<const unsigned char *>(frame.payload().constData());
-    int dataLen = frame.payload().length();
-
-    for (int i = 0; i < filters.length(); i++)
+    if (!scriptEngine || !gotFrameFunction.isCallable())
     {
-        if (filters[i].checkFilter(frame.frameId(), frame.bus))
-        {
-            QJSValueList args;
-            args << frame.bus << frame.frameId() << static_cast<uint>(frame.payload().length());
-            QJSValue dataBytes = scriptEngine->newArray(dataLen);
+        return;
+    }
 
-            for (int j = 0; j < dataLen; j++) dataBytes.setProperty(j, QJSValue(data[j]));
-            args.append(dataBytes);
-            gotFrameFunction.call(args);
-            return; //as soon as one filter matches we jump out
+    for (CANFilter &filter : filters)
+    {
+        if (!filter.checkFilter(frame.frameId(), frame.bus))
+        {
+            continue;
         }
+
+        const QByteArray payload = frame.payload();
+        QJSValue dataBytes = scriptEngine->newArray(payload.length());
+
+        for (int i = 0; i < payload.length(); i++)
+        {
+            dataBytes.setProperty(
+                i,
+                QJSValue(static_cast<unsigned char>(payload.at(i))));
+        }
+
+        QJSValueList args;
+        args << QJSValue(static_cast<int>(frame.bus));
+        args << QJSValue(static_cast<double>(frame.frameId()));
+        args << QJSValue(payload.length());
+        args << dataBytes;
+
+        const QJSValue result = gotFrameFunction.call(args);
+        if (result.isError())
+        {
+            reportCallbackError(QStringLiteral("gotCANFrame"), result);
+        }
+
+        return;
     }
 }
 
-
-
-
-/* ISOTPScriptHelper methods */
-ISOTPScriptHelper::ISOTPScriptHelper(QJSEngine *engine)
+void CANScriptHelper::reportCallbackError(const QString &phase,
+                                          const QJSValue &result)
 {
-    scriptEngine = engine;
-    handler = new ISOTP_HANDLER;
-    connect(handler, SIGNAL(newISOMessage(ISOTP_MESSAGE)), this, SLOT(newISOMessage(ISOTP_MESSAGE)));
+    emit callbackError(
+        phase,
+        result.property(QStringLiteral("lineNumber")).toInt(),
+        result.property(QStringLiteral("message")).toString(),
+        result.property(QStringLiteral("stack")).toString());
+}
+
+/* -------------------------------------------------------------------------
+ * ISOTPScriptHelper
+ * ------------------------------------------------------------------------- */
+
+ISOTPScriptHelper::ISOTPScriptHelper(QJSEngine *engine, QObject *parent)
+    : QObject(parent),
+      scriptEngine(engine),
+      handler(new ISOTP_HANDLER)
+{
+    connect(handler, SIGNAL(newISOMessage(ISOTP_MESSAGE)),
+            this, SLOT(newISOMessage(ISOTP_MESSAGE)));
+
     handler->setReception(true);
     handler->setFlowCtrl(true);
 }
 
-void ISOTPScriptHelper::clearFilters()
+ISOTPScriptHelper::~ISOTPScriptHelper()
 {
-    handler->clearAllFilters();
-}
-
-void ISOTPScriptHelper::setFilter(QJSValue id, QJSValue mask, QJSValue bus)
-{
-    uint32_t idVal = id.toUInt();
-    uint32_t maskVal = mask.toUInt();
-    int busVal = bus.toInt();
-    qDebug() << "Called ISOTP set filter";
-    qDebug() << idVal << "*" << maskVal << "*" << busVal;
-
-    handler->addFilter(busVal, idVal, maskVal);
-}
-
-void ISOTPScriptHelper::sendISOTP(QJSValue bus, QJSValue id, QJSValue length, QJSValue dataBytes)
-{
-    ISOTP_MESSAGE msg;
-    msg.setExtendedFrameFormat(false);
-    msg.setFrameId(id.toUInt());
-    QByteArray dataArray(length.toUInt(), 0);
-
-    int dataLen = dataArray.length();
-
-    if (!dataBytes.isArray()) qDebug() << "data isn't an array";
-
-    for (int i = 0; i < dataLen; i++)
+    if (handler)
     {
-        dataArray[i] = static_cast<uint8_t>(dataBytes.property(i).toInt());
+        handler->clearAllFilters();
+        delete handler;
+        handler = nullptr;
     }
-    msg.setPayload(dataArray);
-
-    msg.bus = bus.toInt();
-
-    if (msg.frameId() > 0x7FF) msg.setExtendedFrameFormat(true);
-
-    qDebug() << "sending ISOTP message from script";
-    
-    handler->sendISOTPFrame(msg.bus, msg.frameId(), msg.payload());
 }
 
 void ISOTPScriptHelper::setRxCallback(QJSValue cb)
@@ -334,77 +163,128 @@ void ISOTPScriptHelper::setRxCallback(QJSValue cb)
     gotFrameFunction = cb;
 }
 
-void ISOTPScriptHelper::newISOMessage(ISOTP_MESSAGE msg)
+void ISOTPScriptHelper::clearFilters()
 {
-    qDebug() << "isotpScriptHelper got a ISOTP message";
-    if (!gotFrameFunction.isCallable()) return; //nothing to do if we can't even call the function
-    //qDebug() << "Got frame in script interface";
+    if (handler)
+    {
+        handler->clearAllFilters();
+    }
 
-    QJSValueList args;
-    args << msg.bus << msg.frameId() << static_cast<uint>(msg.payload().length());
-    QJSValue dataBytes = scriptEngine->newArray(static_cast<uint>(msg.payload().length()));
-
-    for (int j = 0; j < msg.payload().length(); j++) dataBytes.setProperty(static_cast<quint32>(j), QJSValue((unsigned char)msg.payload()[j]));
-    args.append(dataBytes);
-    gotFrameFunction.call(args);
+    gotFrameFunction = QJSValue();
 }
 
-
-
-
-/* UDSScriptHelper methods */
-UDSScriptHelper::UDSScriptHelper(QJSEngine *engine)
+void ISOTPScriptHelper::setFilter(QJSValue id, QJSValue mask, QJSValue bus)
 {
-    scriptEngine = engine;
-    handler = new UDS_HANDLER;
-    connect(handler, SIGNAL(newUDSMessage(UDS_MESSAGE)), this, SLOT(newUDSMessage(UDS_MESSAGE)));
-    handler->setReception(true);
-    handler->setFlowCtrl(true); //uds potentially requires flow control so turn it on
+    if (!handler)
+    {
+        return;
+    }
+
+    handler->addFilter(bus.toInt(), id.toUInt(), mask.toUInt());
 }
 
-void UDSScriptHelper::clearFilters()
+void ISOTPScriptHelper::sendISOTP(QJSValue bus, QJSValue id,
+                                  QJSValue length, QJSValue dataBytes)
 {
-    handler->clearAllFilters();
-}
+    if (!handler || !dataBytes.isArray())
+    {
+        qWarning() << "Script sendISOTP requires an array payload";
+        return;
+    }
 
-void UDSScriptHelper::setFilter(QJSValue id, QJSValue mask, QJSValue bus)
-{
-    uint32_t idVal = id.toUInt();
-    uint32_t maskVal = mask.toUInt();
-    int busVal = bus.toInt();
-    qDebug() << "Called UDS set filter";
-    qDebug() << idVal << "*" << maskVal << "*" << busVal;
+    const int requestedLength = length.toInt();
+    if (requestedLength < 0)
+    {
+        qWarning() << "Script sendISOTP invalid payload length:" << requestedLength;
+        return;
+    }
 
-    handler->addFilter(busVal, idVal, maskVal);
-}
-
-void UDSScriptHelper::sendUDS(QJSValue bus, QJSValue id, QJSValue service, QJSValue sublen, QJSValue subFunc, QJSValue length, QJSValue dataBytes)
-{
-    UDS_MESSAGE msg;
+    ISOTP_MESSAGE msg;
     msg.setExtendedFrameFormat(false);
     msg.setFrameId(id.toUInt());
-    QByteArray dataArray(length.toUInt(), 0);
-    msg.service = service.toUInt();
-    msg.subFuncLen = sublen.toUInt();
-    msg.subFunc = subFunc.toUInt();
 
-    int dataLen = dataArray.length();
-
-    if (!dataBytes.isArray()) qDebug() << "data isn't an array";
-
-    for (int i = 0; i < dataLen; i++)
+    QByteArray dataArray(requestedLength, 0);
+    for (int i = 0; i < dataArray.length(); i++)
     {
-        dataArray[i] = static_cast<uint8_t>(dataBytes.property(i).toInt());
+        dataArray[i] =
+            static_cast<char>(dataBytes.property(i).toInt() & 0xFF);
     }
-    msg.setPayload(dataArray);
 
+    msg.setPayload(dataArray);
     msg.bus = bus.toInt();
 
-    if (msg.frameId() > 0x7FF) msg.setExtendedFrameFormat( true );
+    if (msg.frameId() > 0x7FF)
+    {
+        msg.setExtendedFrameFormat(true);
+    }
 
-    qDebug() << "sending UDS message from script";
+    handler->sendISOTPFrame(msg.bus, msg.frameId(), msg.payload());
+}
 
-    handler->sendUDSFrame(msg);
+void ISOTPScriptHelper::newISOMessage(ISOTP_MESSAGE msg)
+{
+    if (!scriptEngine || !gotFrameFunction.isCallable())
+    {
+        return;
+    }
+
+    const QByteArray payload = msg.payload();
+    QJSValue dataBytes = scriptEngine->newArray(payload.length());
+
+    for (int i = 0; i < payload.length(); i++)
+    {
+        dataBytes.setProperty(
+            i,
+            QJSValue(static_cast<unsigned char>(payload.at(i))));
+    }
+
+    QJSValueList args;
+    args << QJSValue(static_cast<int>(msg.bus));
+    args << QJSValue(static_cast<double>(msg.frameId()));
+    args << QJSValue(payload.length());
+    args << dataBytes;
+
+    const QJSValue result = gotFrameFunction.call(args);
+    if (result.isError())
+    {
+        reportCallbackError(QStringLiteral("gotISOTPMessage"), result);
+    }
+}
+
+void ISOTPScriptHelper::reportCallbackError(const QString &phase,
+                                            const QJSValue &result)
+{
+    emit callbackError(
+        phase,
+        result.property(QStringLiteral("lineNumber")).toInt(),
+        result.property(QStringLiteral("message")).toString(),
+        result.property(QStringLiteral("stack")).toString());
+}
+
+/* -------------------------------------------------------------------------
+ * UDSScriptHelper
+ * ------------------------------------------------------------------------- */
+
+UDSScriptHelper::UDSScriptHelper(QJSEngine *engine, QObject *parent)
+    : QObject(parent),
+      scriptEngine(engine),
+      handler(new UDS_HANDLER)
+{
+    connect(handler, SIGNAL(newUDSMessage(UDS_MESSAGE)),
+            this, SLOT(newUDSMessage(UDS_MESSAGE)));
+
+    handler->setReception(true);
+    handler->setFlowCtrl(true);
+}
+
+UDSScriptHelper::~UDSScriptHelper()
+{
+    if (handler)
+    {
+        handler->clearAllFilters();
+        delete handler;
+        handler = nullptr;
+    }
 }
 
 void UDSScriptHelper::setRxCallback(QJSValue cb)
@@ -412,19 +292,665 @@ void UDSScriptHelper::setRxCallback(QJSValue cb)
     gotFrameFunction = cb;
 }
 
-void UDSScriptHelper::newUDSMessage(UDS_MESSAGE msg)
+void UDSScriptHelper::clearFilters()
 {
-    //qDebug() << "udsScriptHelper got a UDS message";
-    qDebug() << "UDS script helper. Msg data len: " << msg.payload().length();
-    if (!gotFrameFunction.isCallable()) return; //nothing to do if we can't even call the function
-    qDebug() << "Got frame in script interface";
+    if (handler)
+    {
+        handler->clearAllFilters();
+    }
 
-    QJSValueList args;
-    args << msg.bus << msg.frameId() << msg.service << msg.subFunc << static_cast<uint>(msg.payload().length());
-    QJSValue dataBytes = scriptEngine->newArray(static_cast<unsigned int>(msg.payload().length()));
-
-    for (int j = 0; j < msg.payload().length(); j++) dataBytes.setProperty(static_cast<quint32>(j), QJSValue((unsigned char)msg.payload()[j]));
-    args.append(dataBytes);
-    gotFrameFunction.call(args);
+    gotFrameFunction = QJSValue();
 }
 
+void UDSScriptHelper::setFilter(QJSValue id, QJSValue mask, QJSValue bus)
+{
+    if (!handler)
+    {
+        return;
+    }
+
+    handler->addFilter(bus.toInt(), id.toUInt(), mask.toUInt());
+}
+
+void UDSScriptHelper::sendUDS(QJSValue bus, QJSValue id,
+                              QJSValue service, QJSValue sublen,
+                              QJSValue subFunc, QJSValue length,
+                              QJSValue dataBytes)
+{
+    if (!handler || !dataBytes.isArray())
+    {
+        qWarning() << "Script sendUDS requires an array payload";
+        return;
+    }
+
+    const int requestedLength = length.toInt();
+    if (requestedLength < 0)
+    {
+        qWarning() << "Script sendUDS invalid payload length:" << requestedLength;
+        return;
+    }
+
+    UDS_MESSAGE msg;
+    msg.setExtendedFrameFormat(false);
+    msg.setFrameId(id.toUInt());
+    msg.service = service.toUInt();
+    msg.subFuncLen = sublen.toUInt();
+    msg.subFunc = subFunc.toUInt();
+
+    QByteArray dataArray(requestedLength, 0);
+    for (int i = 0; i < dataArray.length(); i++)
+    {
+        dataArray[i] =
+            static_cast<char>(dataBytes.property(i).toInt() & 0xFF);
+    }
+
+    msg.setPayload(dataArray);
+    msg.bus = bus.toInt();
+
+    if (msg.frameId() > 0x7FF)
+    {
+        msg.setExtendedFrameFormat(true);
+    }
+
+    handler->sendUDSFrame(msg);
+}
+
+void UDSScriptHelper::newUDSMessage(UDS_MESSAGE msg)
+{
+    if (!scriptEngine || !gotFrameFunction.isCallable())
+    {
+        return;
+    }
+
+    const QByteArray payload = msg.payload();
+    QJSValue dataBytes = scriptEngine->newArray(payload.length());
+
+    for (int i = 0; i < payload.length(); i++)
+    {
+        dataBytes.setProperty(
+            i,
+            QJSValue(static_cast<unsigned char>(payload.at(i))));
+    }
+
+    QJSValueList args;
+    args << QJSValue(static_cast<int>(msg.bus));
+    args << QJSValue(static_cast<double>(msg.frameId()));
+    args << QJSValue(static_cast<int>(msg.service));
+    args << QJSValue(static_cast<int>(msg.subFunc));
+    args << QJSValue(payload.length());
+    args << dataBytes;
+
+    const QJSValue result = gotFrameFunction.call(args);
+    if (result.isError())
+    {
+        reportCallbackError(QStringLiteral("gotUDSMessage"), result);
+    }
+}
+
+void UDSScriptHelper::reportCallbackError(const QString &phase,
+                                          const QJSValue &result)
+{
+    emit callbackError(
+        phase,
+        result.property(QStringLiteral("lineNumber")).toInt(),
+        result.property(QStringLiteral("message")).toString(),
+        result.property(QStringLiteral("stack")).toString());
+}
+
+/* -------------------------------------------------------------------------
+ * ScriptContainer
+ * ------------------------------------------------------------------------- */
+
+ScriptContainer::ScriptContainer(QObject *parent)
+    : QObject(parent)
+{
+    connect(&timer, &QTimer::timeout, this, &ScriptContainer::tick);
+}
+
+ScriptContainer::~ScriptContainer()
+{
+    timer.stop();
+    tearDownRuntime();
+}
+
+void ScriptContainer::setScriptWindow(ScriptingWindow *win)
+{
+    if (window == win)
+    {
+        return;
+    }
+
+    if (window)
+    {
+        disconnect(this, nullptr, window, nullptr);
+    }
+
+    window = win;
+
+    if (window)
+    {
+        connect(this, &ScriptContainer::sendLog,
+                window, &ScriptingWindow::log);
+    }
+}
+
+ScriptContainer::ScriptRunState ScriptContainer::state() const
+{
+    return runState;
+}
+
+bool ScriptContainer::isRunning() const
+{
+    return runState == ScriptRunState::Running;
+}
+
+bool ScriptContainer::isEnabled() const
+{
+    return enabled;
+}
+
+QString ScriptContainer::stateText() const
+{
+    switch (runState)
+    {
+    case ScriptRunState::Stopped:
+        return QStringLiteral("Stopped");
+
+    case ScriptRunState::Starting:
+        return QStringLiteral("Starting");
+
+    case ScriptRunState::Running:
+        return QStringLiteral("Running");
+
+    case ScriptRunState::Stopping:
+        return QStringLiteral("Stopping");
+
+    case ScriptRunState::Error:
+        return QStringLiteral("Error");
+
+    case ScriptRunState::Disabled:
+        return QStringLiteral("Disabled");
+    }
+
+    return QStringLiteral("Unknown");
+}
+
+bool ScriptContainer::validateScript(const QString &source)
+{
+    /*
+     * QJSEngine has no checkSyntax() API. Evaluate source wrapped in an
+     * immediately uncalled function instead: parsing occurs, but the
+     * function body itself is not executed. Therefore host/can calls,
+     * setup(), timers, filters, and transmit functions cannot run here.
+     */
+    QJSEngine validationEngine;
+
+    const QString wrappedSource =
+        QStringLiteral("(function() {\n%1\n});").arg(source);
+
+    const QJSValue result =
+        validationEngine.evaluate(wrappedSource, fileName);
+
+    if (result.isError())
+    {
+        const int wrappedLine =
+            result.property(QStringLiteral("lineNumber")).toInt();
+
+        const int reportedSourceLine = qMax(1, wrappedLine - 1);
+
+        const int sourceLineCount =
+            qMax(1, source.count(QLatin1Char('\n')) + 1);
+
+        const int sourceLine =
+            qBound(1, reportedSourceLine, sourceLineCount);
+
+        const QString message =
+            result.property(QStringLiteral("message")).toString();
+
+        const QString stack =
+            result.property(QStringLiteral("stack")).toString();
+
+        qDebug() << "QJS wrapped line:" << wrappedLine
+                 << "reported source line:" << reportedSourceLine
+                 << "navigated source line:" << sourceLine
+                 << "source line count:" << sourceLineCount;
+
+        emit runtimeError(
+            QStringLiteral("validation"),
+            sourceLine,
+            message,
+            stack);
+
+        return false;
+    }
+
+    emit sendLog(QStringLiteral("Validation succeeded."));
+    return true;
+}
+
+bool ScriptContainer::start(const QString &source)
+{
+    if (!enabled)
+    {
+        emit sendLog(QStringLiteral(
+            "Script is disabled and cannot be started."));
+        return false;
+    }
+
+    if (runState == ScriptRunState::Running ||
+        runState == ScriptRunState::Starting ||
+        runState == ScriptRunState::Stopping)
+    {
+        stop();
+    }
+    else if (scriptEngine || canHelper || isoHelper || udsHelper)
+    {
+        /*
+         * Error state can retain a runtime until queued safe cleanup occurs.
+         * Starting again must always begin from a known-clean state.
+         */
+        tearDownRuntime();
+    }
+
+    scriptText = source;
+    setState(ScriptRunState::Starting);
+
+    if (!createRuntime())
+    {
+        emit sendLog(QStringLiteral("Unable to create script runtime."));
+        setState(ScriptRunState::Error);
+        return false;
+    }
+
+    if (!evaluateAndInitialize(scriptText))
+    {
+        tearDownRuntime();
+        setState(ScriptRunState::Error);
+        return false;
+    }
+
+    setState(ScriptRunState::Running);
+    emit sendLog(QStringLiteral("Script started."));
+    return true;
+}
+
+void ScriptContainer::stop()
+{
+    if (runState == ScriptRunState::Disabled)
+    {
+        return;
+    }
+
+    const bool hadRuntime =
+        scriptEngine || canHelper || isoHelper || udsHelper || timer.isActive();
+
+    if (!hadRuntime)
+    {
+        if (runState != ScriptRunState::Stopped)
+        {
+            setState(ScriptRunState::Stopped);
+        }
+        return;
+    }
+
+    setState(ScriptRunState::Stopping);
+    tearDownRuntime();
+    setState(ScriptRunState::Stopped);
+    emit sendLog(QStringLiteral("Script stopped."));
+}
+
+bool ScriptContainer::restart(const QString &source)
+{
+    if (!enabled)
+    {
+        emit sendLog(QStringLiteral(
+            "Script is disabled and cannot be restarted."));
+        return false;
+    }
+
+    stop();
+    return start(source);
+}
+
+void ScriptContainer::setEnabled(bool value)
+{
+    if (enabled == value)
+    {
+        return;
+    }
+
+    if (!value)
+    {
+        stop();
+        enabled = false;
+        setState(ScriptRunState::Disabled);
+        emit sendLog(QStringLiteral("Script disabled."));
+        return;
+    }
+
+    enabled = true;
+    setState(ScriptRunState::Stopped);
+    emit sendLog(QStringLiteral("Script enabled."));
+}
+
+void ScriptContainer::setTickInterval(QJSValue interval)
+{
+    const int intervalValue = interval.toInt();
+
+    if (intervalValue <= 0)
+    {
+        timer.stop();
+        emit sendLog(QStringLiteral("Tick timer stopped."));
+        return;
+    }
+
+    timer.setInterval(intervalValue);
+    timer.start();
+    emit sendLog(QStringLiteral("Tick timer set to %1 ms.")
+                     .arg(intervalValue));
+}
+
+void ScriptContainer::log(QJSValue logString)
+{
+    emit sendLog(logString.toString());
+}
+
+void ScriptContainer::addParameter(QJSValue name)
+{
+    const QString parameterName = name.toString();
+
+    if (parameterName.isEmpty() || scriptParams.contains(parameterName))
+    {
+        return;
+    }
+
+    scriptParams.append(parameterName);
+}
+
+void ScriptContainer::updateValuesTable(QTableWidget *widget)
+{
+    if (!widget || !scriptEngine)
+    {
+        return;
+    }
+
+    for (const QString &paramName : scriptParams)
+    {
+        const QString value =
+            scriptEngine->globalObject().property(paramName).toString();
+
+        bool found = false;
+
+        for (int row = 0; row < widget->rowCount(); row++)
+        {
+            QTableWidgetItem *nameItem = widget->item(row, 0);
+            if (!nameItem || nameItem->text() != paramName)
+            {
+                continue;
+            }
+
+            found = true;
+
+            QTableWidgetItem *valueItem = widget->item(row, 1);
+            if (valueItem && !valueItem->isSelected())
+            {
+                valueItem->setText(value);
+            }
+
+            break;
+        }
+
+        if (found)
+        {
+            continue;
+        }
+
+        const int row = widget->rowCount();
+        widget->insertRow(row);
+
+        QTableWidgetItem *nameItem = new QTableWidgetItem(paramName);
+        nameItem->setFlags(Qt::ItemIsEnabled);
+        widget->setItem(row, 0, nameItem);
+
+        widget->setItem(row, 1, new QTableWidgetItem(value));
+    }
+}
+
+void ScriptContainer::updateParameter(QString name, QString value)
+{
+    if (!scriptEngine || name.isEmpty())
+    {
+        return;
+    }
+
+    scriptEngine->globalObject().setProperty(name, QJSValue(value));
+}
+
+void ScriptContainer::tick()
+{
+    if (runState != ScriptRunState::Running || !tickFunction.isCallable())
+    {
+        return;
+    }
+
+    const QJSValue result = tickFunction.call();
+    if (result.isError())
+    {
+        reportError(QStringLiteral("tick"), result);
+        handleHelperError(
+            QStringLiteral("tick"),
+            result.property(QStringLiteral("lineNumber")).toInt(),
+            result.property(QStringLiteral("message")).toString(),
+            result.property(QStringLiteral("stack")).toString());
+    }
+}
+
+void ScriptContainer::handleHelperError(const QString &phase,
+                                        int line,
+                                        const QString &message,
+                                        const QString &stack)
+{
+    if (runState != ScriptRunState::Running &&
+        runState != ScriptRunState::Starting)
+    {
+        return;
+    }
+
+    emit runtimeError(phase, line, message, stack);
+
+    emit sendLog(QStringLiteral("Error in %1 on line %2: %3")
+                     .arg(phase)
+                     .arg(line)
+                     .arg(message));
+
+    if (!stack.isEmpty())
+    {
+        emit sendLog(QStringLiteral("Stack: %1").arg(stack));
+    }
+
+    /*
+     * Do not delete the helper while it is on the call stack inside a
+     * gotCANFrame/newISOMessage/newUDSMessage callback. The queued teardown
+     * occurs after that callback has returned to Qt's event loop.
+     */
+    setState(ScriptRunState::Error);
+
+    QTimer::singleShot(0, this, [this]()
+                       {
+        if (runState != ScriptRunState::Error)
+        {
+            return;
+        }
+
+        tearDownRuntime();
+        emit sendLog(QStringLiteral("Script stopped after runtime error.")); });
+}
+
+bool ScriptContainer::createRuntime()
+{
+    tearDownRuntime();
+
+    scriptEngine = new QJSEngine(this);
+
+    canHelper = new CANScriptHelper(scriptEngine, this);
+    isoHelper = new ISOTPScriptHelper(scriptEngine, this);
+    udsHelper = new UDSScriptHelper(scriptEngine, this);
+
+    connect(canHelper, &CANScriptHelper::callbackError,
+            this, &ScriptContainer::handleHelperError);
+
+    connect(isoHelper, &ISOTPScriptHelper::callbackError,
+            this, &ScriptContainer::handleHelperError);
+
+    connect(udsHelper, &UDSScriptHelper::callbackError,
+            this, &ScriptContainer::handleHelperError);
+
+    /*
+     * Publish host APIs before evaluate(). This permits ordinary JavaScript
+     * initialization at top level, while setup() remains the recommended
+     * lifecycle callback for scripts needing initialized runtime state.
+     */
+    scriptEngine->globalObject().setProperty(
+        QStringLiteral("host"), scriptEngine->newQObject(this));
+
+    scriptEngine->globalObject().setProperty(
+        QStringLiteral("can"), scriptEngine->newQObject(canHelper));
+
+    scriptEngine->globalObject().setProperty(
+        QStringLiteral("isotp"), scriptEngine->newQObject(isoHelper));
+
+    scriptEngine->globalObject().setProperty(
+        QStringLiteral("uds"), scriptEngine->newQObject(udsHelper));
+
+    return true;
+}
+
+bool ScriptContainer::evaluateAndInitialize(const QString &source)
+{
+    if (!scriptEngine)
+    {
+        return false;
+    }
+
+    const QJSValue result = scriptEngine->evaluate(source, fileName);
+
+    if (result.isError())
+    {
+        reportError(QStringLiteral("evaluation"), result);
+        return false;
+    }
+
+    compiledScript = result;
+
+    setupFunction =
+        scriptEngine->globalObject().property(QStringLiteral("setup"));
+
+    tickFunction =
+        scriptEngine->globalObject().property(QStringLiteral("tick"));
+
+    canHelper->setRxCallback(
+        scriptEngine->globalObject().property(
+            QStringLiteral("gotCANFrame")));
+
+    isoHelper->setRxCallback(
+        scriptEngine->globalObject().property(
+            QStringLiteral("gotISOTPMessage")));
+
+    udsHelper->setRxCallback(
+        scriptEngine->globalObject().property(
+            QStringLiteral("gotUDSMessage")));
+
+    if (!setupFunction.isCallable())
+    {
+        return true;
+    }
+
+    const QJSValue setupResult = setupFunction.call();
+
+    if (setupResult.isError())
+    {
+        reportError(QStringLiteral("setup"), setupResult);
+        return false;
+    }
+
+    return true;
+}
+
+void ScriptContainer::tearDownRuntime()
+{
+    timer.stop();
+
+    if (canHelper)
+    {
+        canHelper->clearFilters();
+    }
+
+    if (isoHelper)
+    {
+        isoHelper->clearFilters();
+    }
+
+    if (udsHelper)
+    {
+        udsHelper->clearFilters();
+    }
+
+    clearParameters();
+
+    setupFunction = QJSValue();
+    tickFunction = QJSValue();
+    compiledScript = QJSValue();
+
+    delete canHelper;
+    canHelper = nullptr;
+
+    delete isoHelper;
+    isoHelper = nullptr;
+
+    delete udsHelper;
+    udsHelper = nullptr;
+
+    delete scriptEngine;
+    scriptEngine = nullptr;
+}
+
+void ScriptContainer::setState(ScriptRunState state)
+{
+    if (runState == state)
+    {
+        return;
+    }
+
+    runState = state;
+    emit stateChanged(runState);
+}
+
+void ScriptContainer::reportError(const QString &phase,
+                                  const QJSValue &result)
+{
+    const int line =
+        result.property(QStringLiteral("lineNumber")).toInt();
+
+    const QString message =
+        result.property(QStringLiteral("message")).toString();
+
+    const QString stack =
+        result.property(QStringLiteral("stack")).toString();
+
+    emit runtimeError(phase, line, message, stack);
+
+    emit sendLog(QStringLiteral("Error in %1 on line %2: %3")
+                     .arg(phase)
+                     .arg(line)
+                     .arg(message));
+
+    if (!stack.isEmpty())
+    {
+        emit sendLog(QStringLiteral("Stack: %1").arg(stack));
+    }
+}
+
+void ScriptContainer::clearParameters()
+{
+    scriptParams.clear();
+}

@@ -29,6 +29,7 @@
 */
 
 #include "jsedit.h"
+#include "themes/thememanager.h"
 
 #include <QtGui>
 
@@ -996,6 +997,7 @@ void JSEdit::updateCursor()
             int pos = d->matchPositions.at(i);
             QTextEdit::ExtraSelection matchHighlight;
             matchHighlight.format.setBackground(d->bracketMatchColor);
+            matchHighlight.format.setForeground(palette().color(QPalette::Text));
             matchHighlight.cursor = textCursor();
             matchHighlight.cursor.setPosition(pos);
             matchHighlight.cursor.setPosition(pos + 1, QTextCursor::KeepAnchor);
@@ -1006,6 +1008,7 @@ void JSEdit::updateCursor()
             int pos = d->errorPositions.at(i);
             QTextEdit::ExtraSelection errorHighlight;
             errorHighlight.format.setBackground(d->bracketErrorColor);
+            errorHighlight.format.setForeground(palette().color(QPalette::Text));
             errorHighlight.cursor = textCursor();
             errorHighlight.cursor.setPosition(pos);
             errorHighlight.cursor.setPosition(pos + 1, QTextCursor::KeepAnchor);
