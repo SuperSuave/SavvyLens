@@ -650,6 +650,219 @@ void ScriptContainer::setTickInterval(QJSValue interval)
                      .arg(intervalValue));
 }
 
+int ScriptContainer::scheduleOnce(QJSValue delayMs, QJSValue callback)
+{
+    const int delay = delayMs.toInt();
+
+    if (delay < 0)
+    {
+        emit sendLog(QStringLiteral(
+            "scheduleOnce requires a delay of zero milliseconds or more."));
+        return 0;
+    }
+
+    if (!callback.isCallable())
+    {
+        emit sendLog(QStringLiteral(
+            "scheduleOnce requires a callable JavaScript function."));
+        return 0;
+    }
+
+    /*
+     * A zero-delay QTimer is legal, but keep it asynchronous. This prevents
+     * scenario code from recursively re-entering itself on the JS call stack.
+     */
+    return createScheduledTask(qMax(1, delay), false, callback);
+}
+
+int ScriptContainer::scheduleEvery(QJSValue intervalMs, QJSValue callback)
+{
+    const int interval = intervalMs.toInt();
+
+    if (interval <= 0)
+    {
+        emit sendLog(QStringLiteral(
+            "scheduleEvery requires an interval greater than zero."));
+        return 0;
+    }
+
+    if (!callback.isCallable())
+    {
+        emit sendLog(QStringLiteral(
+            "scheduleEvery requires a callable JavaScript function."));
+        return 0;
+    }
+
+    return createScheduledTask(interval, true, callback);
+}
+
+bool ScriptContainer::cancelTask(QJSValue taskId)
+{
+    const int id = taskId.toInt();
+
+    QTimer *timer = scheduledTimers.take(id);
+    if (!timer)
+    {
+        return false;
+    }
+
+    scheduledCallbacks.remove(id);
+
+    timer->stop();
+    timer->deleteLater();
+
+    emit sendLog(QStringLiteral("Cancelled scheduled task %1.").arg(id));
+    return true;
+}
+
+int ScriptContainer::createScheduledTask(int intervalMs, bool repeating,
+                                         const QJSValue &callback)
+{
+    /*
+     * setup() is called while start() is still in the Starting state.
+     * Accept scheduling there, but do not permit it while stopped, stopping,
+     * disabled, or in an error state.
+     *
+     * The QTimer callback cannot run until control returns to Qt's event loop,
+     * at which point start() has either set Running or torn the runtime down.
+     */
+    if ((runState != ScriptRunState::Starting &&
+         runState != ScriptRunState::Running) ||
+        !scriptEngine)
+    {
+        emit sendLog(QStringLiteral(
+            "Cannot schedule work because the script is not starting or running."));
+        return 0;
+    }
+
+    const int taskId = allocateScheduledTaskId();
+
+    QTimer *timer = new QTimer(this);
+    timer->setSingleShot(!repeating);
+    timer->setInterval(intervalMs);
+
+    scheduledTimers.insert(taskId, timer);
+    scheduledCallbacks.insert(taskId, callback);
+
+    connect(timer, &QTimer::timeout, this,
+            [this, taskId]()
+            {
+                invokeScheduledTask(taskId);
+            });
+
+    timer->start();
+
+    emit sendLog(QStringLiteral("Scheduled %1 task %2 every %3 ms.")
+                     .arg(repeating
+                              ? QStringLiteral("repeating")
+                              : QStringLiteral("one-shot"))
+                     .arg(taskId)
+                     .arg(intervalMs));
+
+    return taskId;
+}
+
+void ScriptContainer::invokeScheduledTask(int taskId)
+{
+    if (runState != ScriptRunState::Running || !scriptEngine)
+    {
+        cancelTask(QJSValue(taskId));
+        return;
+    }
+
+    QTimer *timer = scheduledTimers.value(taskId, nullptr);
+    if (!timer)
+    {
+        return;
+    }
+
+    QJSValue callback = scheduledCallbacks.value(taskId);
+    if (!callback.isCallable())
+    {
+        cancelTask(QJSValue(taskId));
+
+        emit sendLog(QStringLiteral(
+                         "Scheduled task %1 no longer has a callable callback.")
+                         .arg(taskId));
+        return;
+    }
+
+    if (timer->isSingleShot())
+    {
+        scheduledTimers.remove(taskId);
+        scheduledCallbacks.remove(taskId);
+
+        timer->stop();
+        timer->deleteLater();
+    }
+
+    const QJSValue result = callback.call();
+    if (result.isError())
+    {
+        handleHelperError(
+            QStringLiteral("scheduled task"),
+            result.property(QStringLiteral("lineNumber")).toInt(),
+            result.property(QStringLiteral("message")).toString(),
+            result.property(QStringLiteral("stack")).toString());
+    }
+}
+
+void ScriptContainer::cancelAllScheduledTasks()
+{
+    for (QTimer *timer : scheduledTimers)
+    {
+        if (!timer)
+        {
+            continue;
+        }
+
+        timer->stop();
+        timer->deleteLater();
+    }
+
+    scheduledTimers.clear();
+    scheduledCallbacks.clear();
+}
+
+void ScriptContainer::requestStop()
+{
+    if (runState != ScriptRunState::Running)
+    {
+        return;
+    }
+
+    QTimer::singleShot(0, this, [this]()
+                       {
+        if (runState == ScriptRunState::Running)
+        {
+            stop();
+        } });
+}
+
+int ScriptContainer::allocateScheduledTaskId()
+{
+    /*
+     * Task ID zero is reserved as the JavaScript-visible failure value.
+     * In normal use rollover is effectively impossible, but keep allocation
+     * deterministic and collision-free.
+     */
+    while (nextScheduledTaskId == 0 ||
+           scheduledTimers.contains(nextScheduledTaskId))
+    {
+        ++nextScheduledTaskId;
+    }
+
+    const int taskId = nextScheduledTaskId;
+    ++nextScheduledTaskId;
+
+    if (nextScheduledTaskId <= 0)
+    {
+        nextScheduledTaskId = 1;
+    }
+
+    return taskId;
+}
+
 void ScriptContainer::log(QJSValue logString)
 {
     emit sendLog(logString.toString());
@@ -755,6 +968,8 @@ void ScriptContainer::handleHelperError(const QString &phase,
     {
         return;
     }
+
+    cancelAllScheduledTasks();
 
     emit runtimeError(phase, line, message, stack);
 
@@ -878,6 +1093,14 @@ bool ScriptContainer::evaluateAndInitialize(const QString &source)
 
 void ScriptContainer::tearDownRuntime()
 {
+    /*
+     * Emergency-brake ordering:
+     * 1. Stop all future scenario callbacks.
+     * 2. Remove CAN/ISO-TP/UDS subscriptions.
+     * 3. Release QJSValue references.
+     * 4. Destroy the QJSEngine.
+     */
+    cancelAllScheduledTasks();
     timer.stop();
 
     if (canHelper)

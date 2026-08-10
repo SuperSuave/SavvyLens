@@ -15,6 +15,7 @@
 #include <QStringList>
 #include <QList>
 #include <QVector>
+#include <QHash>
 
 class QTableWidget;
 class ScriptingWindow;
@@ -158,6 +159,22 @@ public slots:
      * These functions are exposed to JavaScript as host.<method>().
      */
     void setTickInterval(QJSValue interval);
+
+    /*
+     * Cancellable scenario scheduler exposed to JavaScript as:
+     *
+     *   host.scheduleOnce(delayMs, callback)
+     *   host.scheduleEvery(intervalMs, callback)
+     *   host.cancelTask(taskId)
+     *
+     * Task IDs are local to this ScriptContainer and are automatically
+     * cancelled by stop() / tearDownRuntime().
+     */
+    int scheduleOnce(QJSValue delayMs, QJSValue callback);
+    int scheduleEvery(QJSValue intervalMs, QJSValue callback);
+    bool cancelTask(QJSValue taskId);
+    void requestStop();
+
     void log(QJSValue logString);
     void addParameter(QJSValue name);
 
@@ -178,6 +195,11 @@ private slots:
 private:
     bool createRuntime();
     bool evaluateAndInitialize(const QString &source);
+    int createScheduledTask(int intervalMs, bool repeating,
+                            const QJSValue &callback);
+    void invokeScheduledTask(int taskId);
+    void cancelAllScheduledTasks();
+    int allocateScheduledTaskId();
     void tearDownRuntime();
 
     void setState(ScriptRunState state);
@@ -199,6 +221,15 @@ private:
     QVector<QString> scriptParams;
     ScriptRunState runState = ScriptRunState::Stopped;
     bool enabled = true;
+
+    /*
+     * QTimer objects are parented to ScriptContainer. The callback values
+     * are retained separately because QTimer only knows about its timeout
+     * connection, not the JavaScript function it should invoke.
+     */
+    QHash<int, QTimer *> scheduledTimers;
+    QHash<int, QJSValue> scheduledCallbacks;
+    int nextScheduledTaskId = 1;
 };
 
 #endif // SCRIPTCONTAINER_H
