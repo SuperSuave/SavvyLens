@@ -6,6 +6,7 @@
 
 #include "scriptcontainer.h"
 #include "connections/canconmanager.h"
+#include "scriptingwindow.h"
 
 
 /* -------------------------------------------------------------------------
@@ -418,23 +419,8 @@ ScriptContainer::~ScriptContainer()
 
 void ScriptContainer::setScriptWindow(ScriptingWindow *win)
 {
-    if (window == win)
-    {
-        return;
-    }
-
-    if (window)
-    {
-        disconnect(this, nullptr, window, nullptr);
-    }
-
     window = win;
-
-    if (window)
-    {
-        connect(this, &ScriptContainer::sendLog,
-                window, &ScriptingWindow::log);
-    }
+    connect(this, &ScriptContainer::sendLog, window, &ScriptingWindow::log);
 }
 
 ScriptContainer::ScriptRunState ScriptContainer::state() const

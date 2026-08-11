@@ -16,6 +16,7 @@
 #include <QSplitter>
 #include <QTabWidget>
 #include <QTableWidget>
+
 #include "canframemodel.h"
 #include "can_structs.h"
 #include "framefileio.h"
@@ -65,6 +66,8 @@ class QLabel;
 class QPlainTextEdit;
 class QGroupBox;
 class QWidget;
+class QAction;
+class QListWidgetItem;
 
 namespace Ui {
 class MainWindow;
@@ -205,6 +208,10 @@ private:
     //canbus related data
     CANFrameModel *model;
     DBCHandler *dbcHandler;
+
+    void addFrameIdsToFilterList(const QSet<uint32_t> &ids);
+    void removeFrameIdsFromFilterList(const QSet<uint32_t> &ids);
+
     QByteArray inputBuffer;
     QTimer updateTimer;
     QElapsedTimer *elapsedTime;
@@ -367,6 +374,8 @@ private slots:
     void disableAutoRowExpansion();
     int64_t selectedFrameTimestamp();
     void scrollToNearestTimestamp(int64_t timestamp);
+    void actionAddSelectedIdsToFilter();
+    void actionRemoveSelectedIdsFromFilter();
 };
 
 #endif // MAINWINDOW_H

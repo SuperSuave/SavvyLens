@@ -1,7 +1,15 @@
 #ifndef ISOTP_INTERPRETERWINDOW_H
 #define ISOTP_INTERPRETERWINDOW_H
 
+#pragma once
+
 #include <QDialog>
+#include <QVector>
+#include <QListWidgetItem>
+
+#include "can_structs.h"
+#include "bus_protocols/uds_handler.h"
+#include "filterutility.h"
 #include "bus_protocols/isotp_handler.h"
 
 
@@ -42,7 +50,7 @@ private slots:
 private:
     Ui::ISOTP_InterpreterWindow *ui;
     ISOTP_HANDLER *decoder;
-    UDS_HANDLER *udsDecoder;
+    UDS_HANDLER *udsDecoder = nullptr;
 
     const QVector<CANFrame> *modelFrames;
     QVector<ISOTP_MESSAGE> messages;

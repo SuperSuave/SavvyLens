@@ -1,8 +1,11 @@
 #include "isotp_interpreterwindow.h"
 #include "ui_isotp_interpreterwindow.h"
+#include "bus_protocols/uds_handler.h"
 #include "mainwindow.h"
 #include "helpwindow.h"
 #include "filterutility.h"
+
+#include <QListWidget>
 
 ISOTP_InterpreterWindow::ISOTP_InterpreterWindow(const QVector<CANFrame> *frames, QWidget *parent) :
     QDialog(parent),

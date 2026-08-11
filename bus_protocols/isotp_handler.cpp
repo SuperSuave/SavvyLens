@@ -1,4 +1,6 @@
 #include "isotp_handler.h"
+#include "mainwindow.h"
+#include "canframemodel.h" 
 #include "connections/canconmanager.h"
 
 ISOTP_HANDLER::ISOTP_HANDLER()
