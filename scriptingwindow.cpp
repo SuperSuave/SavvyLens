@@ -6,7 +6,10 @@
 #include <QFileInfo>
 #include <QFileDialog>
 #include <QSettings>
+#include <QDebug>
 
+#include <QMenu>
+#include <QToolButton>
 #include <QTextBlock>
 #include <QTextCursor>
 #include <QCheckBox>
@@ -16,6 +19,12 @@
 #include <QSignalBlocker>
 #include <QTableWidget>
 #include <algorithm>
+#include <QAction>
+#include <QDir>
+#include <QInputDialog>
+#include <QStandardPaths>
+#include <QCoreApplication>
+#include <QDir>
 
 #if QT_VERSION >= QT_VERSION_CHECK( 5, 10, 0 )
 #include <QtCore/QRandomGenerator>
@@ -29,6 +38,7 @@ ScriptingWindow::ScriptingWindow(const QVector<CANFrame> *frames, QWidget *paren
     ui(new Ui::ScriptingWindow)
 {
     ui->setupUi(this);
+
     ui->listLog->setStyleSheet(ThemeManager::logListStyleSheet());
     setWindowFlags(Qt::Window);
 
@@ -79,6 +89,13 @@ ScriptingWindow::ScriptingWindow(const QVector<CANFrame> *frames, QWidget *paren
     readSettings();
 
     modelFrames = frames;
+
+    templateMenu = new QMenu(ui->btnInsertTemplate);
+
+    ui->btnInsertTemplate->setMenu(templateMenu);
+    connect(templateMenu, &QMenu::aboutToShow, this, &ScriptingWindow::rebuildTemplateMenu);
+
+    rebuildTemplateMenu();
 
     connect(ui->btnLoadScript, &QAbstractButton::pressed, this, &ScriptingWindow::loadNewScript);
     connect(ui->btnNewScript, &QAbstractButton::pressed, this, &ScriptingWindow::createNewScript);
@@ -253,6 +270,12 @@ void ScriptingWindow::changeCurrentScript()
 
     connect(this, SIGNAL(updatedParameter(QString, QString)),
             currentScript, SLOT(updateParameter(QString, QString)));
+
+    /*
+     * Populate Public Variables immediately for a stopped script rather than
+     * waiting for the one-second runtime values timer.
+     */
+    refreshCurrentPublicVariables();
 
     updateExecutionControls();
 }
@@ -516,6 +539,8 @@ void ScriptingWindow::reloadScript()
     currentScript->scriptText = contents;
     editor->setPlainText(contents);
 
+    refreshCurrentPublicVariables();
+
     log(tr("Reloaded %1. Use Restart to apply it to a running script.")
             .arg(currentScript->fileName));
 }
@@ -697,10 +722,45 @@ QListWidgetItem *ScriptingWindow::listItemForScript(
 
 void ScriptingWindow::synchronizeCurrentScriptSource()
 {
-    if (currentScript && editor)
+    if (!currentScript || !editor)
     {
-        currentScript->scriptText = editor->toPlainText();
+        return;
     }
+
+    currentScript->scriptText = editor->toPlainText();
+
+    /*
+     * Re-scan manifest comments whenever the current source is synchronized.
+     * This updates defaults or added/removed @public declarations without
+     * ever evaluating the script.
+     */
+    refreshCurrentPublicVariables();
+}
+
+void ScriptingWindow::refreshCurrentPublicVariables()
+{
+    if (!currentScript || !ui || !ui->tableVariables)
+    {
+        qDebug() << "Cannot refresh public variables:"
+                 << "currentScript=" << currentScript
+                 << "ui=" << ui;
+        return;
+    }
+
+    qDebug() << "Refreshing public variables for:"
+             << currentScript->fileName;
+
+    qDebug() << "Script source:"
+             << currentScript->scriptText;
+
+    currentScript->discoverPublicParameters(
+        currentScript->scriptText);
+
+    currentScript->updateValuesTable(
+        ui->tableVariables);
+
+    qDebug() << "Public Variables table rows:"
+             << ui->tableVariables->rowCount();
 }
 
 void ScriptingWindow::connectScriptContainer(ScriptContainer *container)
@@ -981,4 +1041,277 @@ void ScriptingWindow::navigateToRuntimeError(QListWidgetItem *item)
     editor->setTextCursor(cursor);
     editor->ensureCursorVisible();
     editor->setFocus();
+}
+
+QString ScriptingWindow::builtInTemplateDirectory() const
+{
+    const QString installedDirectory = QStandardPaths::locate(
+        QStandardPaths::GenericDataLocation,
+        QStringLiteral("SavvyLens/templates"),
+        QStandardPaths::LocateDirectory);
+
+    if (!installedDirectory.isEmpty())
+    {
+        return installedDirectory;
+    }
+
+    /*
+     * Development fallback: look beside the executable, which lets a local
+     * Debug or Release build use a manually/deployment-copied templates
+     * directory without installing the application system-wide.
+     */
+    return QDir(QCoreApplication::applicationDirPath())
+        .filePath(QStringLiteral("templates"));
+}
+
+QList<ScriptingWindow::ScriptTemplate>
+ScriptingWindow::availableTemplates() const
+{
+    QList<ScriptTemplate> templates;
+
+    const QDir builtInDirectory(builtInTemplateDirectory());
+    const QDir userDirectory(userTemplateDirectory());
+
+    const QStringList filters =
+        QStringList() << QStringLiteral("*.js");
+
+    const QFileInfoList builtInFiles =
+        builtInDirectory.entryInfoList(
+            filters,
+            QDir::Files | QDir::Readable,
+            QDir::Name | QDir::IgnoreCase);
+
+    for (const QFileInfo &fileInfo : builtInFiles)
+    {
+        templates.append(
+            {fileInfo.completeBaseName(),
+             fileInfo.absoluteFilePath(),
+             true});
+    }
+
+    const QFileInfoList userFiles =
+        userDirectory.entryInfoList(
+            filters,
+            QDir::Files | QDir::Readable,
+            QDir::Name | QDir::IgnoreCase);
+
+    for (const QFileInfo &fileInfo : userFiles)
+    {
+        templates.append(
+            {fileInfo.completeBaseName(),
+             fileInfo.absoluteFilePath(),
+             false});
+    }
+
+    return templates;
+}
+
+QString ScriptingWindow::userTemplateDirectory() const
+{
+    const QString appDataPath = QStandardPaths::writableLocation(
+        QStandardPaths::AppDataLocation);
+
+    return QDir(appDataPath).filePath(QStringLiteral("templates"));
+}
+
+void ScriptingWindow::rebuildTemplateMenu()
+{
+    if (!templateMenu)
+    {
+        return;
+    }
+
+    templateMenu->clear();
+
+    const QList<ScriptTemplate> templates = availableTemplates();
+
+    QMenu *builtInMenu = templateMenu->addMenu(tr("Built-in Templates"));
+    QMenu *userMenu = templateMenu->addMenu(tr("My Templates"));
+
+    bool hasUserTemplates = false;
+
+    for (const ScriptTemplate &scriptTemplate : templates)
+    {
+        QMenu *targetMenu =
+            scriptTemplate.builtIn ? builtInMenu : userMenu;
+
+        QAction *action = targetMenu->addAction(
+            scriptTemplate.displayName);
+
+        connect(action, &QAction::triggered, this,
+                [this, scriptTemplate]()
+                {
+                    insertTemplate(scriptTemplate);
+                });
+
+        if (!scriptTemplate.builtIn)
+        {
+            hasUserTemplates = true;
+        }
+    }
+
+    if (!hasUserTemplates)
+    {
+        QAction *emptyAction = userMenu->addAction(
+            tr("No saved templates"));
+
+        emptyAction->setEnabled(false);
+    }
+
+    templateMenu->addSeparator();
+
+    QAction *saveTemplateAction = templateMenu->addAction(
+        tr("Save Current Script as Template..."));
+
+    saveTemplateAction->setEnabled(currentScript != nullptr);
+
+    connect(saveTemplateAction, &QAction::triggered,
+            this, &ScriptingWindow::saveCurrentScriptAsTemplate);
+}
+
+QString ScriptingWindow::loadTemplateSource(
+    const ScriptTemplate &scriptTemplate) const
+{
+    QFile templateFile(scriptTemplate.sourcePath);
+
+    if (!templateFile.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        return QString();
+    }
+
+    return QString::fromUtf8(templateFile.readAll());
+}
+
+void ScriptingWindow::insertTemplate(
+    const ScriptTemplate &scriptTemplate)
+{
+    const QString source = loadTemplateSource(scriptTemplate);
+
+    if (source.isEmpty())
+    {
+        log(tr("Unable to load template \"%1\".")
+                .arg(scriptTemplate.displayName));
+        return;
+    }
+
+    /*
+     * Templates always create an independent loaded script. Editing or saving
+     * it does not modify the original built-in or user template source file.
+     */
+    createNewScript();
+
+    if (!currentScript || !editor)
+    {
+        return;
+    }
+
+    const QString baseName =
+        scriptTemplate.displayName
+            .toLower()
+            .replace(QLatin1Char(' '), QLatin1Char('_'));
+
+    currentScript->fileName =
+        QStringLiteral("%1.js").arg(baseName);
+
+    currentScript->filePath.clear();
+    currentScript->scriptText = source;
+
+    editor->setPlainText(source);
+
+    refreshCurrentPublicVariables();
+
+    QListWidgetItem *item = listItemForScript(currentScript);
+    if (item)
+    {
+        updateScriptListItem(currentScript);
+    }
+
+    updateExecutionControls();
+
+    log(tr("Created script from template \"%1\".")
+            .arg(scriptTemplate.displayName));
+}
+
+void ScriptingWindow::saveCurrentScriptAsTemplate()
+{
+    if (!currentScript || !editor)
+    {
+        return;
+    }
+
+    synchronizeCurrentScriptSource();
+
+    if (currentScript->scriptText.trimmed().isEmpty())
+    {
+        log(tr("Cannot save an empty script as a template."));
+        return;
+    }
+
+    bool accepted = false;
+
+    QString suggestedName =
+        QFileInfo(currentScript->fileName).completeBaseName();
+
+    if (suggestedName.isEmpty())
+    {
+        suggestedName = QStringLiteral("my_template");
+    }
+
+    QString templateName = QInputDialog::getText(
+                               this,
+                               tr("Save Script as Template"),
+                               tr("Template name:"),
+                               QLineEdit::Normal,
+                               suggestedName,
+                               &accepted)
+                               .trimmed();
+
+    if (!accepted || templateName.isEmpty())
+    {
+        return;
+    }
+
+    /*
+     * Keep template filenames portable and prevent an entered path from
+     * escaping the dedicated templates directory.
+     */
+    templateName.replace(QLatin1Char('/'), QLatin1Char('_'));
+    templateName.replace(QLatin1Char('\\'), QLatin1Char('_'));
+
+    if (!templateName.endsWith(
+            QStringLiteral(".js"), Qt::CaseInsensitive))
+    {
+        templateName.append(QStringLiteral(".js"));
+    }
+
+    QDir directory(userTemplateDirectory());
+
+    if (!directory.exists() && !directory.mkpath(QStringLiteral(".")))
+    {
+        log(tr("Unable to create the user template directory."));
+        return;
+    }
+
+    const QString targetPath =
+        directory.filePath(templateName);
+
+    QFile templateFile(targetPath);
+
+    if (!templateFile.open(
+            QIODevice::WriteOnly |
+            QIODevice::Text |
+            QIODevice::Truncate))
+    {
+        log(tr("Unable to save template \"%1\".")
+                .arg(templateName));
+        return;
+    }
+
+    templateFile.write(
+        currentScript->scriptText.toUtf8());
+
+    templateFile.close();
+
+    log(tr("Saved \"%1\" as a reusable template.")
+            .arg(templateName));
 }

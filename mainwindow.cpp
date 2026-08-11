@@ -176,9 +176,31 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->canFramesView->setFont(sysFont);
 
     QHeaderView *HorzHdr = ui->canFramesView->horizontalHeader();
+
     HorzHdr->setFont(QFont());
-    HorzHdr->setStretchLastSection(false); //causes the data column to automatically fill the tableview
+
+
+    HorzHdr->setSectionResizeMode(QHeaderView::Interactive);
+
+    HorzHdr->setStretchLastSection(true);
+
     connect(HorzHdr, SIGNAL(sectionClicked(int)), this, SLOT(headerClicked(int)));
+
+    // Move original frame number from its logical/model position to the
+    // second displayed column. This does not alter Column::Idx or the model.
+    constexpr int originalFrameNumberVisualColumn = 1;
+    const int originalFrameNumberLogicalColumn = int(Column::Idx);
+
+    const int originalFrameNumberCurrentVisualColumn =
+        HorzHdr->visualIndex(originalFrameNumberLogicalColumn);
+
+    if (originalFrameNumberCurrentVisualColumn >= 0 &&
+        originalFrameNumberCurrentVisualColumn !=
+            originalFrameNumberVisualColumn)
+    {
+        HorzHdr->moveSection(originalFrameNumberCurrentVisualColumn,
+                             originalFrameNumberVisualColumn);
+    }
 
     lastGraphingWindow = nullptr;
     frameInfoWindow = nullptr;
@@ -347,7 +369,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "normal row height = " << normalRowHeight;
     model->clearFrames();
 
-    ui->canFramesView->verticalHeader()->setDefaultSectionSize(normalRowHeight);    // Set the default height for all rows to the height that was calculated
+    ui->canFramesView->verticalHeader()->setDefaultSectionSize(normalRowHeight);
 
     //connect(CANConManager::getInstance(), CANConManager::connectionStatusUpdated, this, MainWindow::connectionStatusUpdated);
     connect(CANConManager::getInstance(), SIGNAL(connectionStatusUpdated(int)), this, SLOT(connectionStatusUpdated(int)));
@@ -532,24 +554,24 @@ if (settings.value("Main/SaveRestorePositions", false).toBool())
     move(Utility::constrainedWindowPos(
         settings.value("Main/WindowPos", QPoint(100, 100)).toPoint()));
 
-    ui->canFramesView->setColumnWidth(int(Column::TimeStamp),
-        settings.value("Main/TimeColumn", 125).toUInt());
-    ui->canFramesView->setColumnWidth(int(Column::FrameId),
-        settings.value("Main/IDColumn", 70).toUInt());
-    ui->canFramesView->setColumnWidth(int(Column::Extended),
-        settings.value("Main/ExtColumn", 40).toUInt());
-    ui->canFramesView->setColumnWidth(int(Column::Remote),
-        settings.value("Main/RemColumn", 40).toUInt());
-    ui->canFramesView->setColumnWidth(int(Column::Direction),
-        settings.value("Main/DirColumn", 40).toUInt());
-    ui->canFramesView->setColumnWidth(int(Column::Bus),
-        settings.value("Main/BusColumn", 40).toUInt());
-    ui->canFramesView->setColumnWidth(int(Column::Length),
-        settings.value("Main/LengthColumn", 40).toUInt());
-    ui->canFramesView->setColumnWidth(int(Column::ASCII),
-        settings.value("Main/AsciiColumn", 50).toUInt());
-    ui->canFramesView->setColumnWidth(int(Column::Data),
-        settings.value("Main/DataColumn", 150).toUInt());
+    // ui->canFramesView->setColumnWidth(int(Column::TimeStamp),
+    //     settings.value("Main/TimeColumn", 125).toUInt());
+    // ui->canFramesView->setColumnWidth(int(Column::FrameId),
+    //     settings.value("Main/IDColumn", 70).toUInt());
+    // ui->canFramesView->setColumnWidth(int(Column::Extended),
+    //     settings.value("Main/ExtColumn", 40).toUInt());
+    // ui->canFramesView->setColumnWidth(int(Column::Remote),
+    //     settings.value("Main/RemColumn", 40).toUInt());
+    // ui->canFramesView->setColumnWidth(int(Column::Direction),
+    //     settings.value("Main/DirColumn", 40).toUInt());
+    // ui->canFramesView->setColumnWidth(int(Column::Bus),
+    //     settings.value("Main/BusColumn", 40).toUInt());
+    // ui->canFramesView->setColumnWidth(int(Column::Length),
+    //     settings.value("Main/LengthColumn", 40).toUInt());
+    // ui->canFramesView->setColumnWidth(int(Column::ASCII),
+    //     settings.value("Main/AsciiColumn", 50).toUInt());
+    // ui->canFramesView->setColumnWidth(int(Column::Data),
+    //     settings.value("Main/DataColumn", 175).toUInt());
     // ui->canFramesView->setColumnWidth(int(Column::Idx),
     //     settings.value("Main/OGIDColumn", 90).toUInt());
 }
@@ -558,15 +580,15 @@ else
     resize(QSize(1280, 850));
     move(Utility::constrainedWindowPos(QPoint(100, 100)));
 
-    ui->canFramesView->setColumnWidth(int(Column::TimeStamp), 125);
-    ui->canFramesView->setColumnWidth(int(Column::FrameId), 70);
-    ui->canFramesView->setColumnWidth(int(Column::Extended), 40);
-    ui->canFramesView->setColumnWidth(int(Column::Remote), 40);
-    ui->canFramesView->setColumnWidth(int(Column::Direction), 40);
-    ui->canFramesView->setColumnWidth(int(Column::Bus), 40);
-    ui->canFramesView->setColumnWidth(int(Column::Length), 40);
-    ui->canFramesView->setColumnWidth(int(Column::ASCII), 50);
-    ui->canFramesView->setColumnWidth(int(Column::Data), 150);
+    // ui->canFramesView->setColumnWidth(int(Column::TimeStamp), 125);
+    // ui->canFramesView->setColumnWidth(int(Column::FrameId), 70);
+    // ui->canFramesView->setColumnWidth(int(Column::Extended), 40);
+    // ui->canFramesView->setColumnWidth(int(Column::Remote), 40);
+    // ui->canFramesView->setColumnWidth(int(Column::Direction), 40);
+    // ui->canFramesView->setColumnWidth(int(Column::Bus), 40);
+    // ui->canFramesView->setColumnWidth(int(Column::Length), 40);
+    // ui->canFramesView->setColumnWidth(int(Column::ASCII), 50);
+    // ui->canFramesView->setColumnWidth(int(Column::Data), 175);
     // ui->canFramesView->setColumnWidth(int(Column::Idx), 90);
 }
 
@@ -652,26 +674,27 @@ void MainWindow::writeSettings()
         settings.setValue("Main/WindowPos", pos());
     }
 
-    settings.setValue("Main/TimeColumn",
-        ui->canFramesView->columnWidth(int(Column::TimeStamp)));
-    settings.setValue("Main/IDColumn",
-        ui->canFramesView->columnWidth(int(Column::FrameId)));
-    settings.setValue("Main/ExtColumn",
-        ui->canFramesView->columnWidth(int(Column::Extended)));
-    settings.setValue("Main/RemColumn",
-        ui->canFramesView->columnWidth(int(Column::Remote)));
-    settings.setValue("Main/DirColumn",
-        ui->canFramesView->columnWidth(int(Column::Direction)));
-    settings.setValue("Main/BusColumn",
-        ui->canFramesView->columnWidth(int(Column::Bus)));
-    settings.setValue("Main/LengthColumn",
-        ui->canFramesView->columnWidth(int(Column::Length)));
-    settings.setValue("Main/AsciiColumn",
-        ui->canFramesView->columnWidth(int(Column::ASCII)));
-    settings.setValue("Main/DataColumn",
-        ui->canFramesView->columnWidth(int(Column::Data)));
-    settings.setValue("Main/OGIDColumn",
-        ui->canFramesView->columnWidth(int(Column::Idx)));
+    // settings.setValue("Main/TimeColumn",
+    //     ui->canFramesView->columnWidth(int(Column::TimeStamp)));
+    // settings.setValue("Main/IDColumn",
+    //     ui->canFramesView->columnWidth(int(Column::FrameId)));
+
+    // settings.setValue("Main/ExtColumn",
+    //     ui->canFramesView->columnWidth(int(Column::Extended)));
+    // settings.setValue("Main/RemColumn",
+    //     ui->canFramesView->columnWidth(int(Column::Remote)));
+    // settings.setValue("Main/DirColumn",
+    //     ui->canFramesView->columnWidth(int(Column::Direction)));
+    // settings.setValue("Main/BusColumn",
+    //     ui->canFramesView->columnWidth(int(Column::Bus)));
+    // settings.setValue("Main/LengthColumn",
+    //     ui->canFramesView->columnWidth(int(Column::Length)));
+    // settings.setValue("Main/AsciiColumn",
+    //     ui->canFramesView->columnWidth(int(Column::ASCII)));
+    // settings.setValue("Main/DataColumn",
+    //     ui->canFramesView->columnWidth(int(Column::Data)));
+    // settings.setValue("Main/OGIDColumn",
+    //     ui->canFramesView->columnWidth(int(Column::Idx)));
 }
 
 
@@ -1709,11 +1732,17 @@ Data Bytes: 88 10 00 13 BB 00 06 00
 void MainWindow::toggleCapture()
 {
     allowCapture = !allowCapture;
-    if (allowCapture) {
+
+    setAutoBookmarkNewIdsActive(false);
+    autoBookmarkTimer->stop();
+    
+    if (allowCapture)
+    {
         ui->btnCaptureToggle->setText("Suspend Capturing");
-    } else {
+    }
+    else
+    {
         ui->btnCaptureToggle->setText("Restart Capturing");
-        setAutoBookmarkNewIdsActive(false);
     }
 
     emit suspendCapturing(!allowCapture);

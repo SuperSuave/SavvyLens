@@ -1,9 +1,12 @@
 #include <QDebug>
 #include <QJSValueIterator>
 #include <QTableWidget>
+#include <QRegularExpression>
+#include <QSet>
 
 #include "scriptcontainer.h"
 #include "connections/canconmanager.h"
+
 
 /* -------------------------------------------------------------------------
  * CANScriptHelper
@@ -553,6 +556,13 @@ bool ScriptContainer::start(const QString &source)
     }
 
     scriptText = source;
+
+    /*
+     * Populate and retain manifest values before a runtime exists. This lets
+     * scripts be configured in the Public Variables table while stopped.
+     */
+    discoverPublicParameters(scriptText);
+
     setState(ScriptRunState::Starting);
 
     if (!createRuntime())
@@ -563,6 +573,20 @@ bool ScriptContainer::start(const QString &source)
     }
 
     if (!evaluateAndInitialize(scriptText))
+    {
+        tearDownRuntime();
+        setState(ScriptRunState::Error);
+        return false;
+    }
+
+    /*
+     * The script has declared its globals, but setup() has not run yet.
+     * Apply values edited in the stopped-state Public Variables table before
+     * setup() configures filters, schedules timers, or sends frames.
+     */
+    applyPublicParameterValues();
+
+    if (!runSetup())
     {
         tearDownRuntime();
         setState(ScriptRunState::Error);
@@ -880,23 +904,139 @@ void ScriptContainer::addParameter(QJSValue name)
     scriptParams.append(parameterName);
 }
 
+void ScriptContainer::discoverPublicParameters(const QString &source)
+{
+    /*
+     * Supported syntax:
+     *
+     *   // @public bus = 0
+     *   // @public id = 0x321
+     *   // @public dataText = B4 5A 14 51 00 00 25 05
+     *
+     * This only reads source comments. It never evaluates JavaScript.
+     */
+    QStringList discoveredOrder;
+    QMap<QString, QString> discoveredValues;
+    QSet<QString> seenNames;
+
+    const QStringList lines = source.split(QLatin1Char('\n'));
+
+    for (const QString &sourceLine : lines)
+    {
+        QString line = sourceLine.trimmed();
+
+        if (!line.startsWith(QStringLiteral("//")))
+        {
+            continue;
+        }
+
+        line.remove(0, 2);
+        line = line.trimmed();
+
+        if (!line.startsWith(QStringLiteral("@public")))
+        {
+            continue;
+        }
+
+        line.remove(0, QStringLiteral("@public").length());
+        line = line.trimmed();
+
+        const int equalsPosition = line.indexOf(QLatin1Char('='));
+
+        if (equalsPosition <= 0)
+        {
+            qDebug() << "Ignoring malformed @public declaration:"
+                     << sourceLine;
+            continue;
+        }
+
+        const QString name =
+            line.left(equalsPosition).trimmed();
+
+        const QString defaultValue =
+            line.mid(equalsPosition + 1).trimmed();
+
+        const QRegularExpression validName(
+            QStringLiteral("^[A-Za-z_$][A-Za-z0-9_$]*$"));
+
+        if (!validName.match(name).hasMatch())
+        {
+            qDebug() << "Ignoring invalid @public name:"
+                     << name;
+            continue;
+        }
+
+        if (seenNames.contains(name))
+        {
+            qDebug() << "Ignoring duplicate @public name:"
+                     << name;
+            continue;
+        }
+
+        seenNames.insert(name);
+        discoveredOrder.append(name);
+
+        discoveredValues.insert(
+            name,
+            publicParameterValues.contains(name)
+                ? publicParameterValues.value(name)
+                : defaultValue);
+
+        qDebug() << "Discovered public parameter:"
+                 << name
+                 << "="
+                 << discoveredValues.value(name);
+    }
+
+    publicParameterOrder = discoveredOrder;
+    publicParameterValues = discoveredValues;
+
+    qDebug() << "Public parameter count:"
+             << publicParameterOrder.count();
+}
+
 void ScriptContainer::updateValuesTable(QTableWidget *widget)
 {
-    if (!widget || !scriptEngine)
+    if (!widget)
     {
         return;
     }
 
-    for (const QString &paramName : scriptParams)
+    /*
+     * Manifest parameters are available even with no active QJSEngine.
+     * Legacy host.addParameter(...) entries remain supported while running.
+     */
+    QStringList parameterNames = publicParameterOrder;
+
+    for (const QString &legacyName : scriptParams)
     {
-        const QString value =
-            scriptEngine->globalObject().property(paramName).toString();
+        if (!parameterNames.contains(legacyName))
+        {
+            parameterNames.append(legacyName);
+        }
+    }
+
+    for (const QString &paramName : parameterNames)
+    {
+        QString value;
+
+        if (publicParameterValues.contains(paramName))
+        {
+            value = publicParameterValues.value(paramName);
+        }
+        else if (scriptEngine)
+        {
+            value = scriptEngine->globalObject()
+                        .property(paramName)
+                        .toString();
+        }
 
         bool found = false;
 
         for (int row = 0; row < widget->rowCount(); row++)
         {
             QTableWidgetItem *nameItem = widget->item(row, 0);
+
             if (!nameItem || nameItem->text() != paramName)
             {
                 continue;
@@ -905,6 +1045,7 @@ void ScriptContainer::updateValuesTable(QTableWidget *widget)
             found = true;
 
             QTableWidgetItem *valueItem = widget->item(row, 1);
+
             if (valueItem && !valueItem->isSelected())
             {
                 valueItem->setText(value);
@@ -921,22 +1062,43 @@ void ScriptContainer::updateValuesTable(QTableWidget *widget)
         const int row = widget->rowCount();
         widget->insertRow(row);
 
-        QTableWidgetItem *nameItem = new QTableWidgetItem(paramName);
-        nameItem->setFlags(Qt::ItemIsEnabled);
-        widget->setItem(row, 0, nameItem);
+        QTableWidgetItem *nameItem =
+            new QTableWidgetItem(paramName);
 
+        nameItem->setFlags(Qt::ItemIsEnabled);
+
+        widget->setItem(row, 0, nameItem);
         widget->setItem(row, 1, new QTableWidgetItem(value));
     }
 }
 
 void ScriptContainer::updateParameter(QString name, QString value)
 {
-    if (!scriptEngine || name.isEmpty())
+    if (name.isEmpty())
     {
         return;
     }
 
-    scriptEngine->globalObject().setProperty(name, QJSValue(value));
+    /*
+     * Persist a manifest value whether or not JavaScript is currently
+     * running. This is what makes stopped-state configuration possible.
+     */
+    if (publicParameterValues.contains(name))
+    {
+        publicParameterValues.insert(name, value);
+    }
+
+    /*
+     * Preserve existing live-update behavior for running scripts.
+     * Values are intentionally text; templates convert with Number(...)
+     * or parse their hexadecimal payload text themselves.
+     */
+    if (scriptEngine)
+    {
+        scriptEngine->globalObject().setProperty(
+            name,
+            QJSValue(value));
+    }
 }
 
 void ScriptContainer::tick()
@@ -1040,6 +1202,23 @@ bool ScriptContainer::createRuntime()
     return true;
 }
 
+void ScriptContainer::applyPublicParameterValues()
+{
+    if (!scriptEngine)
+    {
+        return;
+    }
+
+    QJSValue globalObject = scriptEngine->globalObject();
+
+    for (const QString &name : publicParameterOrder)
+    {
+        globalObject.setProperty(
+            name,
+            QJSValue(publicParameterValues.value(name)));
+    }
+}
+
 bool ScriptContainer::evaluateAndInitialize(const QString &source)
 {
     if (!scriptEngine)
@@ -1075,6 +1254,12 @@ bool ScriptContainer::evaluateAndInitialize(const QString &source)
         scriptEngine->globalObject().property(
             QStringLiteral("gotUDSMessage")));
 
+
+    return true;
+}
+
+bool ScriptContainer::runSetup()
+{
     if (!setupFunction.isCallable())
     {
         return true;

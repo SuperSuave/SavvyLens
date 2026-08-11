@@ -43,12 +43,15 @@
      <number>9</number>
     </property>
     <item>
-     <layout class="QVBoxLayout" name="layoutLeft" stretch="2,0,3">
+     <layout class="QVBoxLayout" name="layoutLeft" stretch="2,0,2">
       <property name="bottomMargin">
        <number>0</number>
       </property>
       <item>
-       <layout class="QHBoxLayout" name="layoutFramesAndFilters" stretch="6,0">
+       <layout class="QHBoxLayout" name="layoutFramesAndFilters" stretch="1,2">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetNoConstraint</enum>
+        </property>
         <property name="leftMargin">
          <number>0</number>
         </property>
@@ -57,20 +60,44 @@
         </property>
         <item>
          <widget class="QTableView" name="canFramesView">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="minimumSize">
            <size>
             <width>775</width>
             <height>0</height>
            </size>
           </property>
+          <property name="sizeAdjustPolicy">
+           <enum>QAbstractScrollArea::AdjustIgnored</enum>
+          </property>
+          <property name="textElideMode">
+           <enum>Qt::ElideNone</enum>
+          </property>
           <property name="sortingEnabled">
            <bool>false</bool>
           </property>
-          <attribute name="horizontalHeaderStretchLastSection">
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+          <property name="cornerButtonEnabled">
+           <bool>false</bool>
+          </property>
+          <attribute name="horizontalHeaderCascadingSectionResizes">
            <bool>true</bool>
           </attribute>
+          <attribute name="horizontalHeaderDefaultSectionSize">
+           <number>50</number>
+          </attribute>
+          <attribute name="horizontalHeaderStretchLastSection">
+           <bool>false</bool>
+          </attribute>
           <attribute name="verticalHeaderStretchLastSection">
-           <bool>true</bool>
+           <bool>false</bool>
           </attribute>
          </widget>
         </item>
@@ -89,6 +116,12 @@
             </property>
             <item>
              <widget class="QLabel" name="lblBusFilters">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>0</width>
@@ -102,17 +135,17 @@
                </size>
               </property>
               <property name="text">
-               <string>Bus Filtering:</string>
+               <string>Bus Filtering</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QListWidget" name="listBusFilters">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -129,6 +162,9 @@
                 <height>25</height>
                </size>
               </property>
+              <property name="movement">
+               <enum>QListView::Static</enum>
+              </property>
               <property name="flow">
                <enum>QListView::LeftToRight</enum>
               </property>
@@ -136,6 +172,12 @@
             </item>
             <item>
              <widget class="Line" name="line_2">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>100</width>
@@ -156,7 +198,7 @@
             <item>
              <widget class="QLabel" name="lblFrameSearch">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -168,7 +210,7 @@
                </size>
               </property>
               <property name="text">
-               <string>ID Search:</string>
+               <string>ID Search</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
@@ -178,7 +220,7 @@
             <item>
              <widget class="QLineEdit" name="frameFilterSearch">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -195,6 +237,9 @@
                 <height>25</height>
                </size>
               </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
              </widget>
             </item>
             <item>
@@ -205,7 +250,7 @@
               <item alignment="Qt::AlignLeft|Qt::AlignTop">
                <widget class="QPushButton" name="btnFilterAll">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -230,7 +275,7 @@
               <item alignment="Qt::AlignLeft|Qt::AlignTop">
                <widget class="QPushButton" name="btnFilterNone">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -252,19 +297,6 @@
                 </property>
                </widget>
               </item>
-              <item>
-               <spacer name="horizontalSpacer">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>5</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
              </layout>
             </item>
            </layout>
@@ -272,30 +304,42 @@
           <item row="2" column="0">
            <widget class="QListWidget" name="listFilters">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="minimumSize">
              <size>
-              <width>100</width>
+              <width>135</width>
               <height>85</height>
              </size>
             </property>
-            <property name="maximumSize">
-             <size>
-              <width>100</width>
-              <height>16777215</height>
-             </size>
+            <property name="horizontalScrollBarPolicy">
+             <enum>Qt::ScrollBarAsNeeded</enum>
+            </property>
+            <property name="sizeAdjustPolicy">
+             <enum>QAbstractScrollArea::AdjustIgnored</enum>
+            </property>
+            <property name="editTriggers">
+             <set>QAbstractItemView::NoEditTriggers</set>
             </property>
             <property name="alternatingRowColors">
              <bool>false</bool>
+            </property>
+            <property name="resizeMode">
+             <enum>QListView::Adjust</enum>
             </property>
            </widget>
           </item>
           <item row="1" column="0" alignment="Qt::AlignHCenter">
            <widget class="QLabel" name="label">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="maximumSize">
              <size>
               <width>100</width>
@@ -303,7 +347,10 @@
              </size>
             </property>
             <property name="text">
-             <string>ID Filtering:</string>
+             <string>ID Filtering</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -869,6 +916,9 @@
             <height>0</height>
            </size>
           </property>
+          <property name="sizeAdjustPolicy">
+           <enum>QAbstractScrollArea::AdjustToContents</enum>
+          </property>
          </widget>
         </item>
         <item>
@@ -899,7 +949,7 @@
      <x>0</x>
      <y>0</y>
      <width>1280</width>
-     <height>23</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_RE_Tools">

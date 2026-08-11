@@ -16,6 +16,7 @@
 #include <QList>
 #include <QVector>
 #include <QHash>
+#include <QMap>
 
 class QTableWidget;
 class ScriptingWindow;
@@ -178,6 +179,12 @@ public slots:
     void log(QJSValue logString);
     void addParameter(QJSValue name);
 
+    /*
+     * Parses // @public name = defaultValue declarations without evaluating
+     * JavaScript. This provides stopped-state configuration in the UI.
+     */
+    void discoverPublicParameters(const QString &source);
+
     void updateValuesTable(QTableWidget *widget);
     void updateParameter(QString name, QString value);
 
@@ -195,6 +202,8 @@ private slots:
 private:
     bool createRuntime();
     bool evaluateAndInitialize(const QString &source);
+    bool runSetup();
+    void applyPublicParameterValues();
     int createScheduledTask(int intervalMs, bool repeating,
                             const QJSValue &callback);
     void invokeScheduledTask(int taskId);
@@ -218,8 +227,17 @@ private:
     ISOTPScriptHelper *isoHelper = nullptr;
     UDSScriptHelper *udsHelper = nullptr;
 
+    /*
+     * Public parameter metadata is available while stopped. Values are stored
+     * as text because the Public Variables table is a text editor; template
+     * JavaScript converts numeric values with Number(...) as needed.
+     */
+    QStringList publicParameterOrder;
+    QMap<QString, QString> publicParameterValues;
+
     QVector<QString> scriptParams;
     ScriptRunState runState = ScriptRunState::Stopped;
+    
     bool enabled = true;
 
     /*

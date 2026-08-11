@@ -12,9 +12,11 @@
 #include <QTimer>
 #include <QVector>
 
+
 class QListWidgetItem;
 class QTableWidget;
 class ScriptContainer;
+class QMenu;
 
 namespace Ui
 {
@@ -87,15 +89,34 @@ private:
 
     void connectScriptContainer(ScriptContainer *container);
     void synchronizeCurrentScriptSource();
-
+    void refreshCurrentPublicVariables();
+    
     void updateExecutionControls();
     void updateScriptListItem(ScriptContainer *container);
     void updateAllScriptListItems();
+
+    struct ScriptTemplate
+    {
+        QString displayName;
+        QString sourcePath;
+        bool builtIn = false;
+    };
+
+    QList<ScriptTemplate> availableTemplates() const;
+    QString builtInTemplateDirectory() const;
+    QString userTemplateDirectory() const;
+
+    void rebuildTemplateMenu();
+    void insertTemplate(const ScriptTemplate &scriptTemplate);
+    void saveCurrentScriptAsTemplate();
+
+    QString loadTemplateSource(const ScriptTemplate &scriptTemplate) const;
 
     ScriptContainer *selectedScript() const;
     QListWidgetItem *listItemForScript(ScriptContainer *container) const;
 
     Ui::ScriptingWindow *ui = nullptr;
+    QMenu *templateMenu = nullptr;
     JSEdit *editor = nullptr;
 
     QList<ScriptContainer *> scripts;
