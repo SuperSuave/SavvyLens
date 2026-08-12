@@ -6,6 +6,8 @@
 #include <QVector>
 #include <QDebug>
 #include <QMutex>
+#include <QSet>
+
 #include "can_structs.h"
 #include "dbc/dbchandler.h"
 #include "connections/canconnection.h"
@@ -53,6 +55,7 @@ public:
     void setTimeStyle(TimeStyle newStyle);
     void setIgnoreDBCColors(bool mode);
     void setFilterState(unsigned int ID, bool state);
+    void setActiveFilterIds(const QSet<uint32_t> &ids);
     void setBusFilterState(unsigned int BusID, bool state);
     void setAllFilters(bool state);
     void setTimeFormat(QString);
@@ -76,7 +79,8 @@ public:
     enum CustomRoles
     {
         RawPayloadRole = Qt::UserRole + 1,
-        ChangedBytesRole
+        ChangedBytesRole,
+        CanIDRole
     };
 
     QByteArray getRawPayloadForRow(int filteredRow) const;
@@ -120,4 +124,3 @@ private:
 
 
 #endif // CANFRAMEMODEL_H
-

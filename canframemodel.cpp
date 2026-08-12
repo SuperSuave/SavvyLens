@@ -222,15 +222,49 @@ void CANFrameModel::setClearMode(bool mode)
 
 void CANFrameModel::setFilterState(unsigned int ID, bool state)
 {
-    if (!filters.contains(ID)) return;
-    filters[ID] = state;
+    const bool isNewFilterId =
+        !filters.contains(static_cast<int>(ID));
+
+    filters.insert(static_cast<int>(ID), state);
+
+    if (isNewFilterId)
+        emit updatedFiltersList();
+
+    sendRefresh();
+}
+
+void CANFrameModel::setActiveFilterIds(const QSet<uint32_t> &ids)
+{
+    // Preserve all known IDs in the working set, but deactivate them.
+    for (auto iter = filters.begin();
+         iter != filters.end();
+         ++iter)
+    {
+        iter.value() = false;
+    }
+
+    // Add any newly selected IDs and activate all selected IDs.
+    for (uint32_t id : ids)
+    {
+        filters.insert(static_cast<int>(id), true);
+    }
+
+    qDebug() << "Active CAN ID filters updated:"
+             << filters.count()
+             << "saved IDs,"
+             << ids.count()
+             << "active IDs";
+
+    // Rebuild MainWindow's checkbox list from the updated QMap.
+    emit updatedFiltersList();
+
+    // Refresh the actual filtered CAN-frame table.
     sendRefresh();
 }
 
 void CANFrameModel::setBusFilterState(unsigned int BusID, bool state)
 {
-    if (!busFilters.contains(BusID)) return;
-    busFilters[BusID] = state;
+    busFilters.insert(BusID, state);
     sendRefresh();
 }
 
@@ -433,7 +467,16 @@ QVariant CANFrameModel::data(const QModelIndex &index, int role) const
 
     thisFrame = filteredFrames.at(index.row());
 
-    const unsigned char *data = reinterpret_cast<const unsigned char *>(thisFrame.payload().constData());
+    if (role == CanIDRole)
+    {
+        return QVariant::fromValue(
+            static_cast<qulonglong>(thisFrame.frameId()));
+    }
+
+    const unsigned char *data =
+        reinterpret_cast<const unsigned char *>(
+            thisFrame.payload().constData());
+
     int dataLen = thisFrame.payload().count();
 
     if (role == Qt::BackgroundRole)
@@ -811,18 +854,18 @@ void CANFrameModel::addFrames(const CANConnection*, const QVector<CANFrame>& pFr
     if(frames.length() > frames.capacity() * 0.99)
     {
         mutex.lock();
-        qDebug() << "Frames count: " << frames.length() << " of " << frames.capacity() << " capacity, removing first " << (int)(frames.capacity() * 0.05) << " frames";
+        // qDebug() << "Frames count: " << frames.length() << " of " << frames.capacity() << " capacity, removing first " << (int)(frames.capacity() * 0.05) << " frames";
         frames.remove(0, (int)(frames.capacity() * 0.05));
-        qDebug() << "Frames removed, new count: " << frames.length();
+        // qDebug() << "Frames removed, new count: " << frames.length();
         mutex.unlock();
     }
 
     if(filteredFrames.length() > filteredFrames.capacity() * 0.99)
     {
         mutex.lock();
-        qDebug() << "filteredFrames count: " << filteredFrames.length() << " of " << filteredFrames.capacity() << " capacity, removing first " << (int)(filteredFrames.capacity() * 0.05) << " frames";
+        // qDebug() << "filteredFrames count: " << filteredFrames.length() << " of " << filteredFrames.capacity() << " capacity, removing first " << (int)(filteredFrames.capacity() * 0.05) << " frames";
         filteredFrames.remove(0, (int)(filteredFrames.capacity() * 0.05));
-        qDebug() << "filteredFrames removed, new count: " << filteredFrames.length();
+        // qDebug() << "filteredFrames removed, new count: " << filteredFrames.length();
         mutex.unlock();
     }
 
@@ -839,7 +882,7 @@ void CANFrameModel::addFrames(const CANConnection*, const QVector<CANFrame>& pFr
 
 void CANFrameModel::sendRefresh()
 {
-    qDebug() << "Sending mass refresh";    
+    // qDebug() << "Sending mass refresh";    
 
     if(overwriteDups)
     {
