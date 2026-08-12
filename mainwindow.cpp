@@ -27,6 +27,8 @@
 #include <QPlainTextEdit>
 #include <QSet>
 #include <QShortcut>
+#include <QMouseEvent>
+#include <QRegularExpression>
 #include <QSignalBlocker>
 #include <QSortFilterProxyModel>
 #include <QSpinBox>
@@ -269,15 +271,28 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionTemporal_Graph, &QAction::triggered, this, &MainWindow::showTemporalGraphWindow);
     connect(ui->actionCAN_Bridge, &QAction::triggered, this, &MainWindow::showCANBridgeWindow);
 
-    //handlers fror interactions with the main can frame view table
+    // Handlers for interactions with the main CAN frame view table.
     connect(ui->canFramesView, &QAbstractItemView::clicked, this, &MainWindow::gridClicked);
+
     connect(ui->canFramesView, &QAbstractItemView::doubleClicked, this, &MainWindow::gridDoubleClicked);
+
     ui->canFramesView->setContextMenuPolicy(Qt::CustomContextMenu);
+
+    // Allow Ctrl-click for non-contiguous rows and Shift-click for ranges.
+    ui->canFramesView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
+    ui->canFramesView->setSelectionBehavior(QAbstractItemView::SelectRows);
+
+    // Preserve an existing multi-row selection when right-clicking inside it.
+    ui->canFramesView->viewport()->installEventFilter(this);
 
     copyAct = new QAction(tr("Copy"), this);
     copyAct->setShortcut(QKeySequence::Copy);
+
     connect(copyAct, &QAction::triggered, this, &MainWindow::copyFromTable);
+
     ui->canFramesView->addAction(copyAct);
+
     connect(ui->canFramesView, &QAbstractItemView::customContextMenuRequested, this, &MainWindow::gridContextMenuRequest);
 
     connect(model, &CANFrameModel::updatedFiltersList, this, &MainWindow::updateFilterList);
@@ -510,11 +525,41 @@ bool MainWindow::getSelectedFrameInfo(CANFrame &outFrame, QModelIndex *outIndex)
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
-    Q_UNUSED(obj);
+    // Preserve an existing multi-row table selection when the user
+    // right-clicks on one of the selected CAN-frame rows.
+    //
+    // Without this, QAbstractItemView can collapse Ctrl/Shift selection
+    // to the clicked row before gridContextMenuRequest() is called.
+    if (obj == ui->canFramesView->viewport() && event->type() == QEvent::MouseButtonPress)
+    {
+        QMouseEvent *mouseEvent =
+            static_cast<QMouseEvent *>(event);
+
+        if (mouseEvent->button() == Qt::RightButton)
+        {
+            const QModelIndex index =
+                ui->canFramesView->indexAt(mouseEvent->pos());
+
+            QItemSelectionModel *selectionModel =
+                ui->canFramesView->selectionModel();
+
+            const bool clickedSelectedRow =
+                index.isValid() && selectionModel != nullptr && selectionModel->isRowSelected(index.row(), index.parent());
+
+            if (clickedSelectedRow)
+            {
+                // Consume only the press. The subsequent context-menu event
+                // will still invoke gridContextMenuRequest(), but the view
+                // will not collapse the existing multi-selection first.
+                return true;
+            }
+        }
+    }
 
     if (event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease)
     {
-        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        QKeyEvent *keyEvent =
+            static_cast<QKeyEvent *>(event);
 
         if (keyEvent->isAutoRepeat())
             return true;
@@ -524,6 +569,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         case Qt::Key_F1:
             if (event->type() == QEvent::KeyRelease)
                 HelpWindow::getRef()->showHelp("mainscreen.md");
+
             return true;
 
         default:
@@ -550,8 +596,8 @@ if (settings.value("Main/SaveRestorePositions", false).toBool())
     move(Utility::constrainedWindowPos(
         settings.value("Main/WindowPos", QPoint(100, 100)).toPoint()));
 
-    // ui->canFramesView->setColumnWidth(int(Column::TimeStamp),
-    //     settings.value("Main/TimeColumn", 125).toUInt());
+    ui->canFramesView->setColumnWidth(int(Column::TimeStamp),
+        settings.value("Main/TimeColumn", 125).toUInt());
     // ui->canFramesView->setColumnWidth(int(Column::FrameId),
     //     settings.value("Main/IDColumn", 70).toUInt());
     // ui->canFramesView->setColumnWidth(int(Column::Extended),
@@ -573,10 +619,10 @@ if (settings.value("Main/SaveRestorePositions", false).toBool())
 }
 else
 {
-    resize(QSize(1280, 850));
+    resize(QSize(1280, 900));
     move(Utility::constrainedWindowPos(QPoint(100, 100)));
 
-    // ui->canFramesView->setColumnWidth(int(Column::TimeStamp), 125);
+    ui->canFramesView->setColumnWidth(int(Column::TimeStamp), 125);
     // ui->canFramesView->setColumnWidth(int(Column::FrameId), 70);
     // ui->canFramesView->setColumnWidth(int(Column::Extended), 40);
     // ui->canFramesView->setColumnWidth(int(Column::Remote), 40);
@@ -652,10 +698,6 @@ void MainWindow::readUpdateableSettings()
 
     CSVAbsTime = settings.value("Main/CSVAbsTime", false).toBool();
 
-    if (settings.value("Main/FilterLabeling", false).toBool())
-        ui->listFilters->setMaximumWidth(100);
-    else
-        ui->listFilters->setMaximumWidth(100);
     updateFilterList();    
 }    
 
@@ -670,8 +712,8 @@ void MainWindow::writeSettings()
         settings.setValue("Main/WindowPos", pos());
     }
 
-    // settings.setValue("Main/TimeColumn",
-    //     ui->canFramesView->columnWidth(int(Column::TimeStamp)));
+    settings.setValue("Main/TimeColumn",
+        ui->canFramesView->columnWidth(int(Column::TimeStamp)));
     // settings.setValue("Main/IDColumn",
     //     ui->canFramesView->columnWidth(int(Column::FrameId)));
 
@@ -850,7 +892,7 @@ void MainWindow::gridDoubleClicked(const QModelIndex &idx)
 
 void MainWindow::gridContextMenuRequest(QPoint pos)
 {
-    QModelIndex idx = ui->canFramesView->indexAt(pos);
+    const QModelIndex idx = ui->canFramesView->indexAt(pos);
 
     qDebug() << "Pos" << pos
              << " Row " << idx.row()
@@ -862,10 +904,13 @@ void MainWindow::gridContextMenuRequest(QPoint pos)
     QItemSelectionModel *selectionModel =
         ui->canFramesView->selectionModel();
 
-    if (selectionModel != nullptr && !selectionModel->isSelected(idx))
+    if (selectionModel == nullptr)
+        return;
+
+    // Right-clicking an unselected row replaces the selection with that row.
+    // Right-clicking within an existing multi-row selection preserves it.
+    if (!selectionModel->isRowSelected(idx.row(), idx.parent()))
     {
-        // Right-clicking an unselected row changes the selection to that row.
-        // Right-clicking within the existing selection preserves multi-selection.
         selectionModel->select(
             idx,
             QItemSelectionModel::ClearAndSelect
@@ -876,26 +921,46 @@ void MainWindow::gridContextMenuRequest(QPoint pos)
             QItemSelectionModel::NoUpdate);
     }
 
+    const bool hasSelectedRows =
+        !selectionModel->selectedRows().isEmpty();
+
+    qDebug() << "Selected rows count:"
+             << selectionModel->selectedRows().count();
+
     QMenu *menu = new QMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
 
     menu->addAction(copyAct);
     menu->addSeparator();
 
-    QAction *addSelectedIdsAction = menu->addAction(tr("Add selected ID(s) to filter"), this, &MainWindow::actionAddSelectedIdsToFilter);
+    QAction *filterToSelectedIdsAction =
+        new QAction(tr("Filter to selected ID(s)"), menu);
 
-    // QAction *removeSelectedIdsAction = menu->addAction(tr("Remove selected ID(s) from filter"), this, &MainWindow::actionRemoveSelectedIdsFromFilter);
+    connect(
+        filterToSelectedIdsAction,
+        &QAction::triggered,
+        this,
+        [this]()
+        {
+            actionFilterToSelectedIds();
+        });
 
-    const bool hasSelectedRows = selectionModel != nullptr && !selectionModel->selectedRows().isEmpty();
+    filterToSelectedIdsAction->setEnabled(hasSelectedRows);
+    filterToSelectedIdsAction->setVisible(true);
 
-    addSelectedIdsAction->setEnabled(hasSelectedRows);
-    // removeSelectedIdsAction->setEnabled(hasSelectedRows);
+    menu->addAction(filterToSelectedIdsAction);
 
     menu->addSeparator();
 
-    menu->addAction( tr("Analyze Control Type"), this, &MainWindow::analyzeControlStatesForSelectedFrame);
+    menu->addAction(
+        tr("Analyze Control Type"),
+        this,
+        &MainWindow::analyzeControlStatesForSelectedFrame);
 
-    menu->addAction( tr("Analyze Around This Frame"), this, &MainWindow::analyzeCurrentBookmarkOrSelection);
+    menu->addAction(
+        tr("Analyze Around This Frame"),
+        this,
+        &MainWindow::analyzeCurrentBookmarkOrSelection);
 
     if (idx.column() == 8) // DATA column
     {
@@ -914,7 +979,16 @@ void MainWindow::gridContextMenuRequest(QPoint pos)
             SLOT(setupSendToLatestGraphWindow()));
     }
 
-    menu->popup(ui->canFramesView->viewport()->mapToGlobal(pos));
+    for (QAction *action : menu->actions())
+    {
+        qDebug() << "  text:" << action->text()
+                 << "visible:" << action->isVisible()
+                 << "enabled:" << action->isEnabled()
+                 << "separator:" << action->isSeparator();
+    }
+
+    menu->popup(
+        ui->canFramesView->viewport()->mapToGlobal(pos));
 }
 
 void MainWindow::copyFromTable()
@@ -1084,16 +1158,22 @@ void MainWindow::presistentFiltersToggled(bool state)
 
 void MainWindow::updateFilterList()
 {
+    qDebug() << "updateFilterList called on MainWindow";
     if (model == nullptr)
         return;
 
-    const QMap<int, bool> *filters = model->getFiltersReference();
-    const QMap<int, bool> *busFilters = model->getBusFiltersReference();
+    const QMap<int, bool> *filters =
+        model->getFiltersReference();
+
+    const QMap<int, bool> *busFilters =
+        model->getBusFiltersReference();
 
     if (filters == nullptr || busFilters == nullptr)
         return;
 
-    qDebug() << "updateFilterList called on MainWindow";
+    qDebug() << "updateFilterList called on MainWindow"
+             << "CAN filters:" << filters->count()
+             << "bus filters:" << busFilters->count();
 
     inhibitFilterUpdate = true;
 
@@ -1110,19 +1190,18 @@ void MainWindow::updateFilterList()
             ui->listFilters);
     }
 
-    for (auto filterIter = busFilters->cbegin();
-         filterIter != busFilters->cend();
-         ++filterIter)
+    for (auto busFilterIter = busFilters->cbegin();
+         busFilterIter != busFilters->cend();
+         ++busFilterIter)
     {
         FilterUtility::createCheckableBusFilterItem(
-            static_cast<uint32_t>(filterIter.key()),
-            filterIter.value(),
+            static_cast<uint32_t>(busFilterIter.key()),
+            busFilterIter.value(),
             ui->listBusFilters);
     }
 
     inhibitFilterUpdate = false;
 
-    // Preserve the existing search text when the list is rebuilt.
     if (ui->frameFilterSearch != nullptr)
         filterFrameFilterList(ui->frameFilterSearch->text());
 }
@@ -1210,7 +1289,9 @@ void MainWindow::filterClearAll()
 
 void MainWindow::filterFrameFilterList(const QString &text)
 {
-    const QString needle = text.trimmed();
+    const QStringList searchTerms = text.split(
+        QRegularExpression(QStringLiteral("[,\\s]+")),
+        Qt::SkipEmptyParts);
 
     for (int i = 0; i < ui->listFilters->count(); ++i)
     {
@@ -1219,30 +1300,50 @@ void MainWindow::filterFrameFilterList(const QString &text)
         if (item == nullptr)
             continue;
 
-        const bool match =
-            needle.isEmpty()
-            || item->text().contains(needle, Qt::CaseInsensitive);
+        bool matchesSearch = searchTerms.isEmpty();
 
-        item->setHidden(!match);
+        for (const QString &term : searchTerms)
+        {
+            if (item->text().contains(
+                    term,
+                    Qt::CaseInsensitive))
+            {
+                matchesSearch = true;
+                break;
+            }
+        }
+
+        item->setHidden(!matchesSearch);
     }
 }
 
-void MainWindow::actionAddSelectedIdsToFilter()
+void MainWindow::actionFilterToSelectedIds()
 {
+    qDebug() << "Filter to selected IDs action triggered";
+
     if (ui->canFramesView == nullptr)
+    {
+        qDebug() << "No canFramesView";
         return;
+    }
 
     QItemSelectionModel *selectionModel =
         ui->canFramesView->selectionModel();
 
     if (selectionModel == nullptr)
+    {
+        qDebug() << "No CAN-frame selection model";
         return;
+    }
 
     const QModelIndexList selectedRows =
         selectionModel->selectedRows();
 
     if (selectedRows.isEmpty())
+    {
+        qDebug() << "No selected CAN frame rows";
         return;
+    }
 
     QSet<uint32_t> selectedIds;
 
@@ -1258,55 +1359,50 @@ void MainWindow::actionAddSelectedIdsToFilter()
             static_cast<uint32_t>(idValue.toULongLong()));
     }
 
-    addFrameIdsToFilterList(selectedIds);
+    qDebug() << "Unique selected CAN IDs:"
+             << selectedIds.count();
+
+    for (uint32_t id : selectedIds)
+    {
+        qDebug() << "  ID:"
+                 << QStringLiteral("0x%1")
+                        .arg(id, 0, 16)
+                        .toUpper();
+    }
+
+    if (selectedIds.isEmpty())
+    {
+        qDebug() << "No valid CAN IDs found in selected rows";
+        return;
+    }
+
+    filterToFrameIds(selectedIds);
 }
 
-void MainWindow::addFrameIdsToFilterList(const QSet<uint32_t> &ids)
+void MainWindow::filterToFrameIds(const QSet<uint32_t> &ids)
 {
     if (model == nullptr || ids.isEmpty())
         return;
 
     const int64_t savedTs = selectedFrameTimestamp();
 
-    inhibitFilterUpdate = true;
+    qDebug() << "Filtering to" << ids.count()
+             << "selected CAN IDs";
 
     for (uint32_t id : ids)
     {
-        bool foundExistingItem = false;
-
-        for (int row = 0; row < ui->listFilters->count(); ++row)
-        {
-            QListWidgetItem *item = ui->listFilters->item(row);
-
-            if (item == nullptr)
-                continue;
-
-            if (FilterUtility::getIdAsInt(item) != id)
-                continue;
-
-            foundExistingItem = true;
-
-            // Existing saved ID: activate it, rather than creating a duplicate.
-            item->setCheckState(Qt::Checked);
-            break;
-        }
-
-        // Requires the updated setFilterState() implementation:
-        // filters.insert(ID, state);
-        model->setFilterState(id, true);
-
-        if (!foundExistingItem)
-        {
-            FilterUtility::createCheckableFilterItem(
-                id,
-                true,
-                ui->listFilters);
-        }
+        qDebug() << "  Active filter ID:"
+                 << QStringLiteral("0x%1")
+                        .arg(id, 0, 16)
+                        .toUpper();
     }
 
-    inhibitFilterUpdate = false;
+    // Makes all previous IDs inactive and selected IDs active.
+    model->setActiveFilterIds(ids);
 
-    // Keep list-search text intact; merely apply it to newly added entries.
+    // setActiveFilterIds() emits updatedFiltersList, which calls
+    // updateFilterList() and rebuilds listFilters.
+
     if (ui->frameFilterSearch != nullptr)
         filterFrameFilterList(ui->frameFilterSearch->text());
 

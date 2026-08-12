@@ -742,17 +742,17 @@ void ScriptingWindow::refreshCurrentPublicVariables()
 {
     if (!currentScript || !ui || !ui->tableVariables)
     {
-        qDebug() << "Cannot refresh public variables:"
-                 << "currentScript=" << currentScript
-                 << "ui=" << ui;
+        // qDebug() << "Cannot refresh public variables:"
+        //          << "currentScript=" << currentScript
+        //          << "ui=" << ui;
         return;
     }
 
-    qDebug() << "Refreshing public variables for:"
-             << currentScript->fileName;
+    // qDebug() << "Refreshing public variables for:"
+    //          << currentScript->fileName;
 
-    qDebug() << "Script source:"
-             << currentScript->scriptText;
+    // qDebug() << "Script source:"
+    //          << currentScript->scriptText;
 
     currentScript->discoverPublicParameters(
         currentScript->scriptText);
@@ -760,8 +760,8 @@ void ScriptingWindow::refreshCurrentPublicVariables()
     currentScript->updateValuesTable(
         ui->tableVariables);
 
-    qDebug() << "Public Variables table rows:"
-             << ui->tableVariables->rowCount();
+    // qDebug() << "Public Variables table rows:"
+    //          << ui->tableVariables->rowCount();
 }
 
 void ScriptingWindow::connectScriptContainer(ScriptContainer *container)

@@ -209,7 +209,7 @@ private:
     CANFrameModel *model;
     DBCHandler *dbcHandler;
 
-    void addFrameIdsToFilterList(const QSet<uint32_t> &ids);
+    void filterToFrameIds(const QSet<uint32_t> &ids);
     void removeFrameIdsFromFilterList(const QSet<uint32_t> &ids);
 
     QByteArray inputBuffer;
@@ -374,8 +374,7 @@ private slots:
     void disableAutoRowExpansion();
     int64_t selectedFrameTimestamp();
     void scrollToNearestTimestamp(int64_t timestamp);
-    void actionAddSelectedIdsToFilter();
-    void actionRemoveSelectedIdsFromFilter();
+    void actionFilterToSelectedIds();
 };
 
 #endif // MAINWINDOW_H
