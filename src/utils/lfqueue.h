@@ -1,6 +1,7 @@
 #ifndef LFQUEUE_H
 #define LFQUEUE_H
 
+// QT headers
 #include <QObject>
 #include <QDebug>
 

@@ -1,15 +1,20 @@
-#include "frameplaybackwindow.h"
-#include "mainwindow.h"
+#include "playback/frameplaybackwindow.h"
 #include "ui_frameplaybackwindow.h"
-#include <QDebug>
-#include <QFileDialog>
-#include <QMenu>
-#include <QSettings>
-#include <qevent.h>
-#include <QScrollBar>
+
+// SavvyLens headers
+#include "app/helpwindow.h"
+#include "app/mainwindow.h"
 #include "connections/canconmanager.h"
-#include "helpwindow.h"
-#include "filterutility.h"
+#include "widgets/filterutility.h"
+
+// QT headers
+#include <QDebug>
+#include <QEvent>
+#include <QFileDialog>
+#include <QKeyEvent>
+#include <QMenu>
+#include <QScrollBar>
+#include <QSettings>
 
 /*
  * Notes about new functionality:

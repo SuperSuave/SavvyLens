@@ -1,19 +1,22 @@
 #ifndef FRAMEFILEIO_H
 #define FRAMEFILEIO_H
 
-//Class full of static methods that load and save canbus frames to/from various file formats
-
-#include "config.h"
-#include <Qt>
-#include <QApplication>
-#include <QObject>
-#include <QVector>
-#include <QFile>
-#include <QString>
-#include <QStringList>
-#include <QFileDialog>
+// SavvyLens headers
 #include "can/can_structs.h"
 #include "common/utility.h"
+#include "config.h"
+
+// QT headers
+#include <QApplication>
+#include <QFile>
+#include <QFileDialog>
+#include <QObject>
+#include <QString>
+#include <QStringList>
+#include <Qt>
+#include <QVector>
+
+//Class full of static methods that load and save canbus frames to/from various file formats
 
 class BookmarkManager;
 

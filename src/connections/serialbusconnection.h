@@ -1,9 +1,11 @@
 #ifndef SERIALBUSCONNECTION_H
 #define SERIALBUSCONNECTION_H
 
-#include "canconnection.h"
-#include "canframemodel.h"
+// SavvyLens headers
+#include "connections/canconnection.h"
+#include "frames/canframemodel.h"
 
+// QT headers
 #include <QCanBusDevice>
 #include <QTimer>
 
@@ -32,14 +34,12 @@ public:
     virtual ~SerialBusConnection();
 
 protected:
-
     virtual void piStarted();
     virtual void piStop();
     virtual void piSetBusSettings(int pBusIdx, CANBus pBus);
     virtual bool piGetBusSettings(int pBusIdx, CANBus& pBus);
     virtual void piSuspend(bool pSuspend);
     virtual bool piSendFrame(const CANFrame&);
-
     void disconnectDevice();
 
 private slots:
@@ -52,6 +52,5 @@ protected:
     QCanBusDevice     *mDev_p = nullptr;
     QTimer             mTimer;
 };
-
 
 #endif // SERIALBUSCONNECTION_H

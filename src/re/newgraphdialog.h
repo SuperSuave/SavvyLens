@@ -1,9 +1,12 @@
 #ifndef NEWGRAPHDIALOG_H
 #define NEWGRAPHDIALOG_H
 
-#include <QDialog>
-#include "graphingwindow.h"
+// SavvyLens headers
 #include "dbc/dbchandler.h"
+#include "graphingwindow.h"
+
+// QT headers
+#include <QDialog>
 
 namespace Ui {
 class NewGraphDialog;

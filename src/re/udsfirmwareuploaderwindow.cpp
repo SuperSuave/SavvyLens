@@ -1,17 +1,20 @@
 #include "udsfirmwareuploaderwindow.h"
 #include "ui_udsfirmwareuploaderwindow.h"
-#include "mainwindow.h"
-#include "connections/canconmanager.h"
-#include "common/utility.h"
 
+// SavvyLens headers
+#include "app/mainwindow.h"
+#include "common/utility.h"
+#include "connections/canconmanager.h"
+
+// QT headers
+#include <QCoreApplication>
+#include <QDateTime>
+#include <QDir>
 #include <QFile>
 #include <QFileDialog>
-#include <QTextStream>
-#include <QDateTime>
-#include <QCoreApplication>
-#include <QDir>
 #include <QFileInfo>
 #include <QJsonArray>
+#include <QTextStream>
 
 UDSFirmwareUploaderWindow::UDSFirmwareUploaderWindow(const QVector<CANFrame> *frames, QWidget *parent) :
     QDialog(parent),

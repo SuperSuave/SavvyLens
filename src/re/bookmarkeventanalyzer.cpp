@@ -1,9 +1,12 @@
 #include "bookmarkeventanalyzer.h"
 
-#include <algorithm>
+// QT headers
 #include <QMap>
 #include <QStringList>
 #include <QtGlobal>
+
+// C++ standard-library headers
+#include <algorithm>
 
 BookmarkEventAnalyzer::BookmarkEventAnalyzer(QObject *parent)
     : QObject(parent)

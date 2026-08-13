@@ -1,12 +1,13 @@
-#include <QObject>
-#include <QDebug>
+#include "connections/gvretserial.h"
+
+// QT headers
 #include <QCanBusFrame>
+#include <QDebug>
+#include <QObject>
 #include <QSerialPortInfo>
 #include <QSettings>
 #include <QStringBuilder>
 #include <QtNetwork>
-
-#include "gvretserial.h"
 
 GVRetSerial::GVRetSerial(QString portName, bool useTcp) :
     CANConnection(portName, "gvret", CANCon::GVRET_SERIAL, 0, 0, false, 0, 3, 4000, true),
@@ -30,7 +31,6 @@ GVRetSerial::GVRetSerial(QString portName, bool useTcp) :
 
     readSettings();
 }
-
 
 GVRetSerial::~GVRetSerial()
 {
@@ -88,7 +88,6 @@ void GVRetSerial::piStarted()
     connectDevice();
 }
 
-
 void GVRetSerial::piSuspend(bool pSuspend)
 {
     /* update capSuspended */
@@ -99,19 +98,16 @@ void GVRetSerial::piSuspend(bool pSuspend)
         getQueue().flush();
 }
 
-
 void GVRetSerial::piStop()
 {
     mTimer.stop();
     disconnectDevice();
 }
 
-
 bool GVRetSerial::piGetBusSettings(int pBusIdx, CANBus& pBus)
 {
     return getBusConfig(pBusIdx, pBus);
 }
-
 
 void GVRetSerial::piSetBusSettings(int pBusIdx, CANBus bus)
 {
@@ -227,7 +223,6 @@ void GVRetSerial::piSetBusSettings(int pBusIdx, CANBus bus)
     }
 }
 
-
 bool GVRetSerial::piSendFrame(const CANFrame& frame)
 {
     QByteArray buffer;
@@ -271,10 +266,6 @@ bool GVRetSerial::piSendFrame(const CANFrame& frame)
     return true;
 }
 
-
-
-/****************************************************************/
-
 void GVRetSerial::readSettings()
 {
     QSettings settings;
@@ -285,7 +276,6 @@ void GVRetSerial::readSettings()
     }
     else doValidation = false;
 }
-
 
 void GVRetSerial::connectDevice()
 {
@@ -546,7 +536,6 @@ void GVRetSerial::serialError(QSerialPort::SerialPortError err)
     }
 }
 
-
 void GVRetSerial::connectionTimeout()
 {
     //one second after trying to connect are we actually connected?
@@ -569,7 +558,6 @@ void GVRetSerial::connectionTimeout()
         mTimer.start();
     }
 }
-
 
 void GVRetSerial::readSerialData()
 {
@@ -1136,7 +1124,6 @@ void GVRetSerial::handleTick()
     if (doValidation && udpClient && udpClient->isOpen()) sendCommValidation();
 }
 
-
 void GVRetSerial::sendCommValidation()
 {
     QByteArray output;
@@ -1146,6 +1133,3 @@ void GVRetSerial::sendCommValidation()
 
     sendToSerial(output);
 }
-
-
-

@@ -1,3 +1,6 @@
+#ifndef QMQTT_MESSAGE_P_H
+#define QMQTT_MESSAGE_P_H
+
 /*
  * qmqtt_message.h - qmqtt message private header
  *
@@ -29,12 +32,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef QMQTT_MESSAGE_P_H
-#define QMQTT_MESSAGE_P_H
 
+// QT headers
+#include <QByteArray>
 #include <QSharedData>
 #include <QString>
-#include <QByteArray>
 
 namespace QMQTT {
 

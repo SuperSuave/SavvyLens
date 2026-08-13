@@ -1,16 +1,19 @@
-#include <QCanBus>
-#include <QNetworkDatagram>
-#include <QThread>
-
-#include "connectionwindow.h"
-#include "mainwindow.h"
-#include "helpwindow.h"
+#include "connections/connectionwindow.h"
 #include "ui_connectionwindow.h"
+
+// SavvyLens headers
+#include "app/helpwindow.h"
+#include "app/mainwindow.h"
+#include "connections/canbus.h"
 #include "connections/canconfactory.h"
 #include "connections/canconmanager.h"
-#include "canbus.h"
+#include "connections/newconnectiondialog.h"
+
+// QT headers
+#include <QCanBus>
+#include <QNetworkDatagram>
 #include <QSettings>
-#include <connections/newconnectiondialog.h>
+#include <QThread>
 
 ConnectionWindow::ConnectionWindow(QWidget *parent) :
     QDialog(parent),
@@ -88,7 +91,6 @@ ConnectionWindow::ConnectionWindow(QWidget *parent) :
 
 }
 
-
 void ConnectionWindow::readPendingDatagrams()
 {
     //qDebug() << "Got a UDP frame!";
@@ -145,6 +147,7 @@ void ConnectionWindow::readPendingDatagrams()
         }
     }
 }
+
 ConnectionWindow::~ConnectionWindow()
 {
     QList<CANConnection*>& conns = CANConManager::getInstance()->getConnections();
@@ -163,7 +166,6 @@ ConnectionWindow::~ConnectionWindow()
 
     delete ui;
 }
-
 
 void ConnectionWindow::showEvent(QShowEvent* event)
 {
@@ -556,7 +558,6 @@ CANConnection* ConnectionWindow::create(CANCon::type pTye, QString pPortName, QS
     }
     return conn_p;
 }
-
 
 void ConnectionWindow::loadConnections()
 {

@@ -1,12 +1,15 @@
 #ifndef BOOKMARKEVENTANALYZER_H
 #define BOOKMARKEVENTANALYZER_H
 
-#include <QObject>
-#include <QVector>
-#include <QHash>
-#include <QString>
-#include <QByteArray>
+// SavvyLens headers
 #include "can/can_structs.h"
+
+// QT headers
+#include <QByteArray>
+#include <QHash>
+#include <QObject>
+#include <QString>
+#include <QVector>
 
 class BookmarkEventAnalyzer : public QObject
 {

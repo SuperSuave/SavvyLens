@@ -1,3 +1,6 @@
+#ifndef QMQTT_ROUTER_H
+#define QMQTT_ROUTER_H
+
 /*
  * qmqtt_router.h - qmqtt router
  *
@@ -30,11 +33,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef QMQTT_ROUTER_H
-#define QMQTT_ROUTER_H
 
-#include "qmqtt_global.h"
+// SavvyLens headers
+#include "mqtt/qmqtt_global.h"
 
+// QT headers
 #include <QObject>
 
 namespace QMQTT {

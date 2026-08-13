@@ -1,10 +1,14 @@
 #include "flowviewwindow.h"
 #include "ui_flowviewwindow.h"
-#include "mainwindow.h"
-#include "helpwindow.h"
-#include "filterutility.h"
-#include "qcpaxistickerhex.h"
+
+// SavvyLens headers
+#include "app/helpwindow.h"
+#include "app/mainwindow.h"
 #include "themes/thememanager.h"
+#include "widgets/filterutility.h"
+#include "widgets/plotting/qcpaxistickerhex.h"
+
+// QT headers
 #include <QJsonObject>
 #include <QJsonArray>
 
@@ -967,4 +971,3 @@ void FlowViewWindow::updateGraphLocation()
 
     ui->graphView->replot();
 }
-

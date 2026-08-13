@@ -1,12 +1,15 @@
 #ifndef DBCSIGNALSELECTORTREE_H
 #define DBCSIGNALSELECTORTREE_H
 
-#include <QWidget>
-#include <QStandardItemModel>
-#include <QSortFilterProxyModel>
-#include <QIcon>
-#include <QHash>
+// SavvyLens headers
 #include "dbc/dbchandler.h"
+
+// QT headers
+#include <QHash>
+#include <QIcon>
+#include <QSortFilterProxyModel>
+#include <QStandardItemModel>
+#include <QWidget>
 
 namespace Ui {
 class DbcSignalSelectorTree;

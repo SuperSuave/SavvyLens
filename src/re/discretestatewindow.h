@@ -1,23 +1,26 @@
 #ifndef DISCRETESTATEWINDOW_H
 #define DISCRETESTATEWINDOW_H
 
+// SavvyLens headers
+#include "can/can_structs.h"
+
+// QT headers
 #include <QDialog>
 #include <QTimer>
-#include "can/can_structs.h"
 
 namespace Ui {
 class DiscreteStateWindow;
 }
 
 namespace DWStates {
-enum DiscreteWindowState
-{
-    IDLE,
-    COUNTDOWN_SIGNAL,
-    COUNTDOWN_WAITING,
-    GETTING_SIGNAL,
-    DONE
-};
+    enum DiscreteWindowState
+    {
+        IDLE,
+        COUNTDOWN_SIGNAL,
+        COUNTDOWN_WAITING,
+        GETTING_SIGNAL,
+        DONE
+    };
 }
 
 using namespace DWStates;

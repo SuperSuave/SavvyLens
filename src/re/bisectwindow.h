@@ -1,9 +1,11 @@
 #ifndef BISECTWINDOW_H
 #define BISECTWINDOW_H
 
-#include <QDialog>
-
+// SavvyLens headers
 #include "can/can_structs.h"
+
+// QT headers
+#include <QDialog>
 
 namespace Ui {
 class BisectWindow;
@@ -47,5 +49,3 @@ private:
 };
 
 #endif // BISECTWINDOW_H
-
-

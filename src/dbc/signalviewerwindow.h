@@ -1,8 +1,11 @@
 #ifndef SIGNALVIEWERWINDOW_H
 #define SIGNALVIEWERWINDOW_H
 
-#include <QDialog>
+// SavvyLens headers
 #include "dbc/dbchandler.h"
+
+// QT headers
+#include <QDialog>
 
 namespace Ui {
 class SignalViewerWindow;

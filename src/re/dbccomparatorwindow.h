@@ -1,13 +1,16 @@
 #ifndef DBCCOMPARATORWINDOW_H
 #define DBCCOMPARATORWINDOW_H
 
-#include <QDialog>
-#include <QDebug>
-#include <QTreeWidget>
-#include "framefileio.h"
+// SavvyLens headers
+#include "common/utility.h"
 #include "dbc/dbc_classes.h"
 #include "dbc/dbchandler.h"
-#include "common/utility.h"
+#include "io/framefileio.h"
+
+// QT headers
+#include <QDebug>
+#include <QDialog>
+#include <QTreeWidget>
 
 namespace Ui {
 class DBCComparatorWindow;

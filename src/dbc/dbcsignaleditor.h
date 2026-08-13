@@ -1,9 +1,12 @@
 #ifndef DBCSIGNALEDITOR_H
 #define DBCSIGNALEDITOR_H
 
-#include <QDialog>
-#include "dbchandler.h"
+// SavvyLens headers
+#include "dbc/dbchandler.h"
 #include "common/utility.h"
+
+// QT headers
+#include <QDialog>
 
 namespace Ui {
 class DBCSignalEditor;

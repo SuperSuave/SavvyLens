@@ -1,10 +1,13 @@
 #ifndef BLFHANDLER_H
 #define BLFHANDLER_H
 
-#include <Qt>
+// SavvyLens headers
+#include "can/can_structs.h"
+
+// QT headers
 #include <QByteArray>
 #include <QList>
-#include "can/can_structs.h"
+#include <Qt>
 
 enum
 {

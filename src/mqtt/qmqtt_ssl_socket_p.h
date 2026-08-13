@@ -1,3 +1,6 @@
+#ifndef QMQTT_SSL_SOCKET_P_H
+#define QMQTT_SSL_SOCKET_P_H
+
 /*
  * qmqtt_ssl_socket_p.h - qmqtt SSL socket private header
  *
@@ -30,18 +33,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef QMQTT_SSL_SOCKET_P_H
-#define QMQTT_SSL_SOCKET_P_H
 
 #ifndef QT_NO_SSL
 
-#include "qmqtt_socketinterface.h"
+// SavvyLens headers
+#include "mqtt/qmqtt_socketinterface.h"
 
-#include <QObject>
+// QT headers
 #include <QHostAddress>
-#include <QString>
 #include <QList>
+#include <QObject>
 #include <QScopedPointer>
+#include <QString>
 
 QT_FORWARD_DECLARE_CLASS(QSslSocket)
 QT_FORWARD_DECLARE_CLASS(QSslError)

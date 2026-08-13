@@ -1,12 +1,15 @@
-#include <QObject>
-#include <QDebug>
+#include "connections/canlogserver.h"
+
+// SavvyLens headers
+#include "common/utility.h"
+
+// QT headers
 #include <QCanBusFrame>
+#include <QDebug>
+#include <QObject>
 #include <QSettings>
 #include <QStringBuilder>
 #include <QtNetwork>
-
-#include "common/utility.h"
-#include "canlogserver.h"
 
 CanLogServer::CanLogServer(QString serverAddressString) :
     CANConnection(serverAddressString, "CanLogserver", CANCon::CANLOGSERVER, 0, 0, false, 0, 1, 4000, true),
@@ -31,7 +34,6 @@ CanLogServer::CanLogServer(QString serverAddressString) :
     // Save address
     this->m_qsAddress = serverAddressString;
 }
-
 
 CanLogServer::~CanLogServer()
 {
@@ -132,18 +134,15 @@ void CanLogServer::piSuspend(bool pSuspend)
         getQueue().flush();
 }
 
-
 void CanLogServer::piStop()
 {
     this->disconnectFromDevice();
 }
 
-
 bool CanLogServer::piGetBusSettings(int pBusIdx, CANBus& pBus)
 {
     return getBusConfig(pBusIdx, pBus);
 }
-
 
 void CanLogServer::piSetBusSettings(int pBusIdx, CANBus bus)
 {
@@ -154,7 +153,6 @@ void CanLogServer::piSetBusSettings(int pBusIdx, CANBus bus)
     /* copy bus config */
     setBusConfig(pBusIdx, bus);
 }
-
 
 bool CanLogServer::piSendFrame(const CANFrame& )
 {

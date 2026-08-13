@@ -1,3 +1,5 @@
+#include "third_party/qcustomplot.h"
+
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
@@ -22,9 +24,6 @@
 **             Date: 06.11.22                                             **
 **          Version: 2.1.1                                                **
 ****************************************************************************/
-
-#include "qcustomplot.h"
-
 
 /* including file 'src/vector2d.cpp'       */
 /* modified 2022-11-06T12:45:56, size 7973 */
@@ -35525,5 +35524,3 @@ QVector<QPointF> QCPPolarGraph::dataToLines(const QVector<QCPGraphData> &data) c
   return result;
 }
 /* end of 'src/polar/polargraph.cpp' */
-
-

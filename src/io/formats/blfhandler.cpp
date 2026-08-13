@@ -1,4 +1,6 @@
-#include "blfhandler.h"
+#include "io/formats/blfhandler.h"
+
+// QT headers
 #include <QDebug>
 #include <QFile>
 #include <QString>

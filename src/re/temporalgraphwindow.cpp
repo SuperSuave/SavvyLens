@@ -1,7 +1,9 @@
 #include "temporalgraphwindow.h"
 #include "ui_temporalgraphwindow.h"
-#include "helpwindow.h"
-#include "mainwindow.h"
+
+// SavvyLens headers
+#include "app/helpwindow.h"
+#include "app/mainwindow.h"
 
 QString HexTicker::getTickLabel (double tick, const QLocale& locale, QChar formatChar, int precision)
 {
@@ -407,4 +409,3 @@ void TemporalGraphWindow::zoomOut()
     }
     ui->graphingView->replot();
 }
-

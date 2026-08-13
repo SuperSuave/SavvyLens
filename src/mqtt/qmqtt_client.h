@@ -32,7 +32,7 @@
 #ifndef QMQTT_CLIENT_H
 #define QMQTT_CLIENT_H
 
-#include "qmqtt_global.h"
+#include "mqtt/qmqtt_global.h"
 
 #include <QObject>
 #include <QString>

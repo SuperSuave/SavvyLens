@@ -1,9 +1,12 @@
 #ifndef SNIFFERITEM_H
 #define SNIFFERITEM_H
 
-#include <QVariant>
-#include <QElapsedTimer>
+// SavvyLens headers
 #include "can/can_structs.h"
+
+// QT headers
+#include <QElapsedTimer>
+#include <QVariant>
 
 struct fstCan
 {
@@ -18,7 +21,6 @@ enum dc
     INC,
     DEINC
 };
-
 
 class SnifferItem
 {
@@ -40,17 +42,17 @@ public:
     void notch(bool);
 
 private:
-    quint32         mID;
-    struct fstCan   mLast;
-    struct fstCan   mCurrent;
-    struct fstCan   mLastMarker;
-    struct fstCan   mMarker;
-    quint8          mNotch[8];
-    quint64         mLastTime;
-    quint64         mCurrentTime;
-    quint64         mCurrSeqVal;
+    quint32 mID;
+    struct fstCan mLast;
+    struct fstCan mCurrent;
+    struct fstCan mLastMarker;
+    struct fstCan mMarker;
+    quint8 mNotch[8];
+    quint64 mLastTime;
+    quint64 mCurrentTime;
+    quint64 mCurrSeqVal;
 
-    QElapsedTimer   mTime;
+    QElapsedTimer mTime;
 };
 
 #endif // SNIFFERITEM_H

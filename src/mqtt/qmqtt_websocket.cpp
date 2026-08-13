@@ -1,7 +1,9 @@
 #ifdef QT_WEBSOCKETS_LIB
 
-#include "qmqtt_websocket_p.h"
+// SavvyLens headers
+#include "mqtt/qmqtt_websocket_p.h"
 
+// QT headers
 #include <QNetworkRequest>
 #include <QUrl>
 #include <QSslError>

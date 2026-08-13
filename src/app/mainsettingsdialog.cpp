@@ -1,13 +1,18 @@
-#include "mainsettingsdialog.h"
+#include "app/mainsettingsdialog.h"
 #include "ui_mainsettingsdialog.h"
-#include "helpwindow.h"
-#include <qevent.h>
-#include <QDebug>
-#include <QDir>
-#include <QRegExp>
+
+// SavvyLens headers
+#include "app/helpwindow.h"
+#include "third_party/simplecrypt.h"
+
+// Qt headers
 #include <QCoreApplication>
 #include <QDebug>
-#include "simplecrypt.h"
+#include <QDebug>
+#include <QDir>
+#include <QEvent>
+#include <QKeyEvent>
+#include <QRegExp>
 
 //using this simple encryption library to obfuscate stored password a bit. It's not super secure but better than
 //storing a password in straight plaintext. You have the source to this application anyway, whatever algorithm used,

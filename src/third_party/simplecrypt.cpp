@@ -1,3 +1,5 @@
+#include "third_party/simplecrypt.h"
+
 /*
 Copyright (c) 2011, Andre Somers
 All rights reserved.
@@ -24,14 +26,16 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "simplecrypt.h"
+
+// QT headers
 #include <QByteArray>
-#include <QtDebug>
-#include <QtGlobal>
-#include <QDateTime>
 #include <QCryptographicHash>
 #include <QDataStream>
+#include <QDateTime>
 #include <QIODevice>
+#include <QtDebug>
+#include <QtGlobal>
+
 #if QT_VERSION >= QT_VERSION_CHECK( 5, 10, 0 )
 #include <QtCore/QRandomGenerator>
 #endif

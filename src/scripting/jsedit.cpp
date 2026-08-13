@@ -1,3 +1,5 @@
+#include "scripting/jsedit.h"
+
 /*
   This file is part of the Ofi Labs X2 project.
 
@@ -28,9 +30,10 @@
   THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "jsedit.h"
+// SavvyLens headers
 #include "themes/thememanager.h"
 
+// QT headers
 #include <QtGui>
 
 class JSBlockData: public QTextBlockUserData

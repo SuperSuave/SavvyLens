@@ -7,7 +7,7 @@
 #include <QtNetwork>
 #include <QMetaObject>
 
-#include "socketcand.h"
+#include "connections/socketcand.h"
 
 SocketCANd::SocketCANd(QString portName) :
     CANConnection(portName, "kayak", CANCon::KAYAK, 0, 0, false, 0, 1, 4000, true),
@@ -34,9 +34,7 @@ SocketCANd::SocketCANd(QString portName) :
         rx_state.append(IDLE);
         unprocessedData.append("");
     }
-
 }
-
 
 SocketCANd::~SocketCANd()
 {
@@ -90,7 +88,6 @@ void SocketCANd::piStarted()
     connectDevice();
 }
 
-
 void SocketCANd::piSuspend(bool pSuspend)
 {
     /* update capSuspended */
@@ -101,26 +98,22 @@ void SocketCANd::piSuspend(bool pSuspend)
         getQueue().flush();
 }
 
-
 void SocketCANd::piStop()
 {
     mTimer.stop();
     disconnectDevice();
 }
 
-
 bool SocketCANd::piGetBusSettings(int pBusIdx, CANBus& pBus)
 {
     return getBusConfig(pBusIdx, pBus);
 }
-
 
 void SocketCANd::piSetBusSettings(int pBusIdx, CANBus bus)
 {
     setBusConfig(pBusIdx, bus);
     bus.setSpeed(250000);
 }
-
 
 bool SocketCANd::piSendFrame(const CANFrame& frame)
 {
@@ -166,10 +159,6 @@ bool SocketCANd::piSendFrame(const CANFrame& frame)
 
     return true;
 }
-
-
-
-/****************************************************************/
 
 void SocketCANd::connectDevice()
 {
@@ -306,7 +295,7 @@ QString SocketCANd::decodeFrames(QString data, int busNum)
         buildData[c] = byteVal;
     }
     buildFrame.setPayload(buildData);
-//        buildFrame.isReceived = true;
+    // buildFrame.isReceived = true;
 
     if (!isCapSuspended())
     {
@@ -322,7 +311,7 @@ QString SocketCANd::decodeFrames(QString data, int busNum)
             getQueue().queue();
         }
     }
-    //else
+    // else
     //    qDebug() << "can't get a frame, capture suspended";
 
     //take out the data that we just processed and anything that is in front of it

@@ -1,7 +1,7 @@
 #ifndef QCPAXISTICKERHEX_H
 #define QCPAXISTICKERHEX_H
 
-#include "qcustomplot.h"
+#include "third_party/qcustomplot.h"
 
 class QCPAxisTickerHex: public QCPAxisTicker
 {

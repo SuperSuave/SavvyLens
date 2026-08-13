@@ -1,4 +1,4 @@
-#include "frameplaybackobject.h"
+#include "playback/frameplaybackobject.h"
 
 FramePlaybackObject::FramePlaybackObject()
 {

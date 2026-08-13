@@ -1,13 +1,18 @@
 #ifndef BOOKMARKMANAGER_H
 #define BOOKMARKMANAGER_H
 
+// SavvyLens headers
+#include "can/can_structs.h"
+
+// Qt headers
 #include <QObject>
 #include <QVector>
 #include <QString>
 #include <QStringList>
 #include <QtGlobal>
+
+// C++ standard-library headers
 #include <cstdint>
-#include "can/can_structs.h"
 
 struct FrameBookmark
 {

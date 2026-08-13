@@ -1,3 +1,6 @@
+#ifndef QMQTT_WEBSOCKETIODEVICE_H
+#define QMQTT_WEBSOCKETIODEVICE_H
+
 /*
  * qmqtt_socketinterface.h - qmqtt socket interface header
  *
@@ -30,15 +33,13 @@
  *
  */
 
-#ifndef QMQTT_WEBSOCKETIODEVICE_H
-#define QMQTT_WEBSOCKETIODEVICE_H
-
 #ifdef QT_WEBSOCKETS_LIB
 
+// QT headers
+#include <QAbstractSocket>
 #include <QByteArray>
 #include <QIODevice>
 #include <QList>
-#include <QAbstractSocket>
 
 QT_FORWARD_DECLARE_CLASS(QWebSocket)
 QT_FORWARD_DECLARE_CLASS(QNetworkRequest)

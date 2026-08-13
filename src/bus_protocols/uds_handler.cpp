@@ -1,7 +1,11 @@
 #include "uds_handler.h"
+
+// SavvyLens headers
+#include "app/mainwindow.h"
+#include "bus_protocols/isotp_handler.h"
 #include "connections/canconmanager.h"
-#include "mainwindow.h"
-#include "isotp_handler.h"
+
+// QT headers
 #include <QDebug>
 
 static QVector<CODE_STRUCT> UDS_DIAG_CTRL_SUB = {
@@ -640,4 +644,3 @@ void UDS_HANDLER::clearAllFilters()
 {
     isoHandler->clearAllFilters();
 }
-

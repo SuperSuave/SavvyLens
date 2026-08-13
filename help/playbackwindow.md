@@ -1,37 +1,134 @@
-Playback Window
-===============
+# Playback
 
 ![Playback Window](./images/Playback.png)
 
+Playback replays loaded or live-captured CAN frame sequences. It supports multiple sequence items, per-sequence frame selection and filtering, playback speed, burst rate, loop behavior, bus selection, original timing, wait-for-traffic behavior, and step controls.
 
-Preparing Frames for Playback
-=============================
+> **Safety notice:** Playback transmits recorded traffic. Captured traffic may include commands that are unsafe or inappropriate to replay on a live system. Review the source, selected IDs, target bus, timing, and loop settings before pressing Play.
 
-The first order of business is to load some CAN frames that you'd like to play back onto a CAN bus. In the lower left is a section titled "Playback Sequence". It is so named because this playback interface can play a chain of different CAN captures very configurably. It consists of a list of captures to playback along with how many times to play each sequence item. For instance, you could play a file twice then go to the next, then play a third one four times. A playback item can either come from a file (Load File) or from the current list of captured frames on the main window (Load Captured Data). If you load the currently captured frames it truly means "currently". That is, if more traffic comes in it will not play that new traffic back. A snapshot is taken at the time you push the button. Each sequence item has its own list of ID filters. In this way you can send only some of the frame IDs from the capture and this list can be different for each file or capture you load. The list of ID filters can be saved and loaded to make the process faster in the future.
+## Typical workflow
 
-Once you've set up a sequence of frames to playback you can also decide whether you'd like to loop that sequence forever or not. Up above the Playback Sequence and ID Filtering sections is the "Loop Sequence" checkbox.
+1. Open Playback.
+2. Load a capture file or add frames from the current live frame collection.
+3. Review the loaded sequence list and selected frame IDs.
+4. Select the destination bus, `All`, or `From File` as appropriate.
+5. Choose playback speed/burst behavior and whether to preserve original timing.
+6. Use step controls for initial verification.
+7. Start playback only after confirming filters and output bus.
 
-Playing Back Frames
-====================
+Use the smallest possible test set before replaying a full capture.
 
-The playback window can send frames on a specific bus, all buses (be careful with that!) or "From File." Some file formats store which bus each frame came in on. Also, the main window stores that info. So, captures that stored the bus properly could be used to send frames out multiple buses always to the proper bus for the frame in question. But, if you load a capture without this info it will default to bus 0 so bear that in mind. 
+## Playback sequence
 
-The next order of business is frame timing. There are two approaches possible here. If you click "Use original frame timing from captured frames" then frames will be sent out in approximately the same timing as they came in with. The word approximately is used because it is difficult to get 1ms timing precision on a desktop OS. Frames that come in rapidly might have a 2-3ms jitter. In practice this is almost always irrelevant. This setting is suitable for nearly all uses.
+The **Playback Sequence** section contains one or more sequence items. Each item is a capture source and a repeat count. SavvyLens can play one item multiple times before continuing to the next item in the sequence.
 
-Alternatively, it is also possible to send on a set schedule. With the "Use original" checkbox not checked you can set a playback speed in milliseconds and a burst rate. Burst means that it'll send that many frames every tick. So, if you have a burst of 5 and a timing of 10ms then every 10ms 5 frames will be sent. This mode can provide for a predictable number of frames per second and could be useful to test how quickly a device really requires traffic without faulting. But, it will potentially drastically alter the timing of frames compared to their timing when they were captured. You can set a burst rate as well. Burst Rate is the number of frames sent every "tick." This can speed up how fast you can send traffic.
+For example, you can configure Playback to:
 
-There is also now a checkbox that allows for waiting for traffic before sending CAN frames when you click play forward or backward. If this checkbox is checked you will see (WAITING) to the left of the number of frames below "Current frame." Once any CAN traffic starts to come in your frames will begin to playback automatically. Why would you want to do this? Well, the most likely reason is that you want to play back a CAN capture but you only want to do so once the vehicle has been powered on. And, you want to wait until the CAN buses are active so that you don't fault by sending traffic into nowhere. Lastly, this allows your playback to happen very rapidly after start up which might otherwise be tougher to pull off accurately.
+1. Play the first capture twice.
+2. Play the next capture once.
+3. Play a third capture four times.
 
-The top of the window has a series of 6 icons all in a row:
+Each sequence item can come from one of two sources:
 
-1. White Left Arrow - Play the last frame (just one frame)
-2. Pause sign - Pause playback
-3. Green Left Arrow - Play frames backward
-4. Blue Stop Button - Stop playback and return to the first frame in the first capture in the sequence
-5. Green Right Arrow - Play frames forward
-6. White Right Arrow - Play the next frame (just one frame)
+- **Load File** loads a capture or log file from disk.
+- **Load Captured Data** uses a snapshot of the frames currently held in the main window.
 
-Playback Status
-===============
+When you load captured data, Playback takes a snapshot at that moment. Frames received later are not added automatically to that sequence item.
 
-Below the number spinners for Playback Speed and Burst Rate is text that displays the currently playing sequence item along with the current frame within that capture.
+Each sequence item has its own frame cache and ID-filter selection. You can therefore replay different subsets of IDs from different captures in the same sequence.
+
+Enable **Loop Sequence** to repeat the entire configured sequence continuously.
+
+## Controls
+
+| Control | Purpose |
+|---|---|
+| Load File | Adds a capture/log sequence from disk |
+| Load Captured Data / Load Live | Uses the current captured-frame snapshot as a sequence source |
+| Previous Frame | Sends or selects the previous frame one frame at a time |
+| Pause | Temporarily halts active playback |
+| Play Reverse | Starts reverse playback |
+| Stop | Ends playback and returns to the first frame of the first sequence item |
+| Play Forward | Starts forward playback |
+| Next Frame | Sends or selects the next frame one frame at a time |
+| Original Timing | Uses source timestamps rather than only the selected interval |
+| Playback Speed | Sets the interval, in milliseconds, for scheduled playback |
+| Burst Rate | Sets how many frames are sent at each scheduled playback interval |
+| Loop Sequence | Repeats the complete configured sequence |
+| ID List | Selects which CAN IDs are included for the current sequence item |
+| Wait for Traffic | Waits for received CAN traffic before beginning requested playback |
+
+## Selecting output buses
+
+Playback can send frames in three ways:
+
+- Select a specific bus to send all playback frames to that bus.
+- Select **All** to send frames to every available bus.
+- Select **From File** to use each frame’s recorded bus number.
+
+> **Warning:** `All` can transmit traffic to every connected bus. Use it only when that is explicitly intended.
+
+Some capture formats preserve the source bus number, and SavvyLens also stores bus information for captured frames. With **From File**, those frames can be sent back to their associated buses.
+
+If the capture does not contain usable bus information, frames default to bus `0`. Verify the resulting bus selection before starting playback.
+
+Playback refreshes its available bus list when the window is shown.
+
+## Frame selection and filter files
+
+The ID list controls which frame IDs are included for the currently selected sequence item. Unchecked IDs are excluded from playback.
+
+Playback can save and load ID-filter definitions using `.ftl` files. This is useful when you repeatedly replay the same subset of a capture.
+
+Because filters are stored per sequence item, one capture can replay a different set of IDs than another capture in the same playback sequence.
+
+## Timing and burst behavior
+
+Playback has two timing modes.
+
+### Original timing
+
+Enable **Use original frame timing from captured frames** to replay frames using their recorded timing as closely as practical.
+
+Desktop operating systems cannot guarantee exact millisecond-level transmission timing. Closely spaced frames may have a small amount of timing jitter, but original timing is generally the preferred setting when reproducing a recorded capture.
+
+### Scheduled timing
+
+Disable original timing to use a fixed schedule.
+
+- **Playback Speed** sets the interval between playback ticks in milliseconds.
+- **Burst Rate** sets the number of frames transmitted on each tick.
+
+For example, a burst rate of `5` with a playback speed of `10 ms` sends up to five frames every 10 milliseconds.
+
+Scheduled timing can provide a more predictable frame rate, but it can substantially alter the original traffic timing. Use it carefully, particularly when replaying traffic to a live device.
+
+## Wait for traffic
+
+**Wait for Traffic** delays playback after you request forward or reverse playback. SavvyLens remains in a waiting state until it receives CAN traffic, then begins playback automatically.
+
+While waiting, the status area shows `(WAITING)` near the current-frame information.
+
+This can be useful when:
+
+- You need a vehicle or device to power on before replay begins.
+- You want to wait until connected buses are active.
+- You need playback to begin immediately after observed traffic rather than at an arbitrary time.
+
+## Playback status
+
+Below the Playback Speed and Burst Rate controls, the status area shows the active sequence item and the current frame position within that item.
+
+Use this information with the step controls to verify that the expected sequence and frame selection are being replayed.
+
+## Safety checklist
+
+Before starting playback:
+
+- Confirm the source capture and selected sequence item.
+- Confirm which CAN IDs are enabled in the ID list.
+- Confirm the target bus, especially when using `All` or `From File`.
+- Confirm whether **Loop Sequence** is enabled.
+- Confirm whether original timing or scheduled timing is selected.
+- Begin with step controls or a small filtered sequence whenever possible.
+- Stop playback before changing bus assumptions, connection state, or live-system conditions.

@@ -1,8 +1,12 @@
-#include "signalviewerwindow.h"
+#include "dbc/signalviewerwindow.h"
 #include "ui_signalviewerwindow.h"
-#include "helpwindow.h"
-#include "mainwindow.h"
+
+// SavvyLens headers
+#include "app/helpwindow.h"
+#include "app/mainwindow.h"
 #include "common/utility.h"
+
+// QT headers
 #include <QDebug>
 
 #define MSG_COL     1

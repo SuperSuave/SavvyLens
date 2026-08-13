@@ -1,6 +1,7 @@
 #ifndef SNIFFERDELEGATE_H
 #define SNIFFERDELEGATE_H
 
+// QT headers
 #include <QItemDelegate>
 
 class SnifferDelegate : public QItemDelegate

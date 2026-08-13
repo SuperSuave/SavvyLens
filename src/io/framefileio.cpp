@@ -1,18 +1,22 @@
-#include "framefileio.h"
+#include "io/framefileio.h"
 
+// SavvyLens headers
+#include "bookmarks/bookmarkmanager.h"
+#include "common/utility.h"
+#include "io/formats/blfhandler.h"
+#include "io/formats/pcaplite.h"
+
+// QT headers
+#include <QDateTime>
 #include <QMessageBox>
 #include <QProgressDialog>
-#include <QDateTime>
 #include <QRegularExpression>
-#include <QtEndian>
 #include <QSettings>
+#include <QtEndian>
+
+// C++ standard-library headers
 #include <iostream>
 #include <memory>
-#include "pcaplite.h"
-
-#include "common/utility.h"
-#include "blfhandler.h"
-#include "bookmarkmanager.h"
 
 QFile FrameFileIO::continuousFile;
 
@@ -242,7 +246,6 @@ bool FrameFileIO::loadFrameFile(QString &fileName, QVector<CANFrame>* frameCache
         if (selectedNameFilter == filters[24]) { result = loadWiresharkFile(filename, frameCache);          if (result && bookmarkManager) bookmarkManager->clear(); }
         if (selectedNameFilter == filters[25]) { result = loadWiresharkSocketCANFile(filename, frameCache); if (result && bookmarkManager) bookmarkManager->clear(); }
 
-
         progress.cancel();
 
         if (result)
@@ -265,7 +268,6 @@ bool FrameFileIO::loadFrameFile(QString &fileName, QVector<CANFrame>* frameCache
     }
     return false;
 }
-
 
 //Try every format by first using the "is" functions which try to detect whether a given file is a good match to that
 //file format or not. Those functions are much less tolerant than the load functions and so should help to discriminate
@@ -573,7 +575,6 @@ bool FrameFileIO::isVehicleSpyFile(QString filename)
     return isMatch;
 }
 
-
 //2,2550.368293675,0.003818174999651092,67371008,F,F,HS CAN $119,HS CAN,,119,F,F,00,00,00,00,00,00,0D,8B,,,
 //Line,Abs Time(Sec),Rel Time (Sec),Status,Er,Tx,Description,Network,Node,Arb ID,Remote,Xtd,B1,B2,B3,B4,B5,B6,B7,B8,Value,Trigger,Signals
 // 0       1             2             3   4  5   6             7     8     9     10     11 12 13 14 15 16 17 18 19  20     21      22
@@ -845,6 +846,7 @@ bool FrameFileIO::isCARBUSAnalyzerFile(QString filename)
 //14,687	1	0004	4E0	8	24 00 00 00 00 00 00 00	00000000	$
 // timestamp: sec,ms - for version 2
 //            sec,us - for version 3
+
 bool FrameFileIO::loadCARBUSAnalyzerFile(QString filename, QVector<CANFrame>* frames)
 {
     QFile *inFile = new QFile(filename);
@@ -1330,7 +1332,6 @@ bool FrameFileIO::saveCRTDFile(QString filename, const QVector<CANFrame>* frames
 
     return true;
 }
-
 
 bool FrameFileIO::isPCANFile(QString filename)
 {
@@ -2389,7 +2390,6 @@ bool FrameFileIO::flushContinuousNative()
     }
     return false;
 }
-
 
 bool FrameFileIO::isGenericCSVFile(QString filename)
 {

@@ -1,10 +1,13 @@
 #include "isotp_interpreterwindow.h"
 #include "ui_isotp_interpreterwindow.h"
-#include "bus_protocols/uds_handler.h"
-#include "mainwindow.h"
-#include "helpwindow.h"
-#include "filterutility.h"
 
+// SavvyLens headers
+#include "app/helpwindow.h"
+#include "app/mainwindow.h"
+#include "bus_protocols/uds_handler.h"
+#include "widgets/filterutility.h"
+
+// QT headers
 #include <QListWidget>
 
 ISOTP_InterpreterWindow::ISOTP_InterpreterWindow(const QVector<CANFrame> *frames, QWidget *parent) :
@@ -394,4 +397,3 @@ void ISOTP_InterpreterWindow::openAndConfigure(int rxId)
         }
     }
 }
-

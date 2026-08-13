@@ -1,13 +1,16 @@
 #ifndef FRAMEPLAYBACKOBJECT_H
 #define FRAMEPLAYBACKOBJECT_H
 
-#include <QElapsedTimer>
-#include <QTimer>
-#include <QHash>
-#include <QThread>
-#include <QDebug>
+// SavvyLens headers
 #include "can/can_structs.h"
 #include "connections/canconmanager.h"
+
+// QT headers
+#include <QDebug>
+#include <QElapsedTimer>
+#include <QHash>
+#include <QThread>
+#include <QTimer>
 
 //one entry in the sequence of data to use
 struct SequenceItem

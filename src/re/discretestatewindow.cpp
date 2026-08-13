@@ -1,7 +1,9 @@
 #include "discretestatewindow.h"
 #include "ui_discretestatewindow.h"
-#include "mainwindow.h"
-#include "helpwindow.h"
+
+// SavvyLens headers
+#include "app/helpwindow.h"
+#include "app/mainwindow.h"
 
 DiscreteStateWindow::DiscreteStateWindow(const QVector<CANFrame> *frames, QWidget *parent) :
     QDialog(parent),

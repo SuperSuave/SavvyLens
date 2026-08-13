@@ -1,3 +1,5 @@
+#include "mqtt/qmqtt_router.h"
+
 /*
  * qmqtt_router.cpp - qmqtt router
  *
@@ -31,10 +33,11 @@
  *
  */
 
-#include "qmqtt_router.h"
-#include "qmqtt_client.h"
-#include "qmqtt_routesubscription.h"
+// SavvyLens headers
+#include "mqtt/qmqtt_client.h"
+#include "mqtt/qmqtt_routesubscription.h"
 
+// QT headers
 #include <QLoggingCategory>
 
 namespace QMQTT {
@@ -64,4 +67,3 @@ Client *Router::client() const
 }
 
 } // namespace QMQTT
-

@@ -1,19 +1,21 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
-#include <Qt>
-#include <stdint.h>
+// QT headers
+#include <QApplication>
 #include <QByteArray>
+#include <QColor>
+#include <QComboBox>
 #include <QDateTime>
 #include <QDebug>
-#include <QApplication>
 #include <QRect>
-#include <QComboBox>
 #include <QStandardItemModel>
-#include <QColor>
 #include <QString>
+#include <Qt>
+
+// C++ standard-library headers
 #include <array>
-//#include <QDesktopWidget>
+#include <cstdint>
 
 enum TimeStyle
 {
@@ -22,7 +24,6 @@ enum TimeStyle
     TS_MILLIS,
     TS_CLOCK
 };
-
 
 // 32 dark, saturated colors — all designed for readability on white backgrounds.
 // Minimum contrast ratio ≥ 4.5:1 against white (WCAG AA).
@@ -299,7 +300,7 @@ public:
 
         if (littleEndian)
         {
-/*
+            /*
             int currByte = (startBit) / 8;
             int currOffset = startBit - (currByte * 8);
             int remainingBits = qMax(0, (sigSize - (8 - currOffset)) );

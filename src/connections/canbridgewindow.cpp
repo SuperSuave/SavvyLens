@@ -1,9 +1,14 @@
-#include "canbridgewindow.h"
-#include "helpwindow.h"
-#include "qevent.h"
+#include "connections/canbridgewindow.h"
 #include "ui_canbridgewindow.h"
-#include "filterutility.h"
-#include "mainwindow.h"
+
+// SavvyLens headers
+#include "app/helpwindow.h"
+#include "app/mainwindow.h"
+#include "widgets/filterutility.h"
+
+// QT headers
+#include <QEvent>
+#include <QKeyEvent>
 
 CANBridgeWindow::CANBridgeWindow(const QVector<CANFrame> *frames, QWidget *parent) :
     QDialog(parent),
@@ -41,7 +46,6 @@ CANBridgeWindow::~CANBridgeWindow()
     delete ui;
 }
 
-
 void CANBridgeWindow::showEvent(QShowEvent* event)
 {
     QDialog::showEvent(event);
@@ -78,7 +82,6 @@ void CANBridgeWindow::recalcSides()
     side1BusNum = ui->cbSide1->currentText().toInt();
     side2BusNum = ui->cbSide2->currentText().toInt();
 }
-
 
 void CANBridgeWindow::updatedFrames(int numFrames)
 {
@@ -140,4 +143,3 @@ void CANBridgeWindow::updatedFrames(int numFrames)
         if (addedSide2) ui->listSide2->sortItems();
     }
 }
-

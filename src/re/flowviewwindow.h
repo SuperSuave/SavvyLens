@@ -1,12 +1,14 @@
 #ifndef FLOWVIEWWINDOW_H
 #define FLOWVIEWWINDOW_H
 
+// SavvyLens headers
+#include "can/can_structs.h"
+#include "third_party/qcustomplot.h"
+
+// QT headers
 #include <QDialog>
 #include <QLocale>
 #include <QSlider>
-
-#include "qcustomplot.h"
-#include "can/can_structs.h"
 
 namespace Ui {
 class FlowViewWindow;

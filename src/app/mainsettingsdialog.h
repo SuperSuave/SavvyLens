@@ -1,6 +1,7 @@
 #ifndef MAINSETTINGSDIALOG_H
 #define MAINSETTINGSDIALOG_H
 
+// Qt headers
 #include <QDialog>
 #include <QSettings>
 

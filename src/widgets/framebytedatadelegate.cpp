@@ -1,6 +1,9 @@
-#include "framebytedatadelegate.h"
-#include "canframemodel.h"
+#include "widgets/framebytedatadelegate.h"
 
+// SavvyLens headers
+#include "frames/canframemodel.h"
+
+// QT headers
 #include <QApplication>
 #include <QPainter>
 #include <QStyle>

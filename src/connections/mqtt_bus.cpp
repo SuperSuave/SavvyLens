@@ -1,12 +1,15 @@
-#include <QObject>
-#include <QDebug>
+#include "connections/mqtt_bus.h"
+
+// SavvyLens headers
+#include "common/utility.h"
+
+// QT headers
 #include <QCanBusFrame>
+#include <QDebug>
+#include <QObject>
 #include <QSettings>
 #include <QStringBuilder>
 #include <QtNetwork>
-
-#include "common/utility.h"
-#include "mqtt_bus.h"
 
 MQTT_BUS::MQTT_BUS(QString topicName) :
     CANConnection(topicName, "mqtt_client", CANCon::MQTT, 0, 0, false, 0, 1, 4000, true),
@@ -25,7 +28,6 @@ MQTT_BUS::MQTT_BUS(QString topicName) :
 
     readSettings();
 }
-
 
 MQTT_BUS::~MQTT_BUS()
 {
@@ -199,19 +201,16 @@ void MQTT_BUS::piSuspend(bool pSuspend)
         getQueue().flush();
 }
 
-
 void MQTT_BUS::piStop()
 {
     mTimer.stop();
     disconnectDevice();
 }
 
-
 bool MQTT_BUS::piGetBusSettings(int pBusIdx, CANBus& pBus)
 {
     return getBusConfig(pBusIdx, pBus);
 }
-
 
 void MQTT_BUS::piSetBusSettings(int pBusIdx, CANBus bus)
 {
@@ -223,7 +222,6 @@ void MQTT_BUS::piSetBusSettings(int pBusIdx, CANBus bus)
     setBusConfig(pBusIdx, bus);
     //we don't really update anything. We're just here to listen and perhaps send frames.
 }
-
 
 bool MQTT_BUS::piSendFrame(const CANFrame& frame)
 {
@@ -265,10 +263,6 @@ bool MQTT_BUS::piSendFrame(const CANFrame& frame)
 
     return true;
 }
-
-
-
-/****************************************************************/
 
 void MQTT_BUS::readSettings()
 {

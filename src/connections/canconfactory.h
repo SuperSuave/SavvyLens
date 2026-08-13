@@ -1,8 +1,9 @@
 #ifndef CANCONFACTORY_H
 #define CANCONFACTORY_H
 
-#include "canconconst.h"
-#include "canconnection.h"
+// SavvyLens headers
+#include "connections/canconconst.h"
+#include "connections/canconnection.h"
 
 class CanConFactory
 {

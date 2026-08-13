@@ -1,27 +1,20 @@
-//
-//  canserver.h
-//  SavvyLens
-//
-//  Created by Chris Whiteford on 2022-01-21.
-//
+#ifndef CANSERVER_H
+#define CANSERVER_H
 
-#ifndef canserver_h
-#define canserver_h
+// SavvyLens headers
+#include "frames/canframemodel.h"
+#include "connections/canconnection.h"
+#include "connections/canconmanager.h"
 
-#include <stdio.h>
-
+// QT headers
 #include <QCanBusDevice>
+#include <QDateTime>
 #include <QThread>
 #include <QTimer>
 #include <QUdpSocket>
 
-/*************/
-#include <QDateTime>
-/*************/
-
-#include "canframemodel.h"
-#include "canconnection.h"
-#include "canconmanager.h"
+// C++ standard-library headers
+#include <cstdio>
 
 class CANserver : public CANConnection
 {
@@ -61,4 +54,4 @@ protected:
     QTimer  *_heartbeatTimer;
 };
 
-#endif /* canserver_h */
+#endif // CANSERVER_H

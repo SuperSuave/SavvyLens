@@ -1,9 +1,13 @@
-#include "SnifferDelegate.h"
-#include <QPainter>
-#include <QApplication>
-#include <QDebug>
+#include "re/sniffer/SnifferDelegate.h"
+
+// SavvyLens headers
 #include "common/utility.h"
 #include "re/sniffer/snifferitem.h"
+
+// QT headers
+#include <QApplication>
+#include <QDebug>
+#include <QPainter>
 
 SnifferDelegate::SnifferDelegate(QWidget *parent) : QItemDelegate(parent)
 {
@@ -125,5 +129,3 @@ QSize SnifferDelegate::sizeHint(const QStyleOptionViewItem &option, const QModel
     origSize.setHeight(origSize.height() * 2.0);
     return origSize;
 }
-
-

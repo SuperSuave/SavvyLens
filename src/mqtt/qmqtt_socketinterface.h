@@ -1,3 +1,6 @@
+#ifndef QMQTT_SOCKET_INTERFACE_H
+#define QMQTT_SOCKET_INTERFACE_H
+
 /*
  * qmqtt_socketinterface.h - qmqtt socket interface header
  *
@@ -29,16 +32,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef QMQTT_SOCKET_INTERFACE_H
-#define QMQTT_SOCKET_INTERFACE_H
 
-#include "qmqtt_global.h"
+// SavvyLens headers
+#include "mqtt/qmqtt_global.h"
 
-#include <QObject>
-#include <QHostAddress>
-#include <QString>
+// QT headers
 #include <QAbstractSocket>
+#include <QHostAddress>
 #include <QList>
+#include <QObject>
+#include <QString>
 
 #ifndef QT_NO_SSL
 #include <QSslConfiguration>

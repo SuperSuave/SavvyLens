@@ -1,9 +1,11 @@
 #include "rangestatewindow.h"
 #include "ui_rangestatewindow.h"
-#include "mainwindow.h"
+
+// SavvyLens headers
+#include "app/helpwindow.h"
+#include "app/mainwindow.h"
 #include "common/utility.h"
-#include "helpwindow.h"
-#include "filterutility.h"
+#include "widgets/filterutility.h"
 
 RangeStateWindow::RangeStateWindow(const QVector<CANFrame> *frames, QWidget *parent) :
     QDialog(parent),

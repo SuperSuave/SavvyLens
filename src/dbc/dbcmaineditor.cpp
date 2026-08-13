@@ -1,14 +1,18 @@
-#include "dbcmaineditor.h"
+#include "dbc/dbcmaineditor.h"
 #include "ui_dbcmaineditor.h"
 
+// SavvyLens headers
+#include "app/helpwindow.h"
+
+// QT headers
+#include <QColorDialog>
+#include <QEvent>
+#include <QKeyEvent>
 #include <QMenu>
 #include <QMessageBox>
-#include <QSettings>
-#include <QColorDialog>
-#include <QTableWidgetItem>
 #include <QRandomGenerator>
-#include <qevent.h>
-#include "helpwindow.h"
+#include <QSettings>
+#include <QTableWidgetItem>
 
 DBCMainEditor::DBCMainEditor( const QVector<CANFrame> *frames, QWidget *parent) :
     QDialog(parent),

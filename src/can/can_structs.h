@@ -1,10 +1,13 @@
 #ifndef CAN_STRUCTS_H
 #define CAN_STRUCTS_H
 
+// QT headers
+#include <QCanBusFrame>
 #include <QObject>
 #include <QVector>
-#include <stdint.h>
-#include <QCanBusFrame>
+
+// C++ standard-library headers
+#include <cstdint>
 
 //Now inherits from the built-in CAN frame class from Qt. This should be more future proof and easier to integrate with other code
 
@@ -54,4 +57,3 @@ public:
 };
 
 #endif // CAN_STRUCTS_H
-

@@ -1,9 +1,13 @@
 #include "utils/logger.h"
-#include <QFile>
-#include <QTextStream>
+
+// QT headers
 #include <QDateTime>
-#include <QStandardPaths>
 #include <QDir>
+#include <QFile>
+#include <QStandardPaths>
+#include <QTextStream>
+
+// C++ standard-library headers
 #include <iostream>
 
 #ifdef Q_OS_WIN

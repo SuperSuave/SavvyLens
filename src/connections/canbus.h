@@ -1,7 +1,11 @@
 #ifndef CANBus_H
 #define CANBus_H
-#include <QDataStream>
+
+// SavvyLens headers
 #include "can/can_structs.h"
+
+// QT headers
+#include <QDataStream>
 
 class CANBus
 {
@@ -14,6 +18,7 @@ class CANBus
 
     friend QDataStream& operator<<(QDataStream & pStream, const CANBus& pCanBus);
     friend QDataStream& operator>>(QDataStream & pStream, CANBus& pCanBus);
+
 public:
     CANBus();
 
@@ -32,6 +37,7 @@ public:
     bool isSingleWire() const;
     bool isActive() const;
     bool isCanFD() const;
+    
 };
 
 QDataStream& operator<<(QDataStream & pStream, const CANBus& pCanBus);

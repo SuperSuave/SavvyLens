@@ -1,15 +1,16 @@
 #ifndef SNIFFERMODEL_H
 #define SNIFFERMODEL_H
 
-#include <QAbstractItemModel>
-#include <QModelIndex>
-#include <QVariant>
-#include <QTimer>
-
+// SavvyLens headers
 #include "can/can_structs.h"
 #include "connections/canconnection.h"
-#include "snifferitem.h"
+#include "re/sniffer/snifferitem.h"
 
+// SavvyLens headers
+#include <QAbstractItemModel>
+#include <QModelIndex>
+#include <QTimer>
+#include <QVariant>
 
 enum fltType
 {
@@ -49,7 +50,6 @@ public:
     void setMuteNotched(bool val);
     void setExpireInterval(int newVal);
     void updateNotchPoint();
-
 
 public slots:
     void update(CANConnection*, QVector<CANFrame>&);

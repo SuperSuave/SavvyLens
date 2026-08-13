@@ -1,19 +1,19 @@
 #ifndef MQTTBUS_H
 #define MQTTBUS_H
 
+// SavvyLens headers
+#include "connections/canconmanager.h"
+#include "connections/canconnection.h"
+#include "frames/canframemodel.h"
+#include "mqtt/qmqtt.h"
+#include "app/helpwindow.h"
+#include "third_party/simplecrypt.h"
+
+// QT headers
 #include <QCanBusDevice>
+#include <QDateTime>
 #include <QThread>
 #include <QTimer>
-#include "mqtt/qmqtt.h"
-
-/*************/
-#include <QDateTime>
-/*************/
-
-#include "canframemodel.h"
-#include "canconnection.h"
-#include "canconmanager.h"
-#include "simplecrypt.h"
 
 class MQTT_BUS : public CANConnection
 {
@@ -24,14 +24,12 @@ public:
     virtual ~MQTT_BUS();
 
 protected:
-
     virtual void piStarted();
     virtual void piStop();
     virtual void piSetBusSettings(int pBusIdx, CANBus pBus);
     virtual bool piGetBusSettings(int pBusIdx, CANBus& pBus);
     virtual void piSuspend(bool pSuspend);
-    virtual bool piSendFrame(const CANFrame&) ;
-
+    virtual bool piSendFrame(const CANFrame&);
     void disconnectDevice();
 
 private slots:
@@ -47,12 +45,10 @@ private:
     SimpleCrypt *crypto;
 
 protected:
-    QTimer             mTimer;
-    QThread            mThread;
-
+    QTimer mTimer;
+    QThread mThread;
     QMQTT::Client *mqttClient;
     QString topicName;
-
     bool isAutoRestart;
     int framesRapid;
     CANFrame buildFrame;

@@ -1,12 +1,16 @@
-#include "bisectwindow.h"
+#include "re/bisectwindow.h"
 #include "ui_bisectwindow.h"
 
-#include "mainwindow.h"
-#include "framefileio.h"
-#include "helpwindow.h"
+// SavvyLens headers
+#include "app/helpwindow.h"
+#include "app/mainwindow.h"
+#include "io/framefileio.h"
 
+// QT headers
 #include <QDebug>
 #include <QJsonObject>
+
+// C++ standard-library headers
 #include <algorithm>
 
 BisectWindow::BisectWindow(const QVector<CANFrame> *frames, QWidget *parent) :

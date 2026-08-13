@@ -1,9 +1,14 @@
 #include "dbccomparatorwindow.h"
 #include "ui_dbccomparatorwindow.h"
-#include "helpwindow.h"
+
+// SavvyLens headers
+#include "app/helpwindow.h"
+
+// QT headers
+#include <QEvent>
+#include <QKeyEvent>
 #include <QProgressDialog>
 #include <QSettings>
-#include <qevent.h>
 
 DBCComparatorWindow::DBCComparatorWindow(QWidget *parent) :
     QDialog(parent),
@@ -399,4 +404,3 @@ void DBCComparatorWindow::saveDetails()
 
     }
 }
-

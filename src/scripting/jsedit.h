@@ -1,3 +1,6 @@
+#ifndef OFILABS_JSEDIT
+#define OFILABS_JSEDIT
+
 /*
   This file is part of the Ofi Labs X2 project.
 
@@ -28,9 +31,7 @@
   THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef OFILABS_JSEDIT
-#define OFILABS_JSEDIT
-
+// QT headers
 #include <QColor>
 #include <QPlainTextEdit>
 #include <QScopedPointer>

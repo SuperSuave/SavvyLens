@@ -1,12 +1,15 @@
-#include "dbcnoderebaseeditor.h"
+#include "dbc/dbcnoderebaseeditor.h"
 #include "ui_dbcnoderebaseeditor.h"
 
-#include <QSettings>
-#include <QKeyEvent>
-#include <QColorDialog>
-#include <QMessageBox>
-#include "helpwindow.h"
+// SavvyLens headers
+#include "app/helpwindow.h"
 #include "common/utility.h"
+
+// QT headers
+#include <QColorDialog>
+#include <QKeyEvent>
+#include <QMessageBox>
+#include <QSettings>
 
 DBCNodeRebaseEditor::DBCNodeRebaseEditor(QWidget *parent) :
     QDialog(parent),
@@ -151,7 +154,6 @@ void DBCNodeRebaseEditor::writeSettings()
         settings.setValue("DBCNodeRebaseEditor/WindowPos", pos());
     }
 }
-
 
 void DBCNodeRebaseEditor::setNodeRef(DBC_NODE *node)
 {

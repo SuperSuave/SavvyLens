@@ -1,11 +1,14 @@
 #ifndef FRAMEPLAYBACKWINDOW_H
 #define FRAMEPLAYBACKWINDOW_H
 
+// SavvyLens headers
+#include "can/can_structs.h"
+#include "io/framefileio.h"
+#include "playback/frameplaybackobject.h"
+
+// QT headers
 #include <QDialog>
 #include <QListWidget>
-#include "can/can_structs.h"
-#include "framefileio.h"
-#include "frameplaybackobject.h"
 
 namespace Ui {
 class FramePlaybackWindow;

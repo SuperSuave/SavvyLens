@@ -1632,13 +1632,13 @@
   <customwidget>
    <class>CANDataGrid</class>
    <extends>QWidget</extends>
-   <header>candatagrid.h</header>
+   <header>widgets/candatagrid.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>QCustomPlot</class>
    <extends>QWidget</extends>
-   <header>qcustomplot.h</header>
+   <header>third_party/qcustomplot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

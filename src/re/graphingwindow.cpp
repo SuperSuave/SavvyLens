@@ -1,11 +1,16 @@
 #include "graphingwindow.h"
 #include "ui_graphingwindow.h"
-#include "newgraphdialog.h"
-#include "mainwindow.h"
-#include "helpwindow.h"
+
+// SavvyLens headers
+#include "app/helpwindow.h"
+#include "app/mainwindow.h"
 #include "common/utility.h"
+#include "re/newgraphdialog.h"
+
+// QT headers
 #include <QDebug>
 
+// C++ standard-library headers
 #include <algorithm>
 #include <limits>
 

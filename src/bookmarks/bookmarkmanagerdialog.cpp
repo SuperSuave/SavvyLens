@@ -1,16 +1,20 @@
-#include "bookmarkmanagerdialog.h"
+#include "bookmarks/bookmarkmanagerdialog.h"
 #include "ui_bookmarkmanagerdialog.h"
 
-#include <QListWidgetItem>
-#include <QPushButton>
-#include <QSet>
-#include <QTableWidget>
-#include <QStringList>
-#include <algorithm>
+
+// Qt headers
 #include <QHeaderView>
 #include <QInputDialog>
 #include <QLineEdit>
+#include <QListWidgetItem>
 #include <QMessageBox>
+#include <QPushButton>
+#include <QSet>
+#include <QStringList>
+#include <QTableWidget>
+
+// C++ standard-library headers
+#include <algorithm>
 
 BookmarkManagerDialog::BookmarkManagerDialog(BookmarkManager *manager, QWidget *parent)
     : QDialog(parent),

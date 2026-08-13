@@ -1,5 +1,6 @@
 #include "thememanager.h"
 
+// QT headers
 #include <QStyleFactory>
 #include <QtMath>
 

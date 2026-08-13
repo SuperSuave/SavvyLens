@@ -1,7 +1,9 @@
 #ifdef QT_WEBSOCKETS_LIB
 
-#include "qmqtt_websocketiodevice_p.h"
+// SavvyLens headers
+#include "mqtt/qmqtt_websocketiodevice_p.h"
 
+// QT headers
 #include <QWebSocket>
 
 QMQTT::WebSocketIODevice::WebSocketIODevice(QWebSocket *socket, QObject *parent)

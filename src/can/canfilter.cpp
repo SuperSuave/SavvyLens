@@ -24,4 +24,3 @@ bool CANFilter::checkFilter(uint32_t id, int bus)
     return false;
 
 }
-

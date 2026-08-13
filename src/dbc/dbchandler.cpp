@@ -1,18 +1,21 @@
-#include "dbchandler.h"
+#include "dbc/dbchandler.h"
 
-#include <QFile>
-#include <QRegularExpression>
-#include <QDebug>
-#include <QMessageBox>
-#include <QFileDialog>
-#include <QApplication>
-#include <QPalette>
-#include <QSettings>
-#include <QJsonDocument>
-#include <QJsonArray>
-#include <QJsonObject>
+// SavvyLens headers
 #include "common/utility.h"
 #include "connections/canconmanager.h"
+
+// QT headers
+#include <QApplication>
+#include <QDebug>
+#include <QFile>
+#include <QFileDialog>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QMessageBox>
+#include <QPalette>
+#include <QRegularExpression>
+#include <QSettings>
 
 DBCHandler* DBCHandler::instance = nullptr;
 
@@ -749,7 +752,6 @@ bool DBCFile::parseSignalValueTypeLine(QString line)
     }
     return true;
 }
-
 
 bool DBCFile::parseValueTableLine(QString line)
 {
@@ -2355,7 +2357,6 @@ DBC_MESSAGE* DBCHandler::findMessageForFilter(uint32_t id, MatchingCriteria_t * 
     }
     return nullptr;
 }
-
 
 /*
  * As above, a real shortcut function that searches all files in order to try to find a message with the given name

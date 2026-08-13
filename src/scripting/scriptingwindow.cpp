@@ -1,38 +1,41 @@
-#include "scriptingwindow.h"
-#include "common/utility.h"
+#include "scripting/scriptingwindow.h"
 #include "ui_scriptingwindow.h"
+
+// SavvyLens headers
 #include "themes/thememanager.h"
+#include "common/utility.h"
 
-#include <QFile>
-#include <QFileInfo>
-#include <QFileDialog>
-#include <QSettings>
-#include <QDebug>
-
-#include <QMenu>
-#include <QToolButton>
-#include <QTextBlock>
-#include <QTextCursor>
+// QT headers
+#include <QAction>
 #include <QCheckBox>
 #include <QColor>
-#include <QListWidgetItem>
-#include <QMessageBox>
-#include <QSignalBlocker>
-#include <QTableWidget>
-#include <algorithm>
-#include <QAction>
-#include <QDir>
-#include <QInputDialog>
-#include <QStandardPaths>
 #include <QCoreApplication>
+#include <QDebug>
 #include <QDir>
+#include <QFile>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QInputDialog>
+#include <QListWidgetItem>
+#include <QMenu>
+#include <QMessageBox>
+#include <QSettings>
+#include <QSignalBlocker>
+#include <QStandardPaths>
+#include <QTableWidget>
+#include <QTextBlock>
+#include <QTextCursor>
+#include <QToolButton>
+
+// C++ standard-library headers
+#include <algorithm>
 
 #if QT_VERSION >= QT_VERSION_CHECK( 5, 10, 0 )
 #include <QtCore/QRandomGenerator>
 #endif
 
 #include "connections/canconmanager.h"
-#include "helpwindow.h"
+#include "app/helpwindow.h"
 
 ScriptingWindow::ScriptingWindow(const QVector<CANFrame> *frames, QWidget *parent) :
     QDialog(parent),

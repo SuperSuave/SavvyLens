@@ -1,11 +1,13 @@
 #ifndef SNIFFER_H
 #define SNIFFER_H
 
+// SavvyLens headers
+#include "re/sniffer/sniffermodel.h"
+#include "re/sniffer/SnifferDelegate.h"
+
+// QT headers
 #include <QDialog>
 #include <QListWidgetItem>
-
-#include "sniffermodel.h"
-#include "SnifferDelegate.h"
 
 namespace Ui {
 class snifferWindow;

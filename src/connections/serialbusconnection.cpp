@@ -1,7 +1,9 @@
-#include "serialbusconnection.h"
+#include "connections/serialbusconnection.h"
 
-#include "canconmanager.h"
+// SavvyLens headers
+#include "connections/canconmanager.h"
 
+// QT headers
 #include <QCanBus>
 #include <QCanBusFrame>
 #include <QDateTime>
@@ -17,12 +19,10 @@ SerialBusConnection::SerialBusConnection(QString portName, QString driverName, i
 {
 }
 
-
 SerialBusConnection::~SerialBusConnection()
 {
     stop();
 }
-
 
 void SerialBusConnection::piStarted()
 {
@@ -51,7 +51,6 @@ void SerialBusConnection::piStarted()
     mBusData[0].mConfigured = true;
 }
 
-
 void SerialBusConnection::piSuspend(bool pSuspend)
 {
     /* update capSuspended */
@@ -62,19 +61,16 @@ void SerialBusConnection::piSuspend(bool pSuspend)
         getQueue().flush();
 }
 
-
 void SerialBusConnection::piStop() {
     qDebug() << "piStop()";
     mTimer.stop();
     disconnectDevice();
 }
 
-
 bool SerialBusConnection::piGetBusSettings(int pBusIdx, CANBus& pBus)
 {
     return getBusConfig(pBusIdx, pBus);
 }
-
 
 void SerialBusConnection::piSetBusSettings(int pBusIdx, CANBus bus)
 {
@@ -119,7 +115,6 @@ void SerialBusConnection::piSetBusSettings(int pBusIdx, CANBus bus)
     }
 }
 
-
 bool SerialBusConnection::piSendFrame(const CANFrame& pFrame)
 {
     /* sanity checks */
@@ -130,11 +125,9 @@ bool SerialBusConnection::piSendFrame(const CANFrame& pFrame)
     return mDev_p->writeFrame(pFrame);
 }
 
-
 /***********************************/
 /****   private methods         ****/
 /***********************************/
-
 
 /* disconnect device */
 void SerialBusConnection::disconnectDevice() {
@@ -142,7 +135,6 @@ void SerialBusConnection::disconnectDevice() {
         mDev_p->disconnectDevice();
     }
 }
-
 
 void SerialBusConnection::errorReceived(QCanBusDevice::CanBusError error) const
 {
@@ -225,7 +217,6 @@ void SerialBusConnection::framesReceived()
         }
     }
 }
-
 
 void SerialBusConnection::testConnection() {
     CANConStatus stats;

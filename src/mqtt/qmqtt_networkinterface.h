@@ -1,3 +1,6 @@
+#ifndef QMQTT_NETWORK_INTERFACE_H
+#define QMQTT_NETWORK_INTERFACE_H
+
 /*
  * qmqtt_networkinterface.h - qmqtt network interface header
  *
@@ -29,11 +32,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef QMQTT_NETWORK_INTERFACE_H
-#define QMQTT_NETWORK_INTERFACE_H
 
-#include "qmqtt_global.h"
+// SavvyLens headers
+#include "mqtt/qmqtt_global.h"
 
+// QT headers
 #include <QObject>
 #include <QAbstractSocket>
 #include <QHostAddress>

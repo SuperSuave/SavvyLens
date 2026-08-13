@@ -1,6 +1,8 @@
-#include <QObject>
+#include "connections/canbus.h"
+
+// QT headers
 #include <QDebug>
-#include "canbus.h"
+#include <QObject>
 
 CANBus::CANBus()
 {
@@ -11,7 +13,6 @@ CANBus::CANBus()
     canFD       = false;
     dataRate    = 2000000;
 }
-
 
 bool CANBus::operator==(const CANBus& bus) const{
     return  speed == bus.speed &&
@@ -75,7 +76,6 @@ bool CANBus::isActive() const {
 bool CANBus::isCanFD() const {
     return canFD;
 }
-
 
 QDataStream& operator<<(QDataStream & pStream, const CANBus& pCanBus)
 {

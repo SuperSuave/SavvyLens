@@ -1,18 +1,17 @@
 #ifndef LAWICELSERIAL_H
 #define LAWICELSERIAL_H
 
-#include <QSerialPort>
+// SavvyLens headers
+#include "frames/canframemodel.h"
+#include "connections/canconnection.h"
+#include "connections/canconmanager.h"
+
+// QT headers
 #include <QCanBusDevice>
+#include <QDateTime>
+#include <QSerialPort>
 #include <QThread>
 #include <QTimer>
-
-/*************/
-#include <QDateTime>
-/*************/
-
-#include "canframemodel.h"
-#include "canconnection.h"
-#include "canconmanager.h"
 
 class LAWICELSerial : public CANConnection
 {
@@ -23,14 +22,12 @@ public:
     virtual ~LAWICELSerial();
 
 protected:
-
     virtual void piStarted();
     virtual void piStop();
     virtual void piSetBusSettings(int pBusIdx, CANBus pBus);
     virtual bool piGetBusSettings(int pBusIdx, CANBus& pBus);
     virtual void piSuspend(bool pSuspend);
     virtual bool piSendFrame(const CANFrame&) ;
-
     void disconnectDevice();
 
 public slots:
@@ -53,10 +50,9 @@ private:
     uint8_t bytes_to_dlc_code(uint8_t bytes);
 
 protected:
-    QTimer             mTimer;
-    QThread            mThread;
-    QString            mBuildLine;
-
+    QTimer mTimer;
+    QThread mThread;
+    QString mBuildLine;
     bool isAutoRestart;
     QSerialPort *serial;
     int framesRapid;

@@ -1,10 +1,12 @@
 #include "udsscanwindow.h"
 #include "ui_udsscanwindow.h"
-#include "mainwindow.h"
-#include "connections/canconmanager.h"
+
+// SavvyLens headers
+#include "app/helpwindow.h"
+#include "app/mainwindow.h"
 #include "bus_protocols/uds_handler.h"
 #include "common/utility.h"
-#include "helpwindow.h"
+#include "connections/canconmanager.h"
 
 static QColor blendColors(const QColor &a, const QColor &b, qreal amount)
 {
@@ -142,7 +144,6 @@ void UDSScanWindow::setControlState(QWidget &widget, bool valid)
 
     widget.setPalette(pal);
 }
-
 
 void UDSScanWindow::displayScanEntry(int idx)
 {

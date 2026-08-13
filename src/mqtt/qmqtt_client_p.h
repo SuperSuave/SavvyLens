@@ -1,3 +1,6 @@
+#ifndef QMQTT_CLIENT_P_H
+#define QMQTT_CLIENT_P_H
+
 /*
  * qmqtt_client_p.h - qmqtt client private header
  *
@@ -29,17 +32,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef QMQTT_CLIENT_P_H
-#define QMQTT_CLIENT_P_H
 
-#include "qmqtt_client.h"
+// SavvyLens headers
+#include "mqtt/qmqtt_client.h"
 
-#include <QHostAddress>
-#include <QString>
+// QT headers
+#include <QAbstractSocket>
 #include <QByteArray>
 #include <QHash>
+#include <QHostAddress>
+#include <QString>
 #include <QTimer>
-#include <QAbstractSocket>
 
 #ifdef QT_WEBSOCKETS_LIB
 #include <QWebSocket>

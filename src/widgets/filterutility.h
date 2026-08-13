@@ -1,12 +1,13 @@
 #ifndef FILTERUTILITY_H
 #define FILTERUTILITY_H
 
-#include <cstdint>
-
+// QT headers
 #include <QListWidget>
 #include <QSet>
 #include <QString>
 
+// C++ standard-library headers
+#include <cstdint>
 
 class FilterUtility
 {

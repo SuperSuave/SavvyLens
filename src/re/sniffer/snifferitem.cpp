@@ -1,7 +1,8 @@
+#include "re/sniffer/snifferitem.h"
+
+// QT headers
 #include <QVariant>
 #include <QDebug>
-#include "snifferitem.h"
-
 
 SnifferItem::SnifferItem(const CANFrame& pFrame, quint32 seq):
     mID(pFrame.frameId())
@@ -24,7 +25,6 @@ SnifferItem::SnifferItem(const CANFrame& pFrame, quint32 seq):
     update(pFrame, seq, false);
     update(pFrame, seq, false); //anyone know why we're doing this twice?!
 }
-
 
 SnifferItem::~SnifferItem()
 {
@@ -96,8 +96,6 @@ dc SnifferItem::dataChange(uchar i) const
 
     return dc::NO;
 }
-
-
 
 int SnifferItem::elapsed() const
 {

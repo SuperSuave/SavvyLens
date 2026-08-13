@@ -1,17 +1,20 @@
-#include "controlanalysisdialog.h"
-#include "controlcandidatemodel.h"
+#include "re/controlanalysisdialog.h"
 
+// SavvyLens headers
+#include "re/controlcandidatemodel.h"
+
+// QT headers
+#include <QAction>
+#include <QHBoxLayout>
+#include <QHeaderView>
+#include <QItemSelectionModel>
+#include <QLabel>
+#include <QMenu>
+#include <QPlainTextEdit>
+#include <QPushButton>
+#include <QSplitter>
 #include <QTableView>
 #include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QPushButton>
-#include <QHeaderView>
-#include <QMenu>
-#include <QAction>
-#include <QItemSelectionModel>
-#include <QPlainTextEdit>
-#include <QLabel>
-#include <QSplitter>
 
 ControlAnalysisDialog::ControlAnalysisDialog(QWidget *parent)
     : QDialog(parent)

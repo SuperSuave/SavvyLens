@@ -1,6 +1,7 @@
 #ifndef CONTROLANALYSISDIALOG_H
 #define CONTROLANALYSISDIALOG_H
 
+// QT headers
 #include <QDialog>
 #include <QModelIndex>
 

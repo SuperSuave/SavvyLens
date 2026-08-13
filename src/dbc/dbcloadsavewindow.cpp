@@ -1,11 +1,16 @@
 #include "dbcloadsavewindow.h"
 #include "ui_dbcloadsavewindow.h"
+
+// SavvyLens headers
+#include "app/helpwindow.h"
+#include "connections/canconmanager.h"
+
+// QT headers
 #include <QComboBox>
+#include <QEvent>
+#include <QKeyEvent>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <qevent.h>
-#include "helpwindow.h"
-#include "connections/canconmanager.h"
 
 DBCLoadSaveWindow::DBCLoadSaveWindow(const QVector<CANFrame> *frames, QWidget *parent) :
     QDialog(parent),
@@ -449,4 +454,3 @@ void DBCLoadSaveWindow::setRow(int row, const QList<QTableWidgetItem*>& rowItems
         ui->tableFiles->setItem(row, col, rowItems.at(col));
     }
 }
-

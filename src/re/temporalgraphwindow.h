@@ -1,9 +1,12 @@
 #ifndef TEMPORALGRAPHWINDOW_H
 #define TEMPORALGRAPHWINDOW_H
 
-#include <QDialog>
-#include "qcustomplot.h"
+// SavvyLens headers
 #include "can/can_structs.h"
+#include "third_party/qcustomplot.h"
+
+// QT headers
+#include <QDialog>
 
 namespace Ui {
 class TemporalGraphWindow;

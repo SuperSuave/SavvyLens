@@ -3,16 +3,18 @@
 
 #pragma once
 
+// SavvyLens headers
+#include "bus_protocols/isotp_message.h"
+#include "can/can_structs.h"
+#include "can/canfilter.h"
+
+// Qt headers
 #include <QByteArray>
 #include <QHash>
 #include <QList>
 #include <QObject>
 #include <QTimer>
 #include <QVector>
-
-#include "can/can_structs.h"
-#include "isotp_message.h"
-#include "can/canfilter.h"
 
 class CANConnection;
 

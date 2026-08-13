@@ -1,32 +1,27 @@
 #ifndef SOCKETCAND_H
 #define SOCKETCAND_H
 
-//#include <QSerialPort>
-//#include <QCanBusDevice>
-#include <QTimer>
-#include <QTcpSocket>
-#include <QHostAddress>
-//#include <QUdpSocket>
+// SavvyLens headers
+#include "connections/canconmanager.h"
+#include "connections/canconnection.h"
+#include "frames/canframemodel.h"
 
-/*************/
+// QT headers
 #include <QDateTime>
-/*************/
-
-#include "canframemodel.h"
-#include "canconnection.h"
-#include "canconmanager.h"
-
+#include <QHostAddress>
+#include <QTcpSocket>
+#include <QTimer>
 
 namespace KAYAKSTATE {
 
-enum MODE
-{
-    IDLE, //NO_BUS in socketcand doc
-    BCM,
-    SWITCHING2RAW,
-    RAWMODE,
-    ISOTP
-};
+    enum MODE
+    {
+        IDLE, //NO_BUS in socketcand doc
+        BCM,
+        SWITCHING2RAW,
+        RAWMODE,
+        ISOTP
+    };
 
 }
 
@@ -40,14 +35,12 @@ public:
     virtual ~SocketCANd();
 
 protected:
-
     virtual void piStarted();
     virtual void piStop();
     virtual void piSetBusSettings(int pBusIdx, CANBus pBus);
     virtual bool piGetBusSettings(int pBusIdx, CANBus& pBus);
     virtual void piSuspend(bool pSuspend);
     virtual bool piSendFrame(const CANFrame&);
-
     void disconnectDevice();
 
 private slots:
@@ -77,6 +70,5 @@ protected:
     CANFrame buildFrame;
     QVarLengthArray<QString> unprocessedData;
 };
-
 
 #endif // SOCKETCAND_H

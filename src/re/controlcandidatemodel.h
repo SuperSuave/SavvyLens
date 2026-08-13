@@ -1,10 +1,13 @@
 #ifndef CONTROLCANDIDATEMODEL_H
 #define CONTROLCANDIDATEMODEL_H
 
+// SavvyLens headers
+#include "re/controlstatedetector.h"
+
+// QT headers
 #include <QAbstractTableModel>
-#include <QVector>
 #include <QByteArray>
-#include "controlstatedetector.h"
+#include <QVector>
 
 class ControlCandidateModel : public QAbstractTableModel
 {

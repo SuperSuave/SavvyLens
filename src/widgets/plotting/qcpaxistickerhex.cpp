@@ -1,5 +1,7 @@
+#include "widgets/plotting/qcpaxistickerhex.h"
+
+// QT headers
 #include <Qt>
-#include "qcpaxistickerhex.h"
 
 QString QCPAxisTickerHex::getTickLabel (double tick, const QLocale &locale, QChar formatChar, int precision)
 {

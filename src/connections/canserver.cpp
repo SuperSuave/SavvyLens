@@ -1,19 +1,15 @@
-//
-//  canserver.cpp
-//  SavvyLens
-//
-//  Created by Chris Whiteford on 2022-01-21.
-//
+#include "connections/canserver.h"
 
-#include <QObject>
-#include <QDebug>
+// SavvyLens headers
+#include "common/utility.h"
+
+// QT headers
 #include <QCanBusFrame>
+#include <QDebug>
+#include <QObject>
 #include <QSettings>
 #include <QStringBuilder>
 #include <QtNetwork>
-
-#include "common/utility.h"
-#include "canserver.h"
 
 CANserver::CANserver(QString serverAddressString) :
     CANConnection(serverAddressString, "CANserver", CANCon::CANSERVER, 0, 0, false, 0, 3, 4000, true),
@@ -41,7 +37,6 @@ CANserver::CANserver(QString serverAddressString) :
     _heartbeatTimer->stop();
 }
 
-
 CANserver::~CANserver()
 {
     qDebug() << "CANserver: " << "Deconstructing Connection...";
@@ -67,18 +62,15 @@ void CANserver::piSuspend(bool pSuspend)
         getQueue().flush();
 }
 
-
 void CANserver::piStop()
 {
     this->disconnectFromDevice();
 }
 
-
 bool CANserver::piGetBusSettings(int pBusIdx, CANBus& pBus)
 {
     return getBusConfig(pBusIdx, pBus);
 }
-
 
 void CANserver::piSetBusSettings(int pBusIdx, CANBus bus)
 {
@@ -89,7 +81,6 @@ void CANserver::piSetBusSettings(int pBusIdx, CANBus bus)
     /* copy bus config */
     setBusConfig(pBusIdx, bus);
 }
-
 
 bool CANserver::piSendFrame(const CANFrame& )
 {

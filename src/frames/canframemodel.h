@@ -1,17 +1,19 @@
 #ifndef CANFRAMEMODEL_H
 #define CANFRAMEMODEL_H
 
-#include <QAbstractTableModel>
-#include <QList>
-#include <QVector>
-#include <QDebug>
-#include <QMutex>
-#include <QSet>
-
+// SavvyLens headers
 #include "can/can_structs.h"
 #include "dbc/dbchandler.h"
 #include "connections/canconnection.h"
 #include "common/utility.h"
+
+// QT headers
+#include <QAbstractTableModel>
+#include <QDebug>
+#include <QList>
+#include <QMutex>
+#include <QSet>
+#include <QVector>
 
 enum class Column {
     TimeStamp = 0, ///< The timestamp when the frame was transmitted or received
@@ -121,6 +123,5 @@ private:
     bool sortDirAsc;
     int bytesPerLine;
 };
-
 
 #endif // CANFRAMEMODEL_H

@@ -1,6 +1,7 @@
 #ifndef FRAMEBYTEDATADELEGATE_H
 #define FRAMEBYTEDATADELEGATE_H
 
+// QT headers
 #include <QStyledItemDelegate>
 
 class FrameByteDataDelegate : public QStyledItemDelegate

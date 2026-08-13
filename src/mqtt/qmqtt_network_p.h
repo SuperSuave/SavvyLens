@@ -1,3 +1,6 @@
+#ifndef QMQTT_NETWORK_P_H
+#define QMQTT_NETWORK_P_H
+
 /*
  * qmqtt_network_p.h - qmqtt network private header
  *
@@ -29,11 +32,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef QMQTT_NETWORK_P_H
-#define QMQTT_NETWORK_P_H
 
-#include "qmqtt_networkinterface.h"
+// SavvyLens headers
+#include "mqtt/qmqtt_networkinterface.h"
 
+// QT headers
 #include <QObject>
 #include <QHostAddress>
 #include <QString>

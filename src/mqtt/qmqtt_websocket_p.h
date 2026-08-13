@@ -1,3 +1,6 @@
+#ifndef QMQTT_WEBSOCKET_H
+#define QMQTT_WEBSOCKET_H
+
 /*
  * qmqtt_websocket_p.h - qmqtt socket private header
  *
@@ -29,14 +32,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef QMQTT_WEBSOCKET_H
-#define QMQTT_WEBSOCKET_H
 
 #ifdef QT_WEBSOCKETS_LIB
 
-#include <qmqtt_socketinterface.h>
-#include <qmqtt_websocketiodevice_p.h>
+// SavvyLens headers
+#include "mqtt/qmqtt_socketinterface.h"
+#include "mqtt/qmqtt_websocketiodevice_p.h"
 
+// QT headers
 #include <QObject>
 #include <QWebSocket>
 #include <QHostAddress>

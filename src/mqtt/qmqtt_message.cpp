@@ -1,3 +1,5 @@
+#include "mqtt/qmqtt_message.h"
+
 /*
  * qmqtt_message.cpp - qmqtt message
  *
@@ -30,7 +32,7 @@
  *
  */
 
-#include "qmqtt_message.h"
+// SavvyLens headers
 #include "qmqtt_message_p.h"
 
 namespace QMQTT {

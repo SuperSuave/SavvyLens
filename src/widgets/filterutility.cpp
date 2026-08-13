@@ -1,7 +1,10 @@
+#include "widgets/filterutility.h"
+
+// SavvyLens headers
 #include "common/utility.h"
-#include "filterutility.h"
 #include "dbc/dbchandler.h"
 
+// QT headers
 #include <QSettings>
 #include <QVariant>
 

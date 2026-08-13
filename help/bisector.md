@@ -1,23 +1,62 @@
-Bisector Window
-=================
+# Frame Bisector
 
-![Bisector Window](images/Bisector.png)
+![Frame Bisector](images/Bisector.png)
 
-Using the Bisector Window
-==========================
+Frame Bisector creates a selected subset of the current frame collection. It is useful when isolating a time range, frame-index region, CAN ID range, or bus for reverse-engineering, export, and comparison work.
 
-The purpose of this window is obviously to split the list of frames into two pieces. You have many options for how to do this. You can split by:
+The tool divides the current frame list into two logical sections. You choose which section to retain, then save that subset or replace the main frame collection with it.
 
-ID Range - Grab a set of frames between two values. Note that you cannot pick and choose frame IDs here but rather just use a list. If you want to pick and choose then use the filter interface on the main form and then save the filtered list from the File menu.
+## Split modes
 
-Frame Number - You can split right at a given frame number. All frames up to that number will be on one side with all the rest on the other.
+| Mode | Selection behavior |
+|---|---|
+| Frame number | Select frames before or after a chosen index |
+| Percentage | Select frames before or after a percentage through the current collection |
+| CAN ID range | Select frames inside or outside the selected ID range |
+| Bus number | Select frames on, or not on, the selected bus |
 
-Percentage - Pretty much just like the Frame Number option but in percentage instead in case that is more convenient.
+### CAN ID range
 
-Bus Number - You can also split the capture to include or exclude a given bus number. This can be helpful to allow breaking up the file into per-bus files.
+CAN ID range selects a continuous range of IDs. It does not support choosing arbitrary individual IDs.
 
-In all cases, you have the option of which side of the split you want to save. Click "Calculate Split" to process the split. You will see above the buttons a reference of how many frames there were in total and how many you would be saving after the split. From here you *should* be able to do one of two things:
+If you need to retain a non-contiguous selection of IDs, use the main-window filter interface to select the IDs you want, then save the filtered frame list from the File menu.
 
-"Save split frames to a new file" - Save the new list of frames (after the split) to a file. You can save to any file format that SavvyLens supports elsewhere. 
+### Frame number
 
-"Replace main list with split frames" - Erases all messages on the main window and replaces them with the results of the bisection. You will lose all discarded frames if you haven't saved them elsewhere.
+Frame-number mode splits at the specified frame index. Frames up to the selected frame are on one side of the split; subsequent frames are on the other side.
+
+### Percentage
+
+Percentage mode works like frame-number mode, but selects the split position as a percentage through the current frame collection.
+
+### Bus number
+
+Bus-number mode includes or excludes frames from a selected bus. It can be useful for separating a multi-bus capture into one capture per bus.
+
+## Typical workflow
+
+1. Load or capture the frame collection you want to investigate.
+2. Open Frame Bisector.
+3. Choose a split mode and configure its value or range.
+4. Choose whether to retain the lower/inside or upper/outside section.
+5. Select **Calculate Split**.
+6. Review the total frame count and calculated subset count.
+7. Save the subset to a file or replace the current main frame collection.
+
+After calculating the split, SavvyLens displays how many frames exist in the original collection and how many frames the selected result contains. Review those counts before continuing.
+
+## Saving a subset
+
+Select **Save Split Frames to a New File** to export the calculated subset without changing the current main frame collection.
+
+The save action uses SavvyLens file-export support. Choose the destination format deliberately; only formats with export support can be written successfully.
+
+Saving the subset first is the safest workflow when you are exploring a capture and may need the original data later.
+
+## Replacing the main collection
+
+Select **Replace Main List With Split Frames** to clear the current main frame model and insert the calculated subset.
+
+> **Caution:** Replacing frames discards the excluded frames from the current main collection. Save the original capture or save the split result first if you may need to return to the original data.
+
+This action is useful when you want other SavvyLens windows to operate only on the narrowed frame set.

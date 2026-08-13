@@ -1,3 +1,5 @@
+#include "mqtt/qmqtt_client.h"
+
 /*
  * qmqtt_client.cpp - qmqtt client
  *
@@ -30,8 +32,8 @@
  *
  */
 
-#include "qmqtt_client.h"
-#include "qmqtt_client_p.h"
+// SavvyLens headers
+#include "mqtt/qmqtt_client_p.h"
 
 QMQTT::Client::Client(const QHostAddress& host,
                       const quint16 port,

@@ -1,9 +1,14 @@
-#include "filecomparatorwindow.h"
+#include "re/filecomparatorwindow.h"
 #include "ui_filecomparatorwindow.h"
-#include "helpwindow.h"
+
+// SavvyLens headers
+#include "app/helpwindow.h"
+
+// QT headers
+#include <QEvent>
+#include <QKeyEvent>
 #include <QProgressDialog>
 #include <QSettings>
-#include <qevent.h>
 
 FileComparatorWindow::FileComparatorWindow(QWidget *parent) :
     QDialog(parent),
@@ -570,4 +575,3 @@ void FileComparatorWindow::saveDetails()
 
     }
 }
-

@@ -1,18 +1,20 @@
 #ifndef FRAMEINFOWINDOW_H
 #define FRAMEINFOWINDOW_H
 
+// SavvyLens headers
+#include "bus_protocols/j1939_handler.h"
+#include "can/can_structs.h"
+#include "common/utility.h"
+#include "dbc/dbchandler.h"
+#include "third_party/qcustomplot.h"
+#include "widgets/candatagrid.h"
+
+// QT headers
 #include <QDialog>
 #include <QFile>
 #include <QListWidget>
 #include <QTreeWidget>
 #include <QPushButton>
-#include <candatagrid.h>
-#include "can/can_structs.h"
-#include "common/utility.h"
-#include "bus_protocols/j1939_handler.h"
-#include "dbc/dbchandler.h"
-
-#include "qcustomplot.h"
 
 namespace Ui {
 class FrameInfoWindow;

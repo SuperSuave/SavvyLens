@@ -1,6 +1,10 @@
-#include "dbcsignalselectortree.h"
+#include "dbc/dbcsignalselectortree.h"
 #include "ui_dbcsignalselectortree.h"
+
+// SavvyLens headers
 #include "common/utility.h"
+
+// QT headers
 #include <QVariant>
 #include <QDebug>
 

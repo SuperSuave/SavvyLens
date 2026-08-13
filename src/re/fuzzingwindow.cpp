@@ -1,12 +1,16 @@
 #include "fuzzingwindow.h"
 #include "ui_fuzzingwindow.h"
+
+// SavvyLens headers
+#include "app/helpwindow.h"
+#include "app/mainwindow.h"
 #include "common/utility.h"
+#include "connections/canconmanager.h"
+#include "widgets/filterutility.h"
+
+// QT headers
 #include <QDebug>
 #include <QRandomGenerator>
-#include "mainwindow.h"
-#include "helpwindow.h"
-#include "connections/canconmanager.h"
-#include "filterutility.h"
 
 FuzzingWindow::FuzzingWindow(const QVector<CANFrame> *frames, QWidget *parent) :
     QDialog(parent),
@@ -38,7 +42,6 @@ FuzzingWindow::FuzzingWindow(const QVector<CANFrame> *frames, QWidget *parent) :
     connect(ui->txtByte5, &QLineEdit::returnPressed, this, [=](){changedDataByteText(5, ui->txtByte5->text());});
     connect(ui->txtByte6, &QLineEdit::returnPressed, this, [=](){changedDataByteText(6, ui->txtByte6->text());});
     connect(ui->txtByte7, &QLineEdit::returnPressed, this, [=](){changedDataByteText(7, ui->txtByte7->text());});
-
 
     connect(MainWindow::getReference(), SIGNAL(framesUpdated(int)), this, SLOT(updatedFrames(int)));
 

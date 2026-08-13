@@ -1,13 +1,16 @@
-#include "canframemodel.h"
+#include "frames/canframemodel.h"
 
-#include <QFile>
-#include <QApplication>
-#include <QPalette>
-#include <QColor>
-#include <QBrush>
-#include <QDateTime>
-#include <QSettings>
+// SavvyLens headers
 #include "common/utility.h"
+
+// QT headers
+#include <QApplication>
+#include <QBrush>
+#include <QColor>
+#include <QDateTime>
+#include <QFile>
+#include <QPalette>
+#include <QSettings>
 
 static inline qint64 frameTimestampMicros(const CANFrame &frame)
 {
@@ -737,7 +740,6 @@ bool CANFrameModel::any_busfilters_are_configured(void)
     }
     return false;
 }
-
 
 void CANFrameModel::addFrame(const CANFrame& frame, bool autoRefresh = false)
 {

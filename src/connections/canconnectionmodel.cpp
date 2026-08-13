@@ -1,4 +1,6 @@
-#include "canconnectionmodel.h"
+#include "connections/canconnectionmodel.h"
+
+// SavvyLens headers
 #include "connections/canconnection.h"
 #include "connections/canconmanager.h"
 
@@ -110,7 +112,6 @@ QVariant CANConnectionModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-
 void CANConnectionModel::add(CANConnection* pConn_p)
 {
     CANConManager* manager = CANConManager::getInstance();
@@ -119,7 +120,6 @@ void CANConnectionModel::add(CANConnection* pConn_p)
     manager->add(pConn_p);
     endResetModel();
 }
-
 
 void CANConnectionModel::remove(CANConnection* pConn_p)
 {

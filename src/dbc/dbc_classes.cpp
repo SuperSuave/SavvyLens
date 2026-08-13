@@ -1,6 +1,10 @@
-#include "dbc_classes.h"
-#include "dbchandler.h"
+#include "dbc/dbc_classes.h"
+
+// SavvyLens headers
+#include "dbc/dbchandler.h"
 #include "common/utility.h"
+
+// QT headers
 #include <QtMath>
 
 DBC_MESSAGE::DBC_MESSAGE()

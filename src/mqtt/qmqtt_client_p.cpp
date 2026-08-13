@@ -1,3 +1,5 @@
+#include "qmqtt_client_p.h"
+
 /*
  * qmqtt_client_p.cpp - qmqtt client private
  *
@@ -30,13 +32,17 @@
  *
  */
 
-#include "qmqtt_client_p.h"
-#include "qmqtt_network_p.h"
-#include "qmqtt_frame.h"
-#include "qmqtt_message.h"
 
+ // SavvyLens headers
+#include "mqtt/qmqtt_frame.h"
+#include "mqtt/qmqtt_message.h"
+#include "mqtt/qmqtt_network_p.h"
+
+// QT headers
 #include <QLoggingCategory>
 #include <QUuid>
+
+
 #ifndef QT_NO_SSL
 #include <QFile>
 #include <QSslConfiguration>

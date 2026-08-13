@@ -1,11 +1,14 @@
-#include "dbcmessageeditor.h"
+#include "dbc/dbcmessageeditor.h"
 #include "ui_dbcmessageeditor.h"
 
-#include <QSettings>
-#include <QKeyEvent>
-#include <QColorDialog>
-#include "helpwindow.h"
+// SavvyLens headers
+#include "app/helpwindow.h"
 #include "common/utility.h"
+
+// QT headers
+#include <QColorDialog>
+#include <QKeyEvent>
+#include <QSettings>
 
 DBCMessageEditor::DBCMessageEditor(QWidget *parent) :
     QDialog(parent),
@@ -201,7 +204,6 @@ void DBCMessageEditor::writeSettings()
         settings.setValue("DBCMessageEditor/WindowPos", pos());
     }
 }
-
 
 void DBCMessageEditor::setMessageRef(DBC_MESSAGE *msg)
 {

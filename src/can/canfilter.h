@@ -1,7 +1,8 @@
 #ifndef CANFILTER_H
 #define CANFILTER_H
 
-#include <stdint.h>
+// C++ standard-library headers
+#include <cstdint>
 
 class CANFilter
 {

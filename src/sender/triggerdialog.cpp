@@ -1,5 +1,7 @@
-#include "triggerdialog.h"
+#include "sender/triggerdialog.h"
 #include "ui_triggerdialog.h"
+
+// QT headers
 #include <QMessageBox>
 
 TriggerDialog::TriggerDialog(QList<Trigger> trigs, QWidget *parent) :

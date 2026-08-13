@@ -1,11 +1,12 @@
 #ifndef GRAPHINGWINDOW_H
 #define GRAPHINGWINDOW_H
 
-#include "qcustomplot.h"
+// SavvyLens headers
 #include "can/can_structs.h"
 #include "dbc/dbchandler.h"
+#include "third_party/qcustomplot.h"
 
-
+// QT headers
 #include <QDialog>
 
 namespace Ui {

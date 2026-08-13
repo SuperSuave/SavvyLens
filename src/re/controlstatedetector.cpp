@@ -1,5 +1,6 @@
-#include "controlstatedetector.h"
+#include "re/controlstatedetector.h"
 
+// C++ standard-library headers
 #include <algorithm>
 
 ControlStateDetector::ControlStateDetector(QObject *parent)

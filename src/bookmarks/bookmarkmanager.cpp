@@ -1,4 +1,6 @@
-#include "bookmarkmanager.h"
+#include "bookmarks/bookmarkmanager.h"
+
+// C++ standard-library headers
 #include <limits>
 #include <algorithm>
 

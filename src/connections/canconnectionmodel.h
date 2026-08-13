@@ -1,10 +1,12 @@
 #ifndef CANCONNECTIONMODEL_H
 #define CANCONNECTIONMODEL_H
 
+// SavvyLens headers
+#include "connections/canbus.h"
 
+// QT headers
 #include <QAbstractTableModel>
 
-#include "canbus.h"
 
 class CANConnection;
 

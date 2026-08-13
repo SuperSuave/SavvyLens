@@ -1,20 +1,20 @@
 #ifndef CANLOGSERVER_H
 #define CANLOGSERVER_H
 
-#include <stdio.h>
+// SavvyLens headers
+#include "frames/canframemodel.h"
+#include "connections/canconnection.h"
+#include "connections/canconmanager.h"
 
+// QT headers
 #include <QCanBusDevice>
+#include <QDateTime>
+#include <QTcpSocket>
 #include <QThread>
 #include <QTimer>
-#include <QTcpSocket>
 
-/*************/
-#include <QDateTime>
-/*************/
-
-#include "canframemodel.h"
-#include "canconnection.h"
-#include "canconmanager.h"
+// C++ standard-library headers
+#include <cstdio>
 
 class CanLogServer : public CANConnection
 {
@@ -54,4 +54,5 @@ protected:
 
 //    QTimer  *_heartbeatTimer;
 };
+
 #endif // CANLOGSERVER_H

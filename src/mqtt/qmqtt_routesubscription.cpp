@@ -1,3 +1,5 @@
+#include "mqtt/qmqtt_routesubscription.h"
+
 /*
  * qmqtt_router.cpp - qmqtt router
  *
@@ -31,11 +33,12 @@
  *
  */
 
-#include "qmqtt_routesubscription.h"
-#include "qmqtt_router.h"
-#include "qmqtt_client.h"
-#include "qmqtt_routedmessage.h"
+// SavvyLens headers
+#include "mqtt/qmqtt_router.h"
+#include "mqtt/qmqtt_client.h"
+#include "mqtt/qmqtt_routedmessage.h"
 
+// QT headers
 #include <QLoggingCategory>
 #include <QLatin1String>
 #include <QLatin1Char>

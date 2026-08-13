@@ -1,9 +1,12 @@
 #ifndef TRIGGERDIALOG_H
 #define TRIGGERDIALOG_H
 
-#include <QDialog>
-#include "can_trigger_structs.h"
+// SavvyLens headers
 #include "dbc/dbchandler.h"
+#include "sender/can_trigger_structs.h"
+
+// QT headers
+#include <QDialog>
 
 namespace Ui {
 class TriggerDialog;

@@ -1,11 +1,14 @@
 #ifndef SCRIPTINGWINDOW_H
 #define SCRIPTINGWINDOW_H
 
-#include "scriptcontainer.h"
+
+// SavvyLens headers
+#include "scripting/scriptcontainer.h"
 #include "can/can_structs.h"
 #include "connections/canconnection.h"
-#include "jsedit.h"
+#include "scripting/jsedit.h"
 
+// QT headers
 #include <QDialog>
 #include <QElapsedTimer>
 #include <QList>
@@ -14,9 +17,9 @@
 
 
 class QListWidgetItem;
+class QMenu;
 class QTableWidget;
 class ScriptContainer;
-class QMenu;
 
 namespace Ui
 {

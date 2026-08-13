@@ -30,8 +30,10 @@
  *
  */
 
-#include "qmqtt_socket_p.h"
+// SavvyLens headers
+#include "mqtt/qmqtt_socket_p.h"
 
+// QT headers
 #include <QTcpSocket>
 
 QMQTT::Socket::Socket(QObject* parent)

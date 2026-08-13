@@ -1,3 +1,6 @@
+#ifndef QMQTT_TIMER_INTERFACE_H
+#define QMQTT_TIMER_INTERFACE_H
+
 /*
  * qmqtt_timerinterface.h - qmqtt timer interface header
  *
@@ -29,11 +32,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef QMQTT_TIMER_INTERFACE_H
-#define QMQTT_TIMER_INTERFACE_H
 
-#include "qmqtt_global.h"
+// SavvyLens headers
+#include "mqtt/qmqtt_global.h"
 
+// QT headers
 #include <QObject>
 
 namespace QMQTT {
@@ -59,4 +62,3 @@ signals:
 }
 
 #endif // QMQTT_TIMER_INTERFACE_H
-

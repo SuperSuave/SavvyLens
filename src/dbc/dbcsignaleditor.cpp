@@ -1,13 +1,18 @@
-#include "dbcsignaleditor.h"
+#include "dbc/dbcsignaleditor.h"
 #include "ui_dbcsignaleditor.h"
+
+// SavvyLens headers
+#include "app/helpwindow.h"
+
+// QT headers
 #include <QDateTime>
 #include <QDebug>
+#include <QEvent>
+#include <QKeyEvent>
 #include <QMenu>
-#include <QSettings>
-#include <QRandomGenerator>
 #include <QMessageBox>
-#include <qevent.h>
-#include "helpwindow.h"
+#include <QRandomGenerator>
+#include <QSettings>
 
 DBCSignalEditor::DBCSignalEditor(QWidget *parent) :
     QDialog(parent),
@@ -486,7 +491,6 @@ void DBCSignalEditor::setSignalRef(DBC_SIGNAL *sig)
     currentSignal = sig;
 }
 
-
 void DBCSignalEditor::showEvent(QShowEvent* event)
 {
     QDialog::showEvent(event);
@@ -807,7 +811,6 @@ void DBCSignalEditor::bitfieldRightClicked(int bit)
         fillValueTable(currentSignal);
     }
 }
-
 
 void DBCSignalEditor::generateUsedBits()
 {

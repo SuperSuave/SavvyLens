@@ -1,16 +1,19 @@
 #ifndef FRAMESENDEROBJECT_H
 #define FRAMESENDEROBJECT_H
 
-#include <QElapsedTimer>
-#include <QTimer>
-#include <QHash>
-#include <QThread>
-#include <QDebug>
-#include <QMutex>
+// SavvyLens headers
 #include "can/can_structs.h"
 #include "connections/canconmanager.h"
-#include "can_trigger_structs.h"
 #include "dbc/dbchandler.h"
+#include "sender/can_trigger_structs.h"
+
+// QT headers
+#include <QDebug>
+#include <QElapsedTimer>
+#include <QHash>
+#include <QMutex>
+#include <QThread>
+#include <QTimer>
 
 class FrameSenderObject : public QObject
 {

@@ -1,20 +1,22 @@
-#include "mainwindow.h"
+#include "app/mainwindow.h"
 #include "ui_mainwindow.h"
-#include "bookmarkmanager.h"
-#include "bookmarkmanagerdialog.h"
+
+// SavvyLens headers
+#include "app/helpwindow.h"
+#include "bookmarks/bookmarkmanager.h"
+#include "bookmarks/bookmarkmanagerdialog.h"
+#include "can/can_structs.h"
+#include "common/utility.h"
+#include "connections/canconmanager.h"
+#include "connections/connectionwindow.h"
+#include "re/bookmarkeventanalyzer.h"
 #include "re/controlanalysisdialog.h"
 #include "re/controlcandidatemodel.h"
 #include "re/controlstatedetector.h"
-#include "re/bookmarkeventanalyzer.h"
-#include "can/can_structs.h"
-#include "connections/canconmanager.h"
-#include "connections/connectionwindow.h"
-#include "helpwindow.h"
-#include "common/utility.h"
-#include "filterutility.h"
-#include "framebytedatadelegate.h"
+#include "widgets/filterutility.h"
+#include "widgets/framebytedatadelegate.h"
 
-#include <limits>
+// Qt headers
 #include <QClipboard>
 #include <QDateTime>
 #include <QDockWidget>
@@ -24,17 +26,20 @@
 #include <QHeaderView>
 #include <QItemSelectionModel>
 #include <QLabel>
+#include <QMouseEvent>
 #include <QPlainTextEdit>
+#include <QRegularExpression>
 #include <QSet>
 #include <QShortcut>
-#include <QMouseEvent>
-#include <QRegularExpression>
 #include <QSignalBlocker>
 #include <QSortFilterProxyModel>
 #include <QSpinBox>
 #include <QTableWidgetItem>
 #include <QtSerialPort/QSerialPortInfo>
 #include <QVBoxLayout>
+
+// C++ standard-library headers
+#include <limits>
 
 /*
 Some notes on things I'd like to put into the program but haven't put on github (yet)
@@ -465,7 +470,6 @@ void MainWindow::exitApp()
     QApplication::quit(); //forces the whole application to terminate when the main window is closed
 }
 
-
 //the close event can be trapped and ignored so put unsaved warnings in here so the user can abort the program closing if they forgot to save things.
 void MainWindow::closeEvent(QCloseEvent *event)
 {
@@ -590,49 +594,49 @@ void MainWindow::readSettings()
 {
     QSettings settings;
 
-if (settings.value("Main/SaveRestorePositions", false).toBool())
-{
-    resize(settings.value("Main/WindowSize", QSize(1280, 850)).toSize());
-    move(Utility::constrainedWindowPos(
-        settings.value("Main/WindowPos", QPoint(100, 100)).toPoint()));
+    if (settings.value("Main/SaveRestorePositions", false).toBool())
+    {
+        resize(settings.value("Main/WindowSize", QSize(1280, 850)).toSize());
+        move(Utility::constrainedWindowPos(
+            settings.value("Main/WindowPos", QPoint(100, 100)).toPoint()));
 
-    ui->canFramesView->setColumnWidth(int(Column::TimeStamp),
-        settings.value("Main/TimeColumn", 125).toUInt());
-    // ui->canFramesView->setColumnWidth(int(Column::FrameId),
-    //     settings.value("Main/IDColumn", 70).toUInt());
-    // ui->canFramesView->setColumnWidth(int(Column::Extended),
-    //     settings.value("Main/ExtColumn", 40).toUInt());
-    // ui->canFramesView->setColumnWidth(int(Column::Remote),
-    //     settings.value("Main/RemColumn", 40).toUInt());
-    // ui->canFramesView->setColumnWidth(int(Column::Direction),
-    //     settings.value("Main/DirColumn", 40).toUInt());
-    // ui->canFramesView->setColumnWidth(int(Column::Bus),
-    //     settings.value("Main/BusColumn", 40).toUInt());
-    // ui->canFramesView->setColumnWidth(int(Column::Length),
-    //     settings.value("Main/LengthColumn", 40).toUInt());
-    // ui->canFramesView->setColumnWidth(int(Column::ASCII),
-    //     settings.value("Main/AsciiColumn", 50).toUInt());
-    // ui->canFramesView->setColumnWidth(int(Column::Data),
-    //     settings.value("Main/DataColumn", 175).toUInt());
-    // ui->canFramesView->setColumnWidth(int(Column::Idx),
-    //     settings.value("Main/OGIDColumn", 90).toUInt());
-}
-else
-{
-    resize(QSize(1280, 900));
-    move(Utility::constrainedWindowPos(QPoint(100, 100)));
+        ui->canFramesView->setColumnWidth(int(Column::TimeStamp),
+            settings.value("Main/TimeColumn", 125).toUInt());
+        // ui->canFramesView->setColumnWidth(int(Column::FrameId),
+        //     settings.value("Main/IDColumn", 70).toUInt());
+        // ui->canFramesView->setColumnWidth(int(Column::Extended),
+        //     settings.value("Main/ExtColumn", 40).toUInt());
+        // ui->canFramesView->setColumnWidth(int(Column::Remote),
+        //     settings.value("Main/RemColumn", 40).toUInt());
+        // ui->canFramesView->setColumnWidth(int(Column::Direction),
+        //     settings.value("Main/DirColumn", 40).toUInt());
+        // ui->canFramesView->setColumnWidth(int(Column::Bus),
+        //     settings.value("Main/BusColumn", 40).toUInt());
+        // ui->canFramesView->setColumnWidth(int(Column::Length),
+        //     settings.value("Main/LengthColumn", 40).toUInt());
+        // ui->canFramesView->setColumnWidth(int(Column::ASCII),
+        //     settings.value("Main/AsciiColumn", 50).toUInt());
+        // ui->canFramesView->setColumnWidth(int(Column::Data),
+        //     settings.value("Main/DataColumn", 175).toUInt());
+        // ui->canFramesView->setColumnWidth(int(Column::Idx),
+        //     settings.value("Main/OGIDColumn", 90).toUInt());
+    }
+    else
+    {
+        resize(QSize(1280, 900));
+        move(Utility::constrainedWindowPos(QPoint(100, 100)));
 
-    ui->canFramesView->setColumnWidth(int(Column::TimeStamp), 125);
-    // ui->canFramesView->setColumnWidth(int(Column::FrameId), 70);
-    // ui->canFramesView->setColumnWidth(int(Column::Extended), 40);
-    // ui->canFramesView->setColumnWidth(int(Column::Remote), 40);
-    // ui->canFramesView->setColumnWidth(int(Column::Direction), 40);
-    // ui->canFramesView->setColumnWidth(int(Column::Bus), 40);
-    // ui->canFramesView->setColumnWidth(int(Column::Length), 40);
-    // ui->canFramesView->setColumnWidth(int(Column::ASCII), 50);
-    // ui->canFramesView->setColumnWidth(int(Column::Data), 175);
-    // ui->canFramesView->setColumnWidth(int(Column::Idx), 90);
-}
+        ui->canFramesView->setColumnWidth(int(Column::TimeStamp), 125);
+        // ui->canFramesView->setColumnWidth(int(Column::FrameId), 70);
+        // ui->canFramesView->setColumnWidth(int(Column::Extended), 40);
+        // ui->canFramesView->setColumnWidth(int(Column::Remote), 40);
+        // ui->canFramesView->setColumnWidth(int(Column::Direction), 40);
+        // ui->canFramesView->setColumnWidth(int(Column::Bus), 40);
+        // ui->canFramesView->setColumnWidth(int(Column::Length), 40);
+        // ui->canFramesView->setColumnWidth(int(Column::ASCII), 50);
+        // ui->canFramesView->setColumnWidth(int(Column::Data), 175);
+        // ui->canFramesView->setColumnWidth(int(Column::Idx), 90);
+    }
 
     if (settings.value("Main/AutoScroll", false).toBool())
     {
@@ -663,7 +667,6 @@ else
 
     readUpdateableSettings();
 }
-
 
 /*
  * TODO: The way the frame timing mode is specified is DEAD STUPID. There shouldn't be three boolean values
@@ -734,7 +737,6 @@ void MainWindow::writeSettings()
     // settings.setValue("Main/OGIDColumn",
     //     ui->canFramesView->columnWidth(int(Column::Idx)));
 }
-
 
 void MainWindow::updateConnectionSettings(QString connectionType, QString port, int speed0, int speed1)
 {
@@ -1118,6 +1120,7 @@ void MainWindow::setupSendToLatestGraphWindow()
         msgbox.exec();
     }
 }
+
 void MainWindow::interpretToggled(bool state)
 {
     model->setInterpretMode(state);
@@ -1770,6 +1773,7 @@ void MainWindow::saveDecodedTextFileAsColumns(QString filename)
 
     if (!outFile->open(QIODevice::WriteOnly | QIODevice::Text))
         return;
+
 /*
 Time: 205.173000   ID: 0x20E Std Bus: 0 Len: 8
 Data Bytes: 88 10 00 13 BB 00 06 00
@@ -3541,7 +3545,6 @@ double BookmarkEventAnalyzer::scoreSameIdCandidate(const SameIdScoreFeatures &f)
     return raw * (0.5 + 0.5 * clamp01(f.windowConfidence));
 }
 
-
 BookmarkEventAnalyzer::CrossIdScoreFeatures BookmarkEventAnalyzer::buildCrossIdScoreFeatures(
         const CrossIdEventStats &stats,
         const FrameIdleStats *idleStats,
@@ -3602,7 +3605,6 @@ double BookmarkEventAnalyzer::computeCrossIdIdleStability(const FrameIdleStats *
     const double idleNoise = static_cast<double>(byteChanges) / static_cast<double>(byteSamples);
     return qBound(0.0, 1.0 - idleNoise, 1.0);
 }
-
 
 void MainWindow::clearInspectDock()
 {
@@ -3848,7 +3850,6 @@ QString MainWindow::formatNeighborhoodText(const QModelIndex &sourceIndex, int r
 
     return lines.join('\n');
 }
-
 
 void MainWindow::showBookmarkAnalysisDialog(const BookmarkEventAnalyzer::BookmarkAnalysisResult &result)
 {
@@ -4277,7 +4278,6 @@ void MainWindow::jumpToAnalysisFrameIndex(int originalIndex)
 
     selectFrameByOriginalIndex(originalIndex);
 }
-
 
 void MainWindow::graphAnalysisFrameKey(const BookmarkEventAnalyzer::FrameKey &key)
 {

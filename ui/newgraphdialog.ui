@@ -311,10 +311,10 @@
   <customwidget>
    <class>CANDataGrid</class>
    <extends>QWidget</extends>
-   <header>candatagrid.h</header>
+   <header>widgets/candatagrid.h</header>
    <container>1</container>
   </customwidget>
- <customwidget><class>DbcSignalSelectorTree</class><extends>QWidget</extends><header>dbcsignalselectortree.h</header><container>1</container></customwidget></customwidgets>
+ <customwidget><class>DbcSignalSelectorTree</class><extends>QWidget</extends><header>dbc/dbcsignalselectortree.h</header><container>1</container></customwidget></customwidgets>
  <tabstops>
   <tabstop>txtName</tabstop>
   <tabstop>txtID</tabstop>

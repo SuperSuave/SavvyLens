@@ -1,14 +1,17 @@
 #include "frameinfowindow.h"
 #include "ui_frameinfowindow.h"
-#include "mainwindow.h"
-#include "helpwindow.h"
+
+// SavvyLens headers
+#include "app/mainwindow.h"
+#include "app/helpwindow.h"
+#include "themes/thememanager.h"
+#include "widgets/filterutility.h"
+#include "widgets/plotting/qcpaxistickerhex.h"
+
+// QT headers
+#include <limits>
 #include <QtDebug>
 #include <vector>
-#include <limits>
-#include "filterutility.h"
-#include "qcpaxistickerhex.h"
-
-#include "themes/thememanager.h"
 
 QColor FrameInfoWindow::byteGraphColorForIndex(int idx)
 {
@@ -249,7 +252,6 @@ void FrameInfoWindow::mouseWheel()
     else
         plot->axisRect()->setRangeZoom(Qt::Horizontal|Qt::Vertical);
 }
-
 
 //two modes here. If none of the 8 sub graphs are hidden then hide all except the one the user
 //just double clicked on. Otherwise unhide the 7 hidden ones
@@ -1123,8 +1125,6 @@ QTreeWidget* FrameInfoWindow::getDetailsTree() const
 {
     return ui->treeDetails;
 }
-
-
 
 void FrameInfoWindow::applyPlotTheme(QCustomPlot *plot)
 {

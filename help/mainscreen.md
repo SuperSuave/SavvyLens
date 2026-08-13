@@ -1,105 +1,204 @@
-Main / Start Up Screen
-======================
+# Main Screen
 
 ![Main Window](./images/MainScreen.png)
 
-This screen embodies the core of the program. Here you will find the master list of all frames. Also, here you can navigate to the other aspects
-of the program. You can have multiple sub-windows open at once - in fact, quite often this is very beneficial.
+The Main Screen is the center of SavvyLens. It contains the current CAN frame collection, capture controls, ID and bus filters, DBC interpretation controls, file load/save actions, and entry points to the other analysis windows.
 
+Most SavvyLens workflows begin here:
 
-The Main Frame List
-====================
+1. Connect to a live CAN interface or load a capture file.
+2. Confirm that frames are arriving in the main table.
+3. Filter down to IDs or buses of interest.
+4. Open analysis tools such as Sniffer, Flow View, Frame Info, Graphing, Signal Viewer, Bisector, Playback, or scripting.
+5. Save the full capture or a filtered subset when you have isolated useful data.
 
-The main frame list takes up the majority of the main screen. This list consists of the following sections:
+You can keep multiple analysis windows open at the same time.
 
-- Timestamp: The timestamp is either in microseconds or seconds. This is a setting in preferences. Either way, the timestamp can have microsecond resolution. The difference is just whether there is a decimal point or not. Many of the CAN capture devices have the ability to maintain full microsecond resolution for timestamping purposes. There is a third timing mode where the timestamp can be customized and is based upon the actual "clock" time.
-- ID: The ID is specified either in hexadecimal or decimal (a preference you can set). This is the message identifier sent over the CAN bus.
-- RTR: 0 = Standard Message 1 = Remote transmit request. An RTR frame merely asks a node to send a message, it has no payload of its own.
-- Ext: 0 = Standard message (11 bit ID). 1 = Extended message (29 bit ID)
-- Dir: Either "Rx" or "Tx" to show whether SavvyLens has received or sent this message.
-- Bus: SavvyLens supports a variety of capture hardware. GVRET compatible devices can support more than one bus. The bus a frame came in on
-  is specified here. Many file formats do not specify bus and thus all frames will be loaded as bus 0.
-- Len: The number of data bytes that were sent with this frame. It can range from 0 to 8 for standard CAN and 0 to 64 for CAN-FD.
-- ASCII: A character based view of the CAN bytes in ASCII characters. Many systems that send serial numbers or VIN numbers will send them in ASCII and these will thus be visible here.
-- Data: All of the data bytes separated by spaces. Can be in either hexadecimal or decimal (preference). If "Interpret Frames" is checked you will
-  also see extra data at the end of any frames that have DBC data. To see the rest of this data click upon the frame in the list. It will automatically expand to show all signals attached to that frame.
-  There is also a setting to limit the number of displayed bytes per line. This is especially useful for CAN-FD traffic.
+## Main frame table
 
+The main table is the authoritative collection of frames currently captured or loaded into SavvyLens.
 
-The Bottom Statusbar
-====================
+| Column | Meaning |
+|---|---|
+| Timestamp | Time assigned to the frame. Display mode is controlled by Preferences and can use seconds, microseconds, or system-clock time. |
+| ID | The CAN message identifier, displayed in hexadecimal or decimal according to Preferences. |
+| RTR | `0` for a normal data frame; `1` for a Remote Transmission Request frame. RTR frames request data and do not carry a normal payload. |
+| Ext | `0` for an 11-bit standard CAN ID; `1` for a 29-bit extended CAN ID. |
+| Dir | `Rx` for frames received by SavvyLens and `Tx` for frames sent by SavvyLens. |
+| Bus | The physical or logical bus associated with the frame. Files without bus information load as bus `0`. |
+| Len | Payload length: `0`–`8` bytes for classic CAN and up to `64` bytes for CAN FD. |
+| ASCII | A text-oriented view of payload bytes. This can help identify ASCII-encoded values such as identifiers or VIN fragments. |
+| Data | Payload bytes, shown in hexadecimal or decimal. With DBC interpretation enabled, decoded information can also appear here. |
 
-At the very bottom of the main screen is a status bar with three sections. 
+Select a frame to inspect it more closely. When DBC interpretation is enabled, a frame with known signals can expand to show its decoded signal values.
 
-* The first section shows the connection status. You will see the number of currently connected buses here.
-* The second section shows which file is currently loaded. This is updated by loading or saving.
-* The third section reminds you that F1 will bring up help. Most all screens have their own help.
+The Preferences setting for maximum data bytes per line can make CAN-FD traffic easier to inspect without requiring an excessively wide window.
 
+## Capture controls
 
-The Rest of the Main Window
-===========================
+### Suspend and resume capture
 
-*To the right of the main frames list is an area that shows the total number of captured frames and the frames per second. Total frames might not match the number of shown frames. If you've deselected any IDs in the filter list then fewer frames will be shown. Frames per second is calculated as an average and so will wind up or down when there is a sudden change.
+Use **Suspend Capturing** to temporarily stop adding received frames to the main collection while keeping connections active.
 
-*Suspend Capturing / Resume Capturing is a button that will temporarily disable frame capture or re-enable it. This can be used to keep everything connected without capturing traffic for a short time. This can help to not capture traffic in between tests.
+Use **Resume Capturing** to begin recording incoming frames again.
 
-*The "Normalize Frame Timing" button is used to reset the lowest timestamp to "0" and offset all other timestamps accordingly. This is useful to remove the starting offset when you start up a device long before actual traffic starts. SavvyLens is designed such that this doesn't really matter most of the time but normalizing the timing might be useful to help correlate the timing between two different captures.
+This is useful when you want to keep a device connected but exclude unrelated traffic between tests.
 
-*The "Clear Frames" button will erase all captured messages. They will be irreversibly erased and all memory will be freed.
+### Clear frames
 
-*"Keep Filters While Clearing" will keep all the filters intact if you push the "Clear Frames" button. Otherwise all filters will also be cleared.
+Use **Clear Frames** to remove the current frame collection and free its associated memory.
 
-*The "Auto Scroll Window" checkbox will cause the main frame list to hunt toward the bottom of the list as frames come in. It will normally not be quite
-at the very bottom as, for performance reasons, the program runs at quarter second updates to things like the auto scroll. Thus, the main list will be
-scrolled to the bottom four times per second.
+> **Caution:** Clearing frames is irreversible unless you saved the capture first.
 
-*The "Interpret Frames" checkbox is used to specify whether the loaded DBC file should be used to interpret all available messages and signals. One might want
-this off for performance reasons (interpreting takes some extra processor power and RAM) or to declutter the main frame list.
+Enable **Keep Filters While Clearing** if you want to retain your current ID-filter selections after clearing the frame list. Otherwise, clearing frames also resets the filters.
 
-*The "Overwrite Mode" checkbox is used to ensure that only the newest frame for each message ID is shown. That is, if 100 messages with ID 0x105 come in you
-will see only the newest one. This is generally used alongside "Interpret Frames" to interpret frames and always see the up-to-date information.
+### Normalize frame timing
 
-*"Expand All Rows" will expand all the rows to show every signal in every message. This will take a **VERY** long time if there are many messages loaded. Because of this, you may receive a warning if the program determines that this will take an excessive amount of time to complete. You can make it work faster by filtering away any unneeded messages.
+**Normalize Frame Timing** shifts timestamps so that the earliest frame begins at `0`.
 
-*"Collapse All Rows" will drop all rows back to taking up only one line. This can also take a while to run and will also warn if the operation seems like it will take a very long time to complete.
+This is useful when:
 
-*"Bus Filtering" allows for messages to be shown or hidden based on which bus they came in on.
+- You started capturing long before the event you care about.
+- You want captures to be easier to compare.
+- You want a timeline relative to the beginning of the retained frame set.
 
-*"Frame Filtering" provides a list of all the frame IDs seen so far. Any ID which is checked will be shown in the main list. Any ID which is unchecked will not.
-This can be used to hone in on frames of importance while hiding frames that are currently of no interest. The filtered list can be saved as well.
+### Auto scroll
 
+Enable **Auto Scroll Window** to keep the main frame list near the newest incoming frames.
 
-Loading And Saving Frames
-=========================
+Auto scroll updates periodically for performance reasons, so the view may not remain exactly on the final row at every instant.
 
-What CANBus analysis tool would be complete without an easy way to load and save frames? 
+### Overwrite mode
 
-SavvyLens can load and save in several formats (a few of which are listed below):
-	- CRTD: This format was made by Mark Webb-Johnson for OVMS (open vehicle monitoring system) and other related tools. It is a reasonably readable and compact format.
-	- GVRET: This is the native format for GVRET and SavvyLens. The GVRET format saves more information such as the bus a frame originated on. This format is in CSV 
-	  (comma delimited) format and as such can easily be loaded into your favorite spreadsheet program as well.
-	- Generic ID/DATA - Another CSV format. This is a very cut down format with limited information.
-	- BusMaster - This is the format output by the BusMaster CANBus program. BusMaster is an open source Windows-only somewhat clone of CANAlyzer (the 800lb gorilla in the analysis space). The ability to load and save in this format makes SavvyLens fully capable of swapping data with BusMaster should you need to do so.
-	- Microchip - Format output by Microchip CANBus tools. Perhaps you have logs that were captured with a $100 Microchip dongle? You can load them in SavvyLens.
+Enable **Overwrite Mode** to show only the most recent frame for each message ID rather than every historical occurrence.
 
-There are many other formats supported. Some are only supported for writing, some only for reading. The list of supported formats is expanded every so often.
+This is useful for live monitoring, especially with **Interpret Frames** enabled, because it keeps the display focused on each message’s current decoded state.
 
+> **Note:** Overwrite Mode changes how the main table is displayed. Use normal mode when you need the complete frame history for analysis, export, graphing, comparison, or correlation work.
 
-Filters
-========
+## Filtering frames
 
-You might notice that there are three entries in the file menu that mention filters. SavvyLens can filter messages so that you only see some of the messages coming in on the bus. It still saves all incoming messages but you are able to filter which you will view at any given time. 
-SavvyLens allows for loading and saving the list of frames you'd like to view so that you can easily switch "sets" of frames to view. Also, when saving you can optionally save just the frames that you have filtered instead of every captured frame. Filters are set in the lower right-hand of the this screen. All IDs are selected by default. To deselect an ID click on the checkbox next to it. You can also deselect all IDs or select all IDs. These are useful if you only want to view a couple of IDs (click None then the few you need) or you just want to remove a couple (click All and then deselect the ones you don't care about).
+SavvyLens captures incoming frames even when they are hidden by the main-screen filters. Filtering controls what is displayed and, when selected during export, what is saved.
 
+### Frame ID filtering
 
+The **Frame Filtering** list contains every CAN ID seen in the current collection.
 
-What is DBC and why would I care?!
-==================================
-	
-I'm glad you asked. DBC is a file format used to specify how "signals" are stored in "messages." A message is essentially a unique packet of data sent on the CAN bus. Ordinarily this message is differentiated by frame ID. Each ID is a different message (usually). A signal is a piece of data stored in a message. For instance, ID 0x105 might be a message from the vehicle control unit to the motor inverter. Within that message bytes 0 and 1 might encode the desired torque. That would be a signal. A DBC file allows these relationships to be specified and named. It also allows for scaling of values stored in a signal. Additionally, a signal can have values associated with textual output. For instance, if a signal encodes the current gear then a DBC file can define that a value of 0 means "Park" and a value of 1 means "Drive". This makes analysis a lot easier since you do not need to remember the mapping yourself. In this way data can be better understood by users of the program. Also, other windows can use the DBC file for such things as being able to graph a signal without having to figure out the actual details of that signal.
+- Checked IDs are shown.
+- Unchecked IDs are hidden.
+- **All** selects every ID.
+- **None** clears every ID selection.
 
+A useful workflow for investigating a few IDs is:
 
-How DBC interacts with the main screen?
-=======================================
-	
-First of all, one can load and save DBC files from the "DBC File Manager" found in the File menu. Also in the File menu it is possible to save the currently loaded frames but with DBC decoding. This is somewhat like the normal saving functionality with a two differences: there is only one output format and that format has all signals contained in each message listed and decoded.
+1. Select **None**.
+2. Enable only the IDs you want to study.
+3. Open a supporting analysis window or export the filtered set.
+
+You can save and load ID-filter lists to restore a useful working set later.
+
+### Bus filtering
+
+Use **Bus Filtering** to show or hide frames based on their bus number.
+
+This is especially useful for multi-bus capture devices, bridge work, or capture files that contain traffic from more than one bus.
+
+### Filtered exports
+
+When saving frames, SavvyLens can export either:
+
+- The complete frame collection.
+- Only the currently filtered/visible frames.
+
+Verify the save option before exporting. A filtered export is useful for sharing a focused research sample; a full export is safer when preserving the original capture.
+
+## DBC interpretation
+
+A DBC file defines how CAN message payloads should be interpreted as named signals.
+
+For example, a message with ID `0x105` might contain a torque request in bytes `0` and `1`, a mode field in another byte, and a gear value represented by a named enumeration.
+
+Load and manage DBC files through the **DBC File Manager** in the File menu.
+
+Enable **Interpret Frames** to apply loaded DBC definitions to matching frames in the main table. With interpretation enabled, SavvyLens can display decoded signal values, message labels, and configured colors.
+
+Use DBC interpretation when:
+
+- You are monitoring known signals.
+- You want human-readable labels instead of raw payload bytes alone.
+- You are validating a DBC definition against live or captured traffic.
+- You want to open Signal Viewer or create signal-aware graphs.
+
+Disable it when:
+
+- You want the cleanest possible raw-frame view.
+- You are working with a very large capture and want to reduce interpretation overhead.
+- You are looking for unknown payload changes without DBC context.
+
+### Expanding interpreted rows
+
+Use **Expand All Rows** to show decoded signals for every interpretable message.
+
+> **Performance note:** Expanding every row can take a long time for a large capture. Filter to the relevant IDs first whenever possible.
+
+Use **Collapse All Rows** to return the table to one row per frame.
+
+## Loading and saving captures
+
+SavvyLens supports many CAN log and capture formats. Support varies by format: some formats can be read and written, while others are import-only or export-only.
+
+Common examples include:
+
+- GVRET/SavvyLens native CSV.
+- Generic ID/data CSV.
+- CRTD / OVMS.
+- BusMaster logs.
+- Microchip logs.
+- Vector and other vendor capture formats.
+- PCAP/SocketCAN captures.
+
+The current supported-format list is maintained in the project README.
+
+### Saving with DBC decoding
+
+The File menu also provides an export path that includes DBC-decoded signal information.
+
+Use this when you need a readable result containing both raw frames and the interpreted signals derived from the loaded DBC definitions.
+
+## Status bar and activity
+
+The status bar provides three quick references:
+
+| Area | Meaning |
+|---|---|
+| Connection status | Number of currently connected buses |
+| Current file | The active file name, updated after loading or saving |
+| Help reminder | Indicates that `F1` opens context-sensitive help |
+
+The right-side activity area shows:
+
+- Total captured frames.
+- Current frame rate.
+
+The total captured-frame count can differ from the number of visible rows when ID or bus filters hide part of the collection.
+
+## Practical capture workflow
+
+For a typical reverse-engineering session:
+
+1. Connect to the target bus and verify expected traffic.
+2. Clear frames, optionally retaining a useful filter set.
+3. Start or resume capture.
+4. Perform one controlled physical event or test action.
+5. Suspend capture if you want to isolate that interval.
+6. Filter to changing or relevant IDs.
+7. Use Bookmarking, Sniffer, Flow View, Frame Info, Graphing, File Comparison, or Bisector to investigate the result.
+8. Save the original capture before replacing, filtering, bisecting, or exporting a narrowed subset.
+
+## Troubleshooting
+
+- **No frames appear:** Confirm the connection is active, the correct bus is selected, capture is not suspended, and no bus/ID filter is hiding the traffic.
+- **Only a few rows appear:** Check whether Overwrite Mode is enabled or filters are active.
+- **DBC values do not appear:** Confirm that a DBC is loaded, Interpret Frames is enabled, the CAN ID matches a DBC message, and the signal definitions are correct.
+- **The table is slow with a large capture:** Disable interpretation, avoid expanding all rows, filter to relevant IDs, or use a smaller subset.
+- **Saved output is missing expected IDs:** Confirm whether you selected filtered export rather than full-capture export.

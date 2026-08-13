@@ -1,13 +1,16 @@
 #ifndef FILECOMPARATORWINDOW_H
 #define FILECOMPARATORWINDOW_H
 
-#include <QDialog>
-#include <QDebug>
-#include <QTreeWidget>
-#include "framefileio.h"
+// SavvyLens headers
 #include "can/can_structs.h"
 #include "common/utility.h"
 #include "dbc/dbchandler.h"
+#include "io/framefileio.h"
+
+// QT headers
+#include <QDialog>
+#include <QDebug>
+#include <QTreeWidget>
 
 namespace Ui {
 class FileComparatorWindow;

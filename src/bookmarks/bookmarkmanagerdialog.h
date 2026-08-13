@@ -1,9 +1,12 @@
 #ifndef BOOKMARKMANAGERDIALOG_H
 #define BOOKMARKMANAGERDIALOG_H
 
+// SavvyLens headers
+#include "bookmarks/bookmarkmanager.h"
+
+// Qt headers
 #include <QDialog>
 #include <QWidget>
-#include "bookmarkmanager.h"
 
 namespace Ui {
 class BookmarkManagerDialog;

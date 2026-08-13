@@ -1,10 +1,13 @@
 #ifndef DBCHANDLER_H
 #define DBCHANDLER_H
 
-#include <QObject>
-#include <QFileSystemWatcher>
-#include "dbc_classes.h"
+// SavvyLens headers
 #include "can/can_structs.h"
+#include "dbc/dbc_classes.h"
+
+// QT headers
+#include <QFileSystemWatcher>
+#include <QObject>
 
     typedef enum
     {
@@ -97,6 +100,7 @@ public:
     QList<DBC_NODE> dbc_nodes;
     QList<DBC_VAL_TABLE> dbc_value_tables;
     QList<DBC_ATTRIBUTE> dbc_attributes;
+
 private:
     QString fileName;
     QString filePath;
@@ -150,7 +154,6 @@ public slots:
 private:
     QFileSystemWatcher *fileWatcher;
     QList<DBCFile> loadedFiles;
-
     DBCHandler();
     static DBCHandler *instance;
 };

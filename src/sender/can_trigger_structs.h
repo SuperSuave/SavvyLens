@@ -1,8 +1,10 @@
 #ifndef CAN_TRIGGER_STRUCTS_H
 #define CAN_TRIGGER_STRUCTS_H
 
+// SavvyLens headers
 #include "can/can_structs.h"
 
+// QT headers
 #include <QList>
 #include <QUuid>
 
@@ -93,4 +95,3 @@ public:
 };
 
 #endif // CAN_TRIGGER_STRUCTS_H
-

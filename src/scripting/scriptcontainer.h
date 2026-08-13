@@ -1,26 +1,28 @@
 #ifndef SCRIPTCONTAINER_H
 #define SCRIPTCONTAINER_H
 
-#include "can/can_structs.h"
-#include "can/canfilter.h"
+// SavvyLens headers
 #include "bus_protocols/isotp_handler.h"
 #include "bus_protocols/isotp_message.h"
 #include "bus_protocols/uds_handler.h"
+#include "can/can_structs.h"
+#include "can/canfilter.h"
 
-#include <QObject>
+// QT headers
+#include <QHash>
 #include <QJSEngine>
 #include <QJSValue>
-#include <QTimer>
+#include <QList>
+#include <QMap>
+#include <QObject>
 #include <QString>
 #include <QStringList>
-#include <QList>
+#include <QTimer>
 #include <QVector>
-#include <QHash>
-#include <QMap>
 
 class QTableWidget;
-class ScriptingWindow;
 class ScriptContainer;
+class ScriptingWindow;
 
 class CANScriptHelper : public QObject
 {

@@ -1,3 +1,6 @@
+#ifndef QMQTT_FRAME_H
+#define QMQTT_FRAME_H
+
 /*
  * qmqtt_frame.h - qmqtt frame heaer
  *
@@ -29,13 +32,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef QMQTT_FRAME_H
-#define QMQTT_FRAME_H
 
-#include "qmqtt_global.h"
+// SavvyLens headers
+#include "mqtt/qmqtt_global.h"
 
-#include <QMetaType>
+// QT headers
 #include <QByteArray>
+#include <QMetaType>
 #include <QString>
 
 QT_FORWARD_DECLARE_CLASS(QDataStream)

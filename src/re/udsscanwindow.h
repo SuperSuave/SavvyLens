@@ -1,14 +1,15 @@
 #ifndef UDSSCANWINDOW_H
 #define UDSSCANWINDOW_H
 
+// SavvyLens headers
+#include "bus_protocols/uds_handler.h"
 #include "can/can_structs.h"
 #include "connections/canconnection.h"
-#include "bus_protocols/uds_handler.h"
 
+// QT headers
 #include <QDialog>
 #include <QFile>
 #include <QTreeWidget>
-
 
 enum SCAN_TYPE
 {

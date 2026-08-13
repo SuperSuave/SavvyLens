@@ -1,6 +1,8 @@
+#include "connections/canconnection.h"
+
+// QT headers
 #include <QSettings>
 #include <QThread>
-#include "canconnection.h"
 
 CANConnection::CANConnection(QString pPort,
                              QString pDriver,
@@ -54,7 +56,6 @@ CANConnection::CANConnection(QString pPort,
     }
 }
 
-
 CANConnection::~CANConnection()
 {
     /* stop and delete thread */
@@ -67,7 +68,6 @@ CANConnection::~CANConnection()
 
     mBusData.clear();
 }
-
 
 void CANConnection::start()
 {
@@ -97,7 +97,6 @@ void CANConnection::start()
     return piStarted();
 }
 
-
 void CANConnection::suspend(bool pSuspend)
 {
     /* execute in mThread_p context */
@@ -110,7 +109,6 @@ void CANConnection::suspend(bool pSuspend)
 
     return piSuspend(pSuspend);
 }
-
 
 void CANConnection::stop()
 {
@@ -136,7 +134,6 @@ void CANConnection::stop()
     return piStop();
 }
 
-
 bool CANConnection::getBusSettings(int pBusIdx, CANBus& pBus)
 {
     /* make sure we execute in mThread context */
@@ -153,7 +150,6 @@ bool CANConnection::getBusSettings(int pBusIdx, CANBus& pBus)
     return piGetBusSettings(pBusIdx, pBus);
 }
 
-
 void CANConnection::setBusSettings(int pBusIdx, CANBus pBus)
 {
     /* make sure we execute in mThread context */
@@ -167,7 +163,6 @@ void CANConnection::setBusSettings(int pBusIdx, CANBus pBus)
 
     return piSetBusSettings(pBusIdx, pBus);
 }
-
 
 bool CANConnection::sendFrame(const CANFrame& pFrame)
 {
@@ -193,7 +188,6 @@ bool CANConnection::sendFrame(const CANFrame& pFrame)
     return piSendFrame(pFrame);
 }
 
-
 bool CANConnection::sendFrames(const QList<CANFrame>& pFrames)
 {
     /* make sure we execute in mThread context */
@@ -210,7 +204,6 @@ bool CANConnection::sendFrames(const QList<CANFrame>& pFrames)
     return piSendFrames(pFrames);
 }
 
-
 int CANConnection::getNumBuses() const{
     return mNumBuses;
 }
@@ -218,7 +211,6 @@ int CANConnection::getNumBuses() const{
 int CANConnection::getSerialSpeed() const{
   return mSerialSpeed;
 }
-
 
 bool CANConnection::isConfigured(int pBusId) {
     if( pBusId < 0 || pBusId >= getNumBuses())
@@ -232,7 +224,6 @@ void CANConnection::setConfigured(int pBusId, bool pConfigured) {
     mBusData[pBusId].mConfigured = pConfigured;
 }
 
-
 bool CANConnection::getBusConfig(int pBusId, CANBus& pBus) {
     if( pBusId < 0 || pBusId >= getNumBuses() || !isConfigured(pBusId))
         return false;
@@ -241,7 +232,6 @@ bool CANConnection::getBusConfig(int pBusId, CANBus& pBus) {
     return true;
 }
 
-
 void CANConnection::setBusConfig(int pBusId, CANBus& pBus) {
     if( pBusId < 0 || pBusId >= getNumBuses())
         return;
@@ -249,7 +239,6 @@ void CANConnection::setBusConfig(int pBusId, CANBus& pBus) {
     mBusData[pBusId].mConfigured = true;
     mBusData[pBusId].mBus = pBus;
 }
-
 
 QString CANConnection::getPort() {
     return mPort;
@@ -264,11 +253,9 @@ LFQueue<CANFrame>& CANConnection::getQueue() {
     return mQueue;
 }
 
-
 CANCon::type CANConnection::getType() {
     return mType;
 }
-
 
 CANCon::status CANConnection::getStatus() {
     return (CANCon::status) mStatus.loadRelaxed();

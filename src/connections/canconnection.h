@@ -1,12 +1,15 @@
 #ifndef CANCONNECTION_H
 #define CANCONNECTION_H
 
-#include <Qt>
-#include <QObject>
-#include "utils/lfqueue.h"
+// SavvyLens headers
 #include "can/can_structs.h"
-#include "canbus.h"
-#include "canconconst.h"
+#include "connections/canbus.h"
+#include "connections/canconconst.h"
+#include "utils/lfqueue.h"
+
+// QT headers
+#include <QObject>
+#include <Qt>
 
 struct BusData;
 
@@ -94,7 +97,6 @@ public:
      * @param state - set whether to send debugging info to the console or not
      */
     void setConsoleOutput(bool state);
-
 
 signals:
     /*not implemented yet */

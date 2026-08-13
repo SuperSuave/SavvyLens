@@ -1,41 +1,40 @@
 #ifndef GVRETSERIAL_H
 #define GVRETSERIAL_H
 
-#include <QSerialPort>
+// SavvyLens headers
+#include "connections/canconmanager.h"
+#include "connections/canconnection.h"
+#include "frames/canframemodel.h"
+
+// QT headers
 #include <QCanBusDevice>
+#include <QDateTime>
+#include <QSerialPort>
+#include <QTcpSocket>
 #include <QThread>
 #include <QTimer>
-#include <QTcpSocket>
 #include <QUdpSocket>
-
-/*************/
-#include <QDateTime>
-/*************/
-
-#include "canframemodel.h"
-#include "canconnection.h"
-#include "canconmanager.h"
 
 namespace SERIALSTATE {
 
-enum STATE
-{
-    IDLE,
-    GET_COMMAND,
-    BUILD_CAN_FRAME,
-    TIME_SYNC,
-    GET_DIG_INPUTS,
-    GET_ANALOG_INPUTS,
-    SET_DIG_OUTPUTS,
-    SETUP_CANBUS,
-    GET_CANBUS_PARAMS,
-    GET_DEVICE_INFO,
-    SET_SINGLEWIRE_MODE,
-    GET_NUM_BUSES,
-    GET_EXT_BUSES,
-    BUILD_FD_FRAME,
-    GET_FD_SETTINGS
-};
+    enum STATE
+    {
+        IDLE,
+        GET_COMMAND,
+        BUILD_CAN_FRAME,
+        TIME_SYNC,
+        GET_DIG_INPUTS,
+        GET_ANALOG_INPUTS,
+        SET_DIG_OUTPUTS,
+        SETUP_CANBUS,
+        GET_CANBUS_PARAMS,
+        GET_DEVICE_INFO,
+        SET_SINGLEWIRE_MODE,
+        GET_NUM_BUSES,
+        GET_EXT_BUSES,
+        BUILD_FD_FRAME,
+        GET_FD_SETTINGS
+    };
 
 }
 
@@ -49,14 +48,12 @@ public:
     virtual ~GVRetSerial();
 
 protected:
-
     virtual void piStarted();
     virtual void piStop();
     virtual void piSetBusSettings(int pBusIdx, CANBus pBus);
     virtual bool piGetBusSettings(int pBusIdx, CANBus& pBus);
     virtual void piSuspend(bool pSuspend);
     virtual bool piSendFrame(const CANFrame&) ;
-
     void disconnectDevice();
 
 public slots:
@@ -81,7 +78,6 @@ private:
 protected:
     QTimer             mTimer;
     QThread            mThread;
-
     bool doValidation;
     int validationCounter;
     bool isAutoRestart;

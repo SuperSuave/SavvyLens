@@ -1,3 +1,6 @@
+#ifndef QMQTT_H
+#define QMQTT_H
+
 /*
  * qmqtt.h - qmqtt library heaer
  *
@@ -29,10 +32,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef QMQTT_H
-#define QMQTT_H
 
-#include "qmqtt_message.h"
-#include "qmqtt_client.h"
+// SavvyLens headers
+#include "mqtt/qmqtt_message.h"
+#include "mqtt/qmqtt_client.h"
 
 #endif // QMQTT_H

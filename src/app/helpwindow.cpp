@@ -1,7 +1,11 @@
-#include <QtDebug>
-#include "common/utility.h"
-#include "helpwindow.h"
+#include "app/helpwindow.h"
 #include "ui_helpwindow.h"
+
+// SavvyLens headers
+#include "common/utility.h"
+
+// Qt headers
+#include <QtDebug>
 
 HelpWindow* HelpWindow::self = nullptr;
 
@@ -68,5 +72,3 @@ void HelpWindow::showHelp(QString help)
     readSettings();
     self->show();
 }
-
-

@@ -1,11 +1,14 @@
 #ifndef DBC_CLASSES_H
 #define DBC_CLASSES_H
 
+// SavvyLens headers
+#include "can/can_structs.h"
+
+// QT headers
 #include <QColor>
 #include <QString>
 #include <QStringList>
 #include <QVariant>
-#include "can/can_structs.h"
 
 /*classes to encapsulate data from a DBC file. Really, the stuff of interest
   are the nodes, messages, signals, attributes, and comments.
@@ -149,6 +152,7 @@ public: //TODO: Clean up this class so that not everything is public. There is o
     {
         return (l.name.toLower() < r.name.toLower());
     }
+
 private:
     QList<QPair<int, int>> multiplexLowAndHighValues;
 };
@@ -180,6 +184,5 @@ public:
         return (l.name.toLower() < r.name.toLower());
     }
 };
-
 
 #endif // DBC_CLASSES_H

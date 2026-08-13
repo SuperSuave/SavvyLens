@@ -1,12 +1,13 @@
-#include <QString>
-#include "canconfactory.h"
-#include "serialbusconnection.h"
-#include "gvretserial.h"
-#include "mqtt_bus.h"
-#include "socketcand.h"
-#include "lawicel_serial.h"
-#include "canserver.h"
-#include "canlogserver.h"
+#include "connections/canconfactory.h"
+
+// SavvyLens headers
+#include "connections/canlogserver.h"
+#include "connections/canserver.h"
+#include "connections/gvretserial.h"
+#include "connections/lawicel_serial.h"
+#include "connections/mqtt_bus.h"
+#include "connections/serialbusconnection.h"
+#include "connections/socketcand.h"
 
 using namespace CANCon;
 

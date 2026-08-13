@@ -1,11 +1,14 @@
 #ifndef UDS_HANDLER_H
 #define UDS_HANDLER_H
 
-#include <Qt>
-#include <QObject>
-#include <QDebug>
+// SavvyLens headers
+#include "bus_protocols/isotp_message.h"
 #include "can/can_structs.h"
-#include "isotp_message.h"
+
+// QT headers
+#include <QDebug>
+#include <QObject>
+#include <Qt>
 
 class ISOTP_HANDLER;
 

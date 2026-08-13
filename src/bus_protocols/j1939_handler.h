@@ -1,10 +1,13 @@
 #ifndef J1939_HANDLER_H
 #define J1939_HANDLER_H
 
-#include <Qt>
-#include <QObject>
-#include <QDebug>
+// SavvyLens headers
 #include "can/can_structs.h"
+
+// Qt headers
+#include <QDebug>
+#include <QObject>
+#include <Qt>
 
 struct J1939ID
 {

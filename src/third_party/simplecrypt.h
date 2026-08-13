@@ -1,3 +1,6 @@
+#ifndef SIMPLECRYPT_H
+#define SIMPLECRYPT_H
+
 /*
 Copyright (c) 2011, Andre Somers
 All rights reserved.
@@ -25,11 +28,10 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SIMPLECRYPT_H
-#define SIMPLECRYPT_H
+// QT headers
+#include <QFlags>
 #include <QString>
 #include <QVector>
-#include <QFlags>
 
 /**
   @short Simple encryption and decryption of strings and byte arrays

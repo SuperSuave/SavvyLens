@@ -1,3 +1,6 @@
+#ifndef QCUSTOMPLOT_H
+#define QCUSTOMPLOT_H
+
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
@@ -23,10 +26,8 @@
 **          Version: 2.1.1                                                **
 ****************************************************************************/
 
-#ifndef QCUSTOMPLOT_H
-#define QCUSTOMPLOT_H
-
-#include <QtCore/qglobal.h>
+// QT headers
+#include <QtGlobal>
 
 // some Qt version/configuration dependent macros to include or exclude certain code paths:
 #ifdef QCUSTOMPLOT_USE_OPENGL
@@ -47,28 +48,32 @@
 #  endif
 #endif
 
-#include <QtCore/QObject>
-#include <QtCore/QPointer>
-#include <QtCore/QSharedPointer>
-#include <QtCore/QTimer>
-#include <QtGui/QPainter>
-#include <QtGui/QPainterPath>
-#include <QtGui/QPaintEvent>
-#include <QtGui/QMouseEvent>
-#include <QtGui/QWheelEvent>
-#include <QtGui/QPixmap>
-#include <QtCore/QVector>
-#include <QtCore/QString>
-#include <QtCore/QDateTime>
-#include <QtCore/QMultiMap>
-#include <QtCore/QFlags>
-#include <QtCore/QDebug>
-#include <QtCore/QStack>
-#include <QtCore/QCache>
-#include <QtCore/QMargins>
-#include <qmath.h>
+// QT headers
+#include <QCache>
+#include <QDateTime>
+#include <QDebug>
+#include <QFlags>
+#include <QMargins>
+#include <QMouseEvent>
+#include <QMultiMap>
+#include <QObject>
+#include <QPainter>
+#include <QPainterPath>
+#include <QPaintEvent>
+#include <QPixmap>
+#include <QPointer>
+#include <QSharedPointer>
+#include <QStack>
+#include <QString>
+#include <QtMath>
+#include <QTimer>
+#include <QVector>
+#include <QWheelEvent>
+
+// C++ standard-library headers
 #include <limits>
 #include <algorithm>
+
 #ifdef QCP_OPENGL_FBO
 #  include <QtGui/QOpenGLContext>
 #  if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
@@ -103,30 +108,30 @@
 #  include <QtCore/QTimeZone>
 #endif
 
-class QCPPainter;
-class QCustomPlot;
-class QCPLayerable;
-class QCPLayoutElement;
-class QCPLayout;
-class QCPAxis;
-class QCPAxisRect;
-class QCPAxisPainterPrivate;
-class QCPAbstractPlottable;
-class QCPGraph;
 class QCPAbstractItem;
-class QCPPlottableInterface1D;
-class QCPLegend;
-class QCPItemPosition;
-class QCPLayer;
 class QCPAbstractLegendItem;
-class QCPSelectionRect;
+class QCPAbstractPlottable;
+class QCPAxis;
+class QCPAxisPainterPrivate;
+class QCPAxisRect;
+class QCPBars;
 class QCPColorMap;
 class QCPColorScale;
-class QCPBars;
-class QCPPolarAxisRadial;
+class QCPGraph;
+class QCPItemPosition;
+class QCPLayer;
+class QCPLayerable;
+class QCPLayout;
+class QCPLayoutElement;
+class QCPLegend;
+class QCPPainter;
+class QCPPlottableInterface1D;
 class QCPPolarAxisAngular;
-class QCPPolarGrid;
+class QCPPolarAxisRadial;
 class QCPPolarGraph;
+class QCPPolarGrid;
+class QCPSelectionRect;
+class QCustomPlot;
 
 /* including file 'src/global.h'            */
 /* modified 2022-11-06T12:45:57, size 18102 */
@@ -7771,4 +7776,3 @@ private:
 
 
 #endif // QCUSTOMPLOT_H
-

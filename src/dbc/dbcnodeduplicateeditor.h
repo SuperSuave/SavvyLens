@@ -1,9 +1,12 @@
 #ifndef DBCNODEDUPLICATEEDITOR_H
 #define DBCNODEDUPLICATEEDITOR_H
 
+// SavvyLens headers
+#include "dbc/dbc_classes.h"
+#include "dbc/dbchandler.h"
+
+// QT headers
 #include <QDialog>
-#include "dbc_classes.h"
-#include "dbchandler.h"
 
 namespace Ui {
 class DBCNodeDuplicateEditor;

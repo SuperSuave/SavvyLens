@@ -1,9 +1,12 @@
 #ifndef RANGESTATEWINDOW_H
 #define RANGESTATEWINDOW_H
 
+// SavvyLens headers
+#include "can/can_structs.h"
+
+// QT headers
 #include <QDialog>
 #include <QMap>
-#include "can/can_structs.h"
 
 namespace Ui {
 class RangeStateWindow;

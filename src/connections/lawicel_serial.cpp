@@ -1,13 +1,16 @@
-#include <QObject>
-#include <QDebug>
+#include "connections/lawicel_serial.h"
+
+// SavvyLens headers
+#include "common/utility.h"
+
+// QT headers
 #include <QCanBusFrame>
+#include <QDebug>
+#include <QObject>
 #include <QSerialPortInfo>
 #include <QSettings>
 #include <QStringBuilder>
 #include <QtNetwork>
-
-#include "lawicel_serial.h"
-#include "common/utility.h"
 
 LAWICELSerial::LAWICELSerial(QString portName, int serialSpeed, int lawicelSpeed, bool canFd, int dataRate) :
     CANConnection(portName, "LAWICEL", CANCon::LAWICEL,serialSpeed, lawicelSpeed, canFd, dataRate, 3, 4000, true),
@@ -21,7 +24,6 @@ LAWICELSerial::LAWICELSerial(QString portName, int serialSpeed, int lawicelSpeed
 
     readSettings();
 }
-
 
 LAWICELSerial::~LAWICELSerial()
 {
@@ -65,7 +67,6 @@ void LAWICELSerial::piStarted()
     connectDevice();
 }
 
-
 void LAWICELSerial::piSuspend(bool pSuspend)
 {
     /* update capSuspended */
@@ -76,19 +77,16 @@ void LAWICELSerial::piSuspend(bool pSuspend)
         getQueue().flush();
 }
 
-
 void LAWICELSerial::piStop()
 {
     mTimer.stop();
     disconnectDevice();
 }
 
-
 bool LAWICELSerial::piGetBusSettings(int pBusIdx, CANBus& pBus)
 {
     return getBusConfig(pBusIdx, pBus);
 }
-
 
 void LAWICELSerial::piSetBusSettings(int pBusIdx, CANBus bus)
 {
@@ -128,7 +126,6 @@ void LAWICELSerial::piSetBusSettings(int pBusIdx, CANBus bus)
     }
 
 }
-
 
 bool LAWICELSerial::piSendFrame(const CANFrame& frame)
 {
@@ -201,9 +198,6 @@ bool LAWICELSerial::piSendFrame(const CANFrame& frame)
 }
 
 
-
-/****************************************************************/
-
 void LAWICELSerial::rebuildLocalTimeBasis()
 {
     timeBasis = 0;
@@ -215,7 +209,6 @@ void LAWICELSerial::readSettings()
 {
     QSettings settings;
 }
-
 
 void LAWICELSerial::connectDevice()
 {
@@ -457,7 +450,6 @@ void LAWICELSerial::serialError(QSerialPort::SerialPortError err)
     }
 }
 
-
 void LAWICELSerial::connectionTimeout()
 {
     //one second after trying to connect are we actually connected?
@@ -684,7 +676,6 @@ void LAWICELSerial::handleTick()
     //qDebug() << "Tick!";
 }
 
-
 // Convert a FDCAN_data_length_code to number of bytes in a message
 uint8_t LAWICELSerial::dlc_code_to_bytes(int dlc_code)
 {
@@ -739,5 +730,3 @@ uint8_t LAWICELSerial::bytes_to_dlc_code(uint8_t bytes)
         }
     }
 }
-
-

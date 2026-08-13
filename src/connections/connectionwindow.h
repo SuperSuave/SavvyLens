@@ -1,26 +1,25 @@
 #ifndef CONNECTIONWINDOW_H
 #define CONNECTIONWINDOW_H
 
-
-
-#include <QDialog>
-#include <QSerialPortInfo>
-#include <QDebug>
-#include <QSettings>
-#include <QTimer>
-#include <QItemSelection>
-#include <QCanBusDeviceInfo>
-#include <QUdpSocket>
-#include "canconnectionmodel.h"
+// SavvyLens headers
+#include "connections/canconnectionmodel.h"
 #include "connections/canconnection.h"
 
+// QT headers
+#include <QCanBusDeviceInfo>
+#include <QDebug>
+#include <QDialog>
+#include <QItemSelection>
+#include <QSerialPortInfo>
+#include <QSettings>
+#include <QTimer>
+#include <QUdpSocket>
 
 class CANConnectionModel;
 
 namespace Ui {
 class ConnectionWindow;
 }
-
 
 class ConnectionWindow : public QDialog
 {
@@ -41,7 +40,6 @@ public slots:
     
     bool connectBus(int type, QString portName, QString driverName, int serialSpeed, int busSpeed, bool isCanFd, int dataRate);
     bool disconnectBus(int index);
-
 
 private slots:
     void currentRowChanged(const QModelIndex &current, const QModelIndex &previous);

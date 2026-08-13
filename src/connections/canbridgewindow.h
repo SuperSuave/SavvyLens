@@ -1,8 +1,11 @@
 #ifndef CANBRIDGEWINDOW_H
 #define CANBRIDGEWINDOW_H
 
-#include <QDialog>
+// SavvyLens headers
 #include "connections/canconmanager.h"
+
+// QT headers
+#include <QDialog>
 
 namespace Ui {
 class CANBridgeWindow;
@@ -16,7 +19,6 @@ public:
     explicit CANBridgeWindow(const QVector<CANFrame> *frames, QWidget *parent = nullptr);
     ~CANBridgeWindow();
     void showEvent(QShowEvent*);
-
 
 private slots:
     void updatedFrames(int);

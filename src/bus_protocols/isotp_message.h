@@ -1,9 +1,12 @@
 #ifndef ISOTP_MESSAGE_H
 #define ISOTP_MESSAGE_H
 
+// SavvyLens headers
+#include "can/can_structs.h"
+
+// Qt headers
 #include <Qt>
 #include <QVector>
-#include "can/can_structs.h"
 
 //Now a child class of CANFrame. We just add the ability to track how long it was supposed to be and other
 //ISOTP related details. But, mostly just CANFrame.

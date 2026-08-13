@@ -1,6 +1,7 @@
-#include "candatagrid.h"
+#include "widgets/candatagrid.h"
 #include "ui_candatagrid.h"
 
+// QT headers
 #include <QPainter>
 #include <QDebug>
 #include <QMouseEvent>

@@ -1,5 +1,7 @@
-#include "framesenderobject.h"
-#include "mainwindow.h"
+#include "sender/framesenderobject.h"
+
+// SavvyLens headers
+#include "app/mainwindow.h"
 
 FrameSenderObject::FrameSenderObject(const QVector<CANFrame> *frames)
 {
@@ -454,4 +456,3 @@ CANFrame* FrameSenderObject::lookupFrame(int ID, int bus)
 
     return nullptr;
 }
-

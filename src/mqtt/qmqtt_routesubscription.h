@@ -1,3 +1,6 @@
+#ifndef QMQTT_ROUTESUBSCRIPTION_H
+#define QMQTT_ROUTESUBSCRIPTION_H
+
 /*
  * qmqtt_router.h - qmqtt router
  *
@@ -30,15 +33,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef QMQTT_ROUTESUBSCRIPTION_H
-#define QMQTT_ROUTESUBSCRIPTION_H
 
-#include "qmqtt_global.h"
+// SavvyLens headers
+#include "mqtt/qmqtt_global.h"
 
+// QT headers
 #include <QObject>
 #include <QPointer>
-#include <QString>
 #include <QRegularExpression>
+#include <QString>
 #include <QStringList>
 
 namespace QMQTT {

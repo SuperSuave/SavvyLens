@@ -1,3 +1,5 @@
+#include "qmqtt_frame.h"
+
 /*
  * qmqtt_frame.cpp - qmqtt frame
  *
@@ -30,8 +32,7 @@
  *
  */
 
-#include "qmqtt_frame.h"
-
+// QT headers
 #include <QLoggingCategory>
 #include <QDataStream>
 
@@ -75,7 +76,6 @@ bool Frame::operator==(const Frame& other) const
   return _header == other._header
       && _data == other._data;
 }
-
 
 Frame::~Frame()
 {

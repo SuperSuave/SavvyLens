@@ -1,13 +1,17 @@
-#include <QDebug>
-#include <Qt>
+#include "re/sniffer/sniffermodel.h"
+
+// SavvyLens headers
+#include "re/sniffer/snifferwindow.h"
+#include "re/sniffer/SnifferDelegate.h"
+#include "themes/thememanager.h"
+
+// QT headers
 #include <QApplication>
 #include <QColor>
-#include <QJsonObject>
+#include <QDebug>
 #include <QJsonArray>
-#include "sniffermodel.h"
-#include "snifferwindow.h"
-#include "SnifferDelegate.h"
-#include "themes/thememanager.h"
+#include <QJsonObject>
+#include <Qt>
 
 SnifferModel::SnifferModel(QObject *parent)
     : QAbstractItemModel(parent),
@@ -43,13 +47,11 @@ int SnifferModel::columnCount(const QModelIndex &parent) const
     return parent.isValid() ? 0 : tc::LAST+1;
 }
 
-
 int SnifferModel::rowCount(const QModelIndex &parent) const
 {
     const QMap<quint32, SnifferItem*>& map = mFilter ? mFilters : mMap;
     return parent.isValid() ? 0 : map.size();
 }
-
 
 QVariant SnifferModel::data(const QModelIndex &index, int role) const
 {
@@ -137,7 +139,6 @@ QVariant SnifferModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-
 Qt::ItemFlags SnifferModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
@@ -145,7 +146,6 @@ Qt::ItemFlags SnifferModel::flags(const QModelIndex &index) const
 
     return QAbstractItemModel::flags(index);
 }
-
 
 QVariant SnifferModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
@@ -169,7 +169,6 @@ QVariant SnifferModel::headerData(int section, Qt::Orientation orientation, int 
     return QVariant();
 }
 
-
 QModelIndex SnifferModel::index(int row, int column, const QModelIndex &parent) const
 {
     if (parent.isValid())
@@ -187,7 +186,6 @@ QModelIndex SnifferModel::index(int row, int column, const QModelIndex &parent) 
 
     return createIndex(row, column, iter.value());
 }
-
 
 QModelIndex SnifferModel::parent(const QModelIndex &) const
 {
@@ -281,7 +279,6 @@ void SnifferModel::refresh()
                     createIndex(rowCount()-1, columnCount()-1), QVector<int>(Qt::DisplayRole));
 }
 
-
 void SnifferModel::filter(fltType pType, int pId)
 {
     beginResetModel();
@@ -313,12 +310,9 @@ void SnifferModel::filter(fltType pType, int pId)
     endResetModel();
 }
 
-
 /***********************************************/
 /**********         slots       ****************/
 /***********************************************/
-
-
 
 void SnifferModel::update(CANConnection*, QVector<CANFrame>& pFrames)
 {
@@ -356,5 +350,3 @@ void SnifferModel::unNotch()
     foreach(SnifferItem* item, map)
         item->notch(false);
 }
-
-

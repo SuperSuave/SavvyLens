@@ -1,13 +1,16 @@
 #ifndef NEWCONNECTIONDIALOG_H
 #define NEWCONNECTIONDIALOG_H
 
-#include <QDialog>
-#include <QCanBusDeviceInfo>
-#include <QSerialPortInfo>
-#include <QDebug>
-#include <QUdpSocket>
-#include "canconnectionmodel.h"
+// SavvyLens headers
+#include "connections/canconnectionmodel.h"
 #include "connections/canconnection.h"
+
+// QT headers
+#include <QCanBusDeviceInfo>
+#include <QDebug>
+#include <QDialog>
+#include <QSerialPortInfo>
+#include <QUdpSocket>
 
 namespace Ui {
 class NewConnectionDialog;

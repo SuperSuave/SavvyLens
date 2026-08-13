@@ -1,6 +1,10 @@
 #ifndef CONTROLSTATEDETECTOR_H
 #define CONTROLSTATEDETECTOR_H
 
+// SavvyLens headers
+#include "can/can_structs.h"
+
+// QT headers
 #include <QObject>
 #include <QVector>
 #include <QByteArray>
@@ -8,7 +12,6 @@
 #include <QSet>
 #include <QString>
 #include <QPair>
-#include "can/can_structs.h"
 
 struct ControlStateKey
 {

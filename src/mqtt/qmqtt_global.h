@@ -1,3 +1,6 @@
+#ifndef QMQTT_GLOBAL_H
+#define QMQTT_GLOBAL_H
+
 /*
  * qmqtt_global.h - qmqtt libray global
  *
@@ -29,9 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef QMQTT_GLOBAL_H
-#define QMQTT_GLOBAL_H
 
+// QT headers
 #include <QtGlobal>
 
 //#ifndef QT_STATIC
@@ -45,4 +47,3 @@
 //#endif
 
 #endif // QMQTT_GLOBAL_H
-

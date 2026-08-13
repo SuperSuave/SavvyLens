@@ -1,9 +1,12 @@
+#include "connections/canconmanager.h"
+
+// SavvyLens headers
+#include "connections/canconfactory.h"
+
+// QT headers
+#include <QCoreApplication>
 #include <QDateTime>
 #include <QSettings>
-#include <QCoreApplication>
-
-#include "canconmanager.h"
-#include "canconfactory.h"
 
 CANConManager* CANConManager::mInstance = nullptr;
 
@@ -147,7 +150,6 @@ CANConnection* CANConManager::getByName(const QString& pName) const
 
     return nullptr;
 }
-
 
 void CANConManager::refreshConnection(CANConnection* pConn_p)
 {

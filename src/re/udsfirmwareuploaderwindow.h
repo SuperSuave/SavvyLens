@@ -1,15 +1,18 @@
 #ifndef UDSFIRMWAREUPLOADERWINDOW_H
 #define UDSFIRMWAREUPLOADERWINDOW_H
 
+// SavvyLens headers
+#include "can/can_structs.h"
+#include "bus_protocols/uds_handler.h"
+
+// QT headers
 #include <QDialog>
-#include <QTimer>
 #include <QElapsedTimer>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMap>
+#include <QTimer>
 #include <QVector>
-#include "can/can_structs.h"
-#include "bus_protocols/uds_handler.h"
 
 struct TeslaNodeInfo
 {

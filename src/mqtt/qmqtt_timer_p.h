@@ -1,3 +1,6 @@
+#ifndef QMQTT_TIMER_P_H
+#define QMQTT_TIMER_P_H
+
 /*
  * qmqtt_timer_p.h - qmqtt timer private header
  *
@@ -29,11 +32,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef QMQTT_TIMER_P_H
-#define QMQTT_TIMER_P_H
 
+// SavvyLens headers
 #include "qmqtt_timerinterface.h"
 
+// QT headers
 #include <QObject>
 #include <QTimer>
 

@@ -1,9 +1,13 @@
-#include "newgraphdialog.h"
+#include "re/newgraphdialog.h"
 #include "ui_newgraphdialog.h"
+
+// SavvyLens headers
+#include "app/helpwindow.h"
+#include "common/utility.h"
+
+// QT headers
 #include <QColorDialog>
 #include <QRandomGenerator>
-#include "common/utility.h"
-#include "helpwindow.h"
 
 NewGraphDialog::NewGraphDialog(DBCHandler *handler, QWidget *parent) :
     QDialog(parent),
@@ -245,8 +249,6 @@ void NewGraphDialog::getParams(GraphParams &params)
     if (fabs(params.scale) < 0.00000001) params.scale = 1.0f;
     if (params.stride < 1) params.stride = 1;
 }
-
-
 
 void NewGraphDialog::bitfieldClicked(int bit)
 {

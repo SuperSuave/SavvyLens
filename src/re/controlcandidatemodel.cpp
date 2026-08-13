@@ -1,8 +1,11 @@
-#include "controlcandidatemodel.h"
+#include "re/controlcandidatemodel.h"
 
-#include <algorithm>
+// QT headers
 #include <QStringList>
 #include <QDebug>
+
+// C++ standard-library headers
+#include <algorithm>
 
 ControlCandidateModel::ControlCandidateModel(QObject *parent)
     : QAbstractTableModel(parent)

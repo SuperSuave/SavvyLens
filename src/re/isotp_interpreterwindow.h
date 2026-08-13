@@ -3,15 +3,16 @@
 
 #pragma once
 
+// SavvyLens headers
+#include "bus_protocols/isotp_handler.h"
+#include "bus_protocols/uds_handler.h"
+#include "can/can_structs.h"
+#include "widgets/filterutility.h"
+
+// QT headers
 #include <QDialog>
 #include <QVector>
 #include <QListWidgetItem>
-
-#include "can/can_structs.h"
-#include "bus_protocols/uds_handler.h"
-#include "filterutility.h"
-#include "bus_protocols/isotp_handler.h"
-
 
 class ISOTP_MESSAGE;
 class ISOTP_HANDLER;

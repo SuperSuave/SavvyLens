@@ -31,12 +31,14 @@
  *
  */
 
+// SavvyLens headers
 #include "qmqtt_ssl_socket_p.h"
 
 #ifndef QT_NO_SSL
 
-#include <QSslSocket>
+// QT headers
 #include <QSslError>
+#include <QSslSocket>
 
 QMQTT::SslSocket::SslSocket(const QSslConfiguration& config, QObject* parent)
     : SocketInterface(parent)

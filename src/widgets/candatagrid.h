@@ -1,6 +1,7 @@
 #ifndef CANDATAGRID_H
 #define CANDATAGRID_H
 
+// QT headers
 #include <QWidget>
 
 namespace Ui {

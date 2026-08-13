@@ -1,18 +1,21 @@
 #ifndef DBCMAINEDITOR_H
 #define DBCMAINEDITOR_H
 
-#include <QDialog>
-#include <QDebug>
-#include <QIcon>
-#include <QTreeWidget>
-#include <QRandomGenerator>
-#include "dbchandler.h"
-#include "dbcsignaleditor.h"
-#include "dbcmessageeditor.h"
-#include "dbcnodeeditor.h"
-#include "dbcnoderebaseeditor.h"
-#include "dbcnodeduplicateeditor.h"
+// SavvyLens headers
 #include "common/utility.h"
+#include "dbc/dbchandler.h"
+#include "dbc/dbcmessageeditor.h"
+#include "dbc/dbcnodeduplicateeditor.h"
+#include "dbc/dbcnodeeditor.h"
+#include "dbc/dbcnoderebaseeditor.h"
+#include "dbc/dbcsignaleditor.h"
+
+// QT headers
+#include <QDebug>
+#include <QDialog>
+#include <QIcon>
+#include <QRandomGenerator>
+#include <QTreeWidget>
 
 namespace Ui {
 class DBCMainEditor;
@@ -85,7 +88,6 @@ private:
     QMap<QTreeWidgetItem*, DBC_MESSAGE*> itemToMessage;
     QMap<QTreeWidgetItem*, DBC_SIGNAL*> itemToSignal;
     QRandomGenerator randGen;
-
     void showEvent(QShowEvent* event);
     void closeEvent(QCloseEvent *event);
     bool eventFilter(QObject *obj, QEvent *event);

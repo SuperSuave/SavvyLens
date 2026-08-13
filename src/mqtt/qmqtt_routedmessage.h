@@ -1,3 +1,6 @@
+#ifndef QMQTT_ROUTEDMESSAGE_H
+#define QMQTT_ROUTEDMESSAGE_H
+
 /*
  * qmqtt_router.h - qmqtt router
  *
@@ -30,11 +33,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef QMQTT_ROUTEDMESSAGE_H
-#define QMQTT_ROUTEDMESSAGE_H
 
-#include "qmqtt_message.h"
+// SavvyLens headers
+#include "mqtt/qmqtt_message.h"
 
+// QT headers
 #include <QMetaType>
 #include <QHash>
 #include <QString>

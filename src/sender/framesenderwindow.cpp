@@ -1,13 +1,16 @@
-#include "framesenderwindow.h"
+#include "sender/framesenderwindow.h"
 #include "ui_framesenderwindow.h"
-#include "common/utility.h"
 
-#include <QFileDialog>
-#include <QDebug>
-#include "mainwindow.h"
-#include "helpwindow.h"
+// SavvyLens headers
+#include "app/helpwindow.h"
+#include "app/mainwindow.h"
+#include "common/utility.h"
 #include "connections/canconmanager.h"
-#include "triggerdialog.h"
+#include "sender/triggerdialog.h"
+
+// QT headers
+#include <QDebug>
+#include <QFileDialog>
 
 /*
  * notes: need to ensure that you grab pointers when modifying data structures and dont
@@ -1189,4 +1192,3 @@ void FrameSenderWindow::processCellChange(int line, int col)
             break;
     }
 }
-

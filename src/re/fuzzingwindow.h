@@ -1,10 +1,13 @@
 #ifndef FUZZINGWINDOW_H
 #define FUZZINGWINDOW_H
 
+// SavvyLens headers
+#include "can/can_structs.h"
+
+// QT headers
 #include <QDialog>
 #include <QListWidget>
 #include <QTimer>
-#include "can/can_structs.h"
 
 namespace Ui {
 class FuzzingWindow;

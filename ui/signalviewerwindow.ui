@@ -96,4 +96,4 @@
  </widget>
  <resources />
  <connections />
-<customwidgets><customwidget><class>DbcSignalSelectorTree</class><extends>QWidget</extends><header>dbcsignalselectortree.h</header><container>1</container></customwidget></customwidgets></ui>
+<customwidgets><customwidget><class>DbcSignalSelectorTree</class><extends>QWidget</extends><header>dbc/dbcsignalselectortree.h</header><container>1</container></customwidget></customwidgets></ui>

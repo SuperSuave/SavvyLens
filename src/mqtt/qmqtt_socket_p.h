@@ -1,3 +1,6 @@
+#ifndef QMQTT_SOCKET_P_H
+#define QMQTT_SOCKET_P_H
+
 /*
  * qmqtt_socket_p.h - qmqtt socket private header
  *
@@ -29,16 +32,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef QMQTT_SOCKET_P_H
-#define QMQTT_SOCKET_P_H
 
-#include "qmqtt_socketinterface.h"
+// SavvyLens headers
+#include "mqtt/qmqtt_socketinterface.h"
 
-#include <QObject>
-#include <QHostAddress>
-#include <QString>
+// QT headers
 #include <QAbstractSocket>
+#include <QHostAddress>
+#include <QObject>
 #include <QScopedPointer>
+#include <QString>
 
 QT_FORWARD_DECLARE_CLASS(QIODevice)
 QT_FORWARD_DECLARE_CLASS(QTcpSocket)

@@ -1,12 +1,17 @@
-#include <QDebug>
-#include <QListWidgetItem>
-#include <qevent.h>
-#include "snifferwindow.h"
+#include "re/sniffer/snifferwindow.h"
 #include "ui_snifferwindow.h"
-#include "helpwindow.h"
-#include "connections/canconmanager.h"
-#include "SnifferDelegate.h"
+
+// SavvyLens headers
+#include "app/helpwindow.h"
 #include "common/utility.h"
+#include "connections/canconmanager.h"
+#include "re/sniffer/SnifferDelegate.h"
+
+// QT headers
+#include <QDebug>
+#include <QEvent>
+#include <QKeyEvent>
+#include <QListWidgetItem>
 
 SnifferWindow::SnifferWindow(QWidget *parent) :
     QDialog(parent),
@@ -128,7 +133,6 @@ void SnifferWindow::showEvent(QShowEvent* event)
     qDebug() << "show";
 }
 
-
 void SnifferWindow::closeEvent(QCloseEvent *event)
 {
     Q_UNUSED(event);
@@ -199,8 +203,6 @@ void SnifferWindow::fltNone()
     filter(true);
 }
 
-
-
 void SnifferWindow::filter(bool pFilter)
 {
     mFilter = pFilter;
@@ -233,7 +235,6 @@ void SnifferWindow::idChange(int pId, bool pAdd)
         delete item;
     }
 }
-
 
 void SnifferWindow::itemChanged(QListWidgetItem * item)
 {

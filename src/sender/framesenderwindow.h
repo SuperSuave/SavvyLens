@@ -1,15 +1,18 @@
 #ifndef FRAMESENDERWINDOW_H
 #define FRAMESENDERWINDOW_H
 
-#include <QDialog>
-#include <QTimer>
-#include <QElapsedTimer>
-#include <QTime>
-#include <QMutex>
+// SavvyLens headers
 #include "can/can_structs.h"
-#include "can_trigger_structs.h"
 #include "dbc/dbchandler.h"
-#include "triggerdialog.h"
+#include "sender/can_trigger_structs.h"
+#include "sender/triggerdialog.h"
+
+// QT headers
+#include <QDialog>
+#include <QElapsedTimer>
+#include <QMutex>
+#include <QTime>
+#include <QTimer>
 
 namespace Ui {
 class FrameSenderWindow;

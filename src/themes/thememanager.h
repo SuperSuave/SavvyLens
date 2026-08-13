@@ -1,5 +1,6 @@
 #pragma once
 
+// QT headers
 #include <QApplication>
 #include <QColor>
 #include <QPalette>

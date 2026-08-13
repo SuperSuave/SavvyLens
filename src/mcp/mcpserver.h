@@ -1,14 +1,15 @@
 #ifndef MCPSERVER_H
 #define MCPSERVER_H
 
+// QT headers
+#include <QByteArray>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QList>
 #include <QObject>
 #include <QTcpServer>
 #include <QTcpSocket>
-#include <QJsonObject>
-#include <QJsonDocument>
-#include <QJsonArray>
-#include <QByteArray>
-#include <QList>
 
 class MCPServer : public QObject
 {

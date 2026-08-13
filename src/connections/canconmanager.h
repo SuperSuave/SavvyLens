@@ -1,11 +1,13 @@
 #ifndef CANCONMANAGER_H
 #define CANCONMANAGER_H
 
+// SavvyLens headers
+#include "connections/canconnection.h"
+
+// QT headers
+#include <QElapsedTimer>
 #include <QObject>
 #include <QTimer>
-#include <QElapsedTimer>
-
-#include "canconnection.h"
 
 class CANConManager : public QObject
 {
@@ -85,4 +87,3 @@ private:
 };
 
 #endif // CANCONNECTIONMODEL_H
-

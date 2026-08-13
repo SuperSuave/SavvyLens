@@ -1,12 +1,15 @@
-#include "dbcnodeduplicateeditor.h"
+#include "dbc/dbcnodeduplicateeditor.h"
 #include "ui_dbcnodeduplicateeditor.h"
 
-#include <QSettings>
-#include <QKeyEvent>
-#include <QColorDialog>
-#include <QMessageBox>
-#include "helpwindow.h"
+// SavvyLens headers
+#include "app/helpwindow.h"
 #include "common/utility.h"
+
+// QT headers
+#include <QColorDialog>
+#include <QKeyEvent>
+#include <QMessageBox>
+#include <QSettings>
 
 DBCNodeDuplicateEditor::DBCNodeDuplicateEditor(QWidget *parent) :
     QDialog(parent),
@@ -160,7 +163,6 @@ void DBCNodeDuplicateEditor::writeSettings()
         settings.setValue("DBCNodeDuplicateEditor/WindowPos", pos());
     }
 }
-
 
 void DBCNodeDuplicateEditor::setNodeRef(DBC_NODE *node)
 {

@@ -1,17 +1,21 @@
-#include "mainwindow.h"
+#include "app/mainwindow.h"
+
+// SavvyLens headers
+#include "mcp/mcpserver.h"
 #include "themes/thememanager.h"
+#include "utils/logger.h"
+
+// Qt headers
 #include <QApplication>
-#include <QTranslator>
-#include <QLocale>
+#include <QColor>
 #include <QDebug>
 #include <QFileOpenEvent>
+#include <QFont>
+#include <QLocale>
+#include <QPalette>
 #include <QSettings>
 #include <QStyleFactory>
-#include <QPalette>
-#include <QColor>
-#include <QFont>
-#include "mcp/mcpserver.h"
-#include "utils/logger.h"
+#include <QTranslator>
 
 class SavvyLensApplication : public QApplication
 {

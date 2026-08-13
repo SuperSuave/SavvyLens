@@ -1,11 +1,14 @@
-#include "dbcnodeeditor.h"
+#include "dbc/dbcnodeeditor.h"
 #include "ui_dbcnodeeditor.h"
 
-#include <QSettings>
-#include <QKeyEvent>
-#include <QColorDialog>
-#include "helpwindow.h"
+// SavvyLens headers
+#include "app/helpwindow.h"
 #include "common/utility.h"
+
+// QT headers
+#include <QColorDialog>
+#include <QKeyEvent>
+#include <QSettings>
 
 DBCNodeEditor::DBCNodeEditor(QWidget *parent) :
     QDialog(parent),
@@ -95,7 +98,6 @@ void DBCNodeEditor::writeSettings()
         settings.setValue("DBCNodeEditor/WindowPos", pos());
     }
 }
-
 
 void DBCNodeEditor::setNodeRef(DBC_NODE *node)
 {

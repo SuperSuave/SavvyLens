@@ -1,6 +1,8 @@
-#include <QCanBus>
 #include "newconnectiondialog.h"
 #include "ui_newconnectiondialog.h"
+
+// QT headers
+#include <QCanBus>
 
 NewConnectionDialog::NewConnectionDialog(QVector<QString>* gvretips, QVector<QString>* kayakhosts, QWidget *parent) :
     QDialog(parent),

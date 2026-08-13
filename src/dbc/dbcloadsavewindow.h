@@ -1,11 +1,14 @@
 #ifndef DBCLOADSAVEWINDOW_H
 #define DBCLOADSAVEWINDOW_H
 
+// SavvyLens headers
+#include "dbc/dbchandler.h"
+#include "dbc/dbcmaineditor.h"
+
+// QT headers
+#include <QComboBox>
 #include <QDialog>
 #include <QTableWidget>
-#include <QComboBox>
-#include "dbchandler.h"
-#include "dbcmaineditor.h"
 
 namespace Ui {
 class DBCLoadSaveWindow;
@@ -43,7 +46,6 @@ private:
     const QVector<CANFrame> *referenceFrames;
     DBCMainEditor *editorWindow;
     bool inhibitCellProcessing;
-
     void swapTableRows(bool up);
     QList<QTableWidgetItem*> takeRow(int row);
     void setRow(int row, const QList<QTableWidgetItem*>& rowItems);
@@ -53,4 +55,3 @@ private:
 };
 
 #endif // DBCLOADSAVEWINDOW_H
-

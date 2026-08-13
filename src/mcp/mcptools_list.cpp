@@ -1,19 +1,22 @@
-#include "mcpserver.h"
-#include <QDebug>
-#include <QJsonParseError>
-#include <QJsonArray>
-#include "../mainwindow.h"
-#include "../re/frameinfowindow.h"
+// SavvyLens headers
+#include "app/mainwindow.h"
 #include "common/utility.h"
-#include "../connections/canconmanager.h"
-#include "../dbc/dbchandler.h"
-#include "../connections/connectionwindow.h"
-#include "../frameplaybackwindow.h"
-#include "../re/udsscanwindow.h"
-#include "../re/isotp_interpreterwindow.h"
-#include "../re/graphingwindow.h"
-#include "../signalviewerwindow.h"
-#include "../framesenderwindow.h"
+#include "connections/canconmanager.h"
+#include "connections/connectionwindow.h"
+#include "dbc/dbchandler.h"
+#include "dbc/signalviewerwindow.h"
+#include "mcp/mcpserver.h"
+#include "playback/frameplaybackwindow.h"
+#include "re/frameinfowindow.h"
+#include "re/graphingwindow.h"
+#include "re/isotp_interpreterwindow.h"
+#include "re/udsscanwindow.h"
+#include "sender/framesenderwindow.h"
+
+// QT headers
+#include <QDebug>
+#include <QJsonArray>
+#include <QJsonParseError>
 
 void MCPServer::handleToolsList(QJsonObject &response)
 {

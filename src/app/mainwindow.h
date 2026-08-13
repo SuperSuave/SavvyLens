@@ -2,71 +2,77 @@
 #define MAINWINDOW_H
 
 #include "config.h"
+
+// SavvyLens headers
+#include "app/mainsettingsdialog.h"
+#include "bookmarks/bookmarkmanager.h"
+#include "bookmarks/bookmarkmanagerdialog.h"
+#include "bus_protocols/isotp_handler.h"
+#include "can/can_structs.h"
+#include "connections/canbridgewindow.h"
+#include "dbc/dbchandler.h"
+#include "dbc/dbcloadsavewindow.h"
+#include "dbc/dbcmaineditor.h"
+#include "dbc/signalviewerwindow.h"
+#include "frames/canframemodel.h"
+#include "io/framefileio.h"
+#include "playback/frameplaybackwindow.h"
+#include "re/bisectwindow.h"
+#include "re/bookmarkeventanalyzer.h"
+#include "re/controlanalysisdialog.h"
+#include "re/dbccomparatorwindow.h"
+#include "re/discretestatewindow.h"
+#include "re/filecomparatorwindow.h"
+#include "re/flowviewwindow.h"
+#include "re/frameinfowindow.h"
+#include "re/fuzzingwindow.h"
+#include "re/graphingwindow.h"
+#include "re/isotp_interpreterwindow.h"
+#include "re/rangestatewindow.h"
+#include "re/sniffer/snifferwindow.h"
+#include "re/temporalgraphwindow.h"
+#include "re/udsfirmwareuploaderwindow.h"
+#include "re/udsscanwindow.h"
+#include "scripting/scriptingwindow.h"
+#include "sender/framesenderobject.h"
+#include "sender/framesenderwindow.h"
+
+// Qt headers
+#include <QDialogButtonBox>
+#include <QHeaderView>
 #include <QMainWindow>
+#include <QPushButton>
 #include <QSerialPort>
 #include <QSerialPortInfo>
 #include <QSet>
-#include <QTimer>
-#include <array>
-#include <algorithm>
-#include <limits>
-#include <QDialogButtonBox>
-#include <QHeaderView>
-#include <QPushButton>
 #include <QSplitter>
-#include <QTabWidget>
 #include <QTableWidget>
+#include <QTabWidget>
+#include <QTimer>
 
-#include "canframemodel.h"
-#include "can/can_structs.h"
-#include "framefileio.h"
-#include "dbc/dbchandler.h"
-#include "bus_protocols/isotp_handler.h"
-#include "framesenderobject.h"
-#include "re/graphingwindow.h"
-#include "re/frameinfowindow.h"
-#include "frameplaybackwindow.h"
-#include "bisectwindow.h"
-#include "re/flowviewwindow.h"
-#include "framesenderwindow.h"
-#include "re/filecomparatorwindow.h"
-#include "dbc/dbcmaineditor.h"
-#include "mainsettingsdialog.h"
-#include "re/discretestatewindow.h"
-#include "scriptingwindow.h"
-#include "re/rangestatewindow.h"
-#include "dbc/dbcloadsavewindow.h"
-#include "re/fuzzingwindow.h"
-#include "re/udsscanwindow.h"
-#include "re/sniffer/snifferwindow.h"
-#include "re/isotp_interpreterwindow.h"
-#include "signalviewerwindow.h"
-#include "re/temporalgraphwindow.h"
-#include "re/dbccomparatorwindow.h"
-#include "re/udsfirmwareuploaderwindow.h"
-#include "canbridgewindow.h"
-#include "bookmarkmanager.h"
-#include "bookmarkmanagerdialog.h"
-#include "re/bookmarkeventanalyzer.h"
-#include "re/controlanalysisdialog.h"
+// C++ standard-library headers
+#include <algorithm>
+#include <array>
+#include <limits>
 
-class CANConnection;
-class ConnectionWindow;
-class ISOTP_InterpreterWindow;
-class ScriptingWindow;
+class BookmarkEventAnalyzer;
 class BookmarkManager;
 class BookmarkManagerDialog;
-class BookmarkEventAnalyzer;
-class ControlStateDetector;
-class ControlCandidateModel;
+class CANConnection;
+class ConnectionWindow;
 class ControlAnalysisDialog;
-class QDockWidget;
-class QLabel;
-class QPlainTextEdit;
-class QGroupBox;
-class QWidget;
+class ControlCandidateModel;
+class ControlStateDetector;
+class ISOTP_InterpreterWindow;
+class ScriptingWindow;
+
 class QAction;
+class QDockWidget;
+class QGroupBox;
+class QLabel;
 class QListWidgetItem;
+class QPlainTextEdit;
+class QWidget;
 
 namespace Ui {
 class MainWindow;
@@ -144,7 +150,6 @@ public slots:
     void DBCSettingsUpdated();
     void showBookmarksWindow();
 
-    /// Suggested by AI
     void deleteBookmarkByIndex(int bookmarkIndex);
     void jumpToBookmark(int bookmarkIndex);
     void jumpToOriginalIndex(int originalIndex);

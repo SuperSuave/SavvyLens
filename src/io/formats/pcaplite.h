@@ -1,7 +1,9 @@
 #ifndef PCAPLITE_H
 #define PCAPLITE_H
 
-#include <stdio.h>
+// C++ standard-library headers
+#include <cstdio>
+
 #if defined(unix) || defined __APPLE__
 #include <sys/time.h>
 #else

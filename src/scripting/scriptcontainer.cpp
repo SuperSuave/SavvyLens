@@ -1,12 +1,15 @@
+#include "scripting/scriptcontainer.h"
+
+// SavvyLens headers
+#include "connections/canconmanager.h"
+#include "scripting/scriptingwindow.h"
+
+// QT headers
 #include <QDebug>
 #include <QJSValueIterator>
 #include <QTableWidget>
 #include <QRegularExpression>
 #include <QSet>
-
-#include "scriptcontainer.h"
-#include "connections/canconmanager.h"
-#include "scriptingwindow.h"
 
 
 /* -------------------------------------------------------------------------

@@ -1,6 +1,7 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
+// QT headers
 #include <QString>
 
 class Logger

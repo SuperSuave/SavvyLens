@@ -1,5 +1,7 @@
-#include <math.h>
-#include "pcaplite.h"
+#include "io/formats/pcaplite.h"
+
+// C++ standard-library headers
+#include <cmath>
 
 #define MAGIC_NG 0x0A0D0D0A
 #define MACIG 0xA1B2C3D4  
@@ -193,7 +195,6 @@ const unsigned char *pcap_next_ng(pcap_t *p, struct pcap_pkthdr *h) {
 
     return pcap_buffer;
 }
-
 
 const unsigned char *pcap_next(pcap_t *p, struct pcap_pkthdr *h)
 {

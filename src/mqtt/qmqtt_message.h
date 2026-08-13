@@ -1,3 +1,6 @@
+#ifndef QMQTT_MESSAGE_H
+#define QMQTT_MESSAGE_H
+
 /*
  * qmqtt_message.h - qmqtt message header
  *
@@ -29,11 +32,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef QMQTT_MESSAGE_H
-#define QMQTT_MESSAGE_H
 
-#include "qmqtt_global.h"
+// SavvyLens headers
+#include "mqtt/qmqtt_global.h"
 
+// QT headers
 #include <QMetaType>
 #include <QString>
 #include <QByteArray>

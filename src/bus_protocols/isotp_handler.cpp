@@ -1,6 +1,8 @@
-#include "isotp_handler.h"
-#include "mainwindow.h"
-#include "canframemodel.h" 
+#include "bus_protocols/isotp_handler.h"
+
+// SavvyLens headers
+#include "app/mainwindow.h"
+#include "frames/canframemodel.h" 
 #include "connections/canconmanager.h"
 
 ISOTP_HANDLER::ISOTP_HANDLER()
