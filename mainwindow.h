@@ -40,7 +40,6 @@
 #include "re/udsscanwindow.h"
 #include "re/sniffer/snifferwindow.h"
 #include "re/isotp_interpreterwindow.h"
-#include "motorcontrollerconfigwindow.h"
 #include "signalviewerwindow.h"
 #include "re/temporalgraphwindow.h"
 #include "re/dbccomparatorwindow.h"
@@ -254,7 +253,6 @@ private:
     UDSScanWindow *udsScanWindow;
     ISOTP_InterpreterWindow *isoWindow;
     SnifferWindow* snifferWindow;
-    MotorControllerConfigWindow *motorctrlConfigWindow;
     BisectWindow* bisectWindow;
     SignalViewerWindow *signalViewerWindow;
     TemporalGraphWindow *temporalGraphWindow;

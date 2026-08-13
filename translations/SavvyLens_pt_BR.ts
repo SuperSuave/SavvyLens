@@ -2636,11 +2636,6 @@ e os intervalos de valores por hífens
         <translation>Atualização de Firmware</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="606"/>
-        <source>MotorControlConfig</source>
-        <translation>MotorControlConfig</translation>
-    </message>
-    <message>
         <location filename="../ui/mainwindow.ui" line="611"/>
         <source>Capture Bisector</source>
         <translation>Capturar Bissetriz</translation>
@@ -2825,34 +2820,6 @@ e os intervalos de valores por hífens
         <location filename="../mainwindow.cpp" line="1559"/>
         <source>No file loaded</source>
         <translation>Nenhum arquivo carregado</translation>
-    </message>
-</context>
-<context>
-    <name>MotorControllerConfigWindow</name>
-    <message>
-        <location filename="../ui/motorcontrollerconfigwindow.ui" line="14"/>
-        <source>Controller Configuration</source>
-        <translation>Configuração do controlador</translation>
-    </message>
-    <message>
-        <location filename="../ui/motorcontrollerconfigwindow.ui" line="32"/>
-        <source>Load Definition File</source>
-        <translation>Carregar arquivo de definição</translation>
-    </message>
-    <message>
-        <location filename="../ui/motorcontrollerconfigwindow.ui" line="39"/>
-        <source>Refresh</source>
-        <translation>Atualizar</translation>
-    </message>
-    <message>
-        <location filename="../ui/motorcontrollerconfigwindow.ui" line="46"/>
-        <source>Save</source>
-        <translation>Salvar</translation>
-    </message>
-    <message>
-        <location filename="../motorcontrollerconfigwindow.cpp" line="120"/>
-        <source>RMS Definition File (*.txt *.TXT)</source>
-        <translation>Arquivo de definição RMS (*.txt *.TXT)</translation>
     </message>
 </context>
 <context>

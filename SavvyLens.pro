@@ -65,7 +65,6 @@ SOURCES += main.cpp\
     scriptcontainer.cpp \
     canfilter.cpp \
     can_structs.cpp \
-    motorcontrollerconfigwindow.cpp \
     connections/canconnection.cpp \
     connections/serialbusconnection.cpp \
     connections/canconfactory.cpp \
@@ -173,7 +172,6 @@ HEADERS  += mainwindow.h \
     scriptcontainer.h \
     canfilter.h \
     utils/lfqueue.h \
-    motorcontrollerconfigwindow.h \
     connections/canconnection.h \
     connections/serialbusconnection.h \
     connections/canconconst.h \
@@ -250,7 +248,6 @@ FORMS    += ui/candatagrid.ui \
     ui/isotp_interpreterwindow.ui \
     ui/mainsettingsdialog.ui \
     ui/mainwindow.ui \
-    ui/motorcontrollerconfigwindow.ui \
     ui/newgraphdialog.ui \
     ui/rangestatewindow.ui \
     ui/scriptingwindow.ui \

@@ -219,7 +219,6 @@ MainWindow::MainWindow(QWidget *parent) :
     dbcFileWindow = nullptr;
     fuzzingWindow = nullptr;
     udsScanWindow = nullptr;
-    motorctrlConfigWindow = nullptr;
     isoWindow = nullptr;
     snifferWindow = nullptr;
     bisectWindow = nullptr;
@@ -264,7 +263,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionUDS_Scanner, &QAction::triggered, this, &MainWindow::showUDSScanWindow);
     connect(ui->actionISO_TP_Decoder, &QAction::triggered, this, &MainWindow::showISOInterpreterWindow);
     connect(ui->actionSniffer, &QAction::triggered, this, &MainWindow::showSnifferWindow);
-    connect(ui->actionMotorControlConfig, &QAction::triggered, this, &MainWindow::showMCConfigWindow);
     connect(ui->actionCapture_Bisector, &QAction::triggered, this, &MainWindow::showBisectWindow);
     connect(ui->actionSignal_Viewer, &QAction::triggered, this, &MainWindow::showSignalViewer);
     connect(ui->actionSave_Continuous_Logfile, &QAction::triggered, this, &MainWindow::handleContinousLogging);
@@ -396,7 +394,6 @@ MainWindow::MainWindow(QWidget *parent) :
     //these either are unfinished/not working or are not for general use. But,they exist
     //so if you want to enable them and play with them then go for it.
     //ui->actionFirmware_Update->setVisible(false);
-    ui->actionMotorControlConfig->setVisible(false);
     ui->actionSingle_Multi_State_2->setVisible(false);
 
     installEventFilter(this);
@@ -438,7 +435,6 @@ void MainWindow::killEmAll()
     killWindow(snifferWindow);
     killWindow(bisectWindow);
     killWindow(udsFirmwareUploaderWindow);
-    killWindow(motorctrlConfigWindow);
     killWindow(signalViewerWindow);
     killWindow(temporalGraphWindow);
     killWindow(canBridgeWindow);
@@ -2326,17 +2322,6 @@ void MainWindow::showFuzzingWindow()
         fuzzingWindow = new FuzzingWindow(model->getListReference());
     }
     fuzzingWindow->show();
-}
-
-void MainWindow::showMCConfigWindow()
-{
-    if (!motorctrlConfigWindow)
-    {
-        motorctrlConfigWindow = new MotorControllerConfigWindow(model->getListReference());
-        //connect(motorctrlConfigWindow, SIGNAL(sendCANFrame(const CANFrame*,int)), worker, SLOT(sendFrame(const CANFrame*,int)));
-        //connect(motorctrlConfigWindow, SIGNAL(sendFrameBatch(const QList<CANFrame>*)), worker, SLOT(sendFrameBatch(const QList<CANFrame>*)));
-    }
-    motorctrlConfigWindow->show();
 }
 
 void MainWindow::showUDSScanWindow()
