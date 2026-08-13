@@ -23,8 +23,15 @@ TEMPLATE = app
 QMAKE_INFO_PLIST = Info.plist.template
 ICON = icons/SavvyLens.icns
 
+# Project-root and source-root bases for explicit module-relative includes.
+INCLUDEPATH += \
+    $$PWD \
+    $$PWD/src
+
+DEPENDPATH += $$PWD/src
+
 SOURCES += main.cpp\
-    utils/logger.cpp \
+    src/utils/logger.cpp \
     bookmarkmanager.cpp \
     bookmarkmanagerdialog.cpp \
     canbridgewindow.cpp \
@@ -54,7 +61,7 @@ SOURCES += main.cpp\
     simplecrypt.cpp \
     themes/thememanager.cpp \
     triggerdialog.cpp \
-    utility.cpp \
+    src/common/utility.cpp \
     qcustomplot.cpp \
     frameplaybackwindow.cpp \
     candatagrid.cpp \
@@ -63,8 +70,7 @@ SOURCES += main.cpp\
     mainsettingsdialog.cpp \
     scriptingwindow.cpp \
     scriptcontainer.cpp \
-    canfilter.cpp \
-    can_structs.cpp \
+    src/can/canfilter.cpp \
     connections/canconnection.cpp \
     connections/serialbusconnection.cpp \
     connections/canconfactory.cpp \
@@ -120,10 +126,10 @@ SOURCES += main.cpp\
     re/bookmarkeventanalyzer.cpp
 
 HEADERS  += mainwindow.h \
-    utils/logger.h \
+    src/utils/logger.h \
     bookmarkmanager.h \
     bookmarkmanagerdialog.h \
-    can_structs.h \
+    src/can/can_structs.h \
     canbridgewindow.h \
     canframemodel.h \
     connections/canlogserver.h \
@@ -159,7 +165,7 @@ HEADERS  += mainwindow.h \
     simplecrypt.h \
     themes/thememanager.h \
     triggerdialog.h \
-    utility.h \
+    src/common/utility.h \
     qcustomplot.h \
     frameplaybackwindow.h \
     candatagrid.h \
@@ -170,8 +176,8 @@ HEADERS  += mainwindow.h \
     mainsettingsdialog.h \
     scriptingwindow.h \
     scriptcontainer.h \
-    canfilter.h \
-    utils/lfqueue.h \
+    src/can/canfilter.h \
+    src/utils/lfqueue.h \
     connections/canconnection.h \
     connections/serialbusconnection.h \
     connections/canconconst.h \
