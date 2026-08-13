@@ -20,7 +20,7 @@ DEFINES += QCUSTOMPLOT_USE_OPENGL
 TARGET = SavvyLens
 TEMPLATE = app
 
-QMAKE_INFO_PLIST = Info.plist.template
+QMAKE_INFO_PLIST = packaging/macos/Info.plist.template
 ICON = icons/SavvyLens.icns
 
 # Project-root and source-root bases for explicit module-relative includes.
@@ -286,10 +286,10 @@ unix {
       PREFIX=/usr/local
    }
    target.path = $$PREFIX/bin
-   shortcutfiles.files=SavvyLens.desktop
+   shortcutfiles.files = packaging/linux/SavvyLens.desktop
    shortcutfiles.path = $$PREFIX/share/applications
    INSTALLS += shortcutfiles
-   DISTFILES += SavvyLens.desktop
+   DISTFILES += packaging/linux/SavvyLens.desktop
 }
 
 windows {
