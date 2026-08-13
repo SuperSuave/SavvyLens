@@ -308,7 +308,7 @@ helpfiles.files=help/*
 helpfiles.path = $$PREFIX/bin/help
 INSTALLS += helpfiles
 
-templatefiles.files = templates/*
+templatefiles.files = src/scripting/templates/*
 templatefiles.path = $$PREFIX/share/SavvyLens/templates
 INSTALLS += templatefiles
 
