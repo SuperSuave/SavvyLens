@@ -7,7 +7,7 @@
 #include <QStringList>
 #include <QtGlobal>
 #include <cstdint>
-#include "can_structs.h"
+#include "can/can_structs.h"
 
 struct FrameBookmark
 {

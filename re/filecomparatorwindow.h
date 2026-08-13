@@ -5,8 +5,8 @@
 #include <QDebug>
 #include <QTreeWidget>
 #include "framefileio.h"
-#include "can_structs.h"
-#include "utility.h"
+#include "can/can_structs.h"
+#include "common/utility.h"
 #include "dbc/dbchandler.h"
 
 namespace Ui {

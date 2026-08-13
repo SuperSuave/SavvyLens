@@ -3,7 +3,7 @@
 #include "mainwindow.h"
 #include "connections/canconmanager.h"
 #include "bus_protocols/uds_handler.h"
-#include "utility.h"
+#include "common/utility.h"
 #include "helpwindow.h"
 
 static QColor blendColors(const QColor &a, const QColor &b, qreal amount)

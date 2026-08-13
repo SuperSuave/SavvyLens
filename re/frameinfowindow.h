@@ -7,8 +7,8 @@
 #include <QTreeWidget>
 #include <QPushButton>
 #include <candatagrid.h>
-#include "can_structs.h"
-#include "utility.h"
+#include "can/can_structs.h"
+#include "common/utility.h"
 #include "bus_protocols/j1939_handler.h"
 #include "dbc/dbchandler.h"
 

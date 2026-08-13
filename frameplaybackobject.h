@@ -6,7 +6,7 @@
 #include <QHash>
 #include <QThread>
 #include <QDebug>
-#include "can_structs.h"
+#include "can/can_structs.h"
 #include "connections/canconmanager.h"
 
 //one entry in the sequence of data to use

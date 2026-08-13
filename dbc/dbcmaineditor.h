@@ -12,7 +12,7 @@
 #include "dbcnodeeditor.h"
 #include "dbcnoderebaseeditor.h"
 #include "dbcnodeduplicateeditor.h"
-#include "utility.h"
+#include "common/utility.h"
 
 namespace Ui {
 class DBCMainEditor;

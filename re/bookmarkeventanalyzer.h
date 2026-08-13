@@ -6,7 +6,7 @@
 #include <QHash>
 #include <QString>
 #include <QByteArray>
-#include "can_structs.h"
+#include "can/can_structs.h"
 
 class BookmarkEventAnalyzer : public QObject
 {

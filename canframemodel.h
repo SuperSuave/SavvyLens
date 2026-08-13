@@ -8,10 +8,10 @@
 #include <QMutex>
 #include <QSet>
 
-#include "can_structs.h"
+#include "can/can_structs.h"
 #include "dbc/dbchandler.h"
 #include "connections/canconnection.h"
-#include "utility.h"
+#include "common/utility.h"
 
 enum class Column {
     TimeStamp = 0, ///< The timestamp when the frame was transmitted or received

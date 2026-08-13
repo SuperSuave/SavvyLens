@@ -1,4 +1,4 @@
-#include "utility.h"
+#include "common/utility.h"
 
 bool Utility::decimalMode = false;
 QString Utility::timeFormat = "MMM-dd HH:mm:ss.zzz";

@@ -1,6 +1,6 @@
 #include "dbcsignalselectortree.h"
 #include "ui_dbcsignalselectortree.h"
-#include "utility.h"
+#include "common/utility.h"
 #include <QVariant>
 #include <QDebug>
 

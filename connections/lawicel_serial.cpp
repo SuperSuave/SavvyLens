@@ -7,7 +7,7 @@
 #include <QtNetwork>
 
 #include "lawicel_serial.h"
-#include "utility.h"
+#include "common/utility.h"
 
 LAWICELSerial::LAWICELSerial(QString portName, int serialSpeed, int lawicelSpeed, bool canFd, int dataRate) :
     CANConnection(portName, "LAWICEL", CANCon::LAWICEL,serialSpeed, lawicelSpeed, canFd, dataRate, 3, 4000, true),

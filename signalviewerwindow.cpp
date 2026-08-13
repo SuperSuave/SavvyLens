@@ -2,7 +2,7 @@
 #include "ui_signalviewerwindow.h"
 #include "helpwindow.h"
 #include "mainwindow.h"
-#include "utility.h"
+#include "common/utility.h"
 #include <QDebug>
 
 #define MSG_COL     1

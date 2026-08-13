@@ -1,6 +1,6 @@
 #include "fuzzingwindow.h"
 #include "ui_fuzzingwindow.h"
-#include "utility.h"
+#include "common/utility.h"
 #include <QDebug>
 #include <QRandomGenerator>
 #include "mainwindow.h"

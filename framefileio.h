@@ -12,8 +12,8 @@
 #include <QString>
 #include <QStringList>
 #include <QFileDialog>
-#include "can_structs.h"
-#include "utility.h"
+#include "can/can_structs.h"
+#include "common/utility.h"
 
 class BookmarkManager;
 

@@ -6,7 +6,7 @@
 #include <QColorDialog>
 #include <QMessageBox>
 #include "helpwindow.h"
-#include "utility.h"
+#include "common/utility.h"
 
 DBCNodeRebaseEditor::DBCNodeRebaseEditor(QWidget *parent) :
     QDialog(parent),

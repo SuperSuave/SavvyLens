@@ -4,7 +4,7 @@
 #include <Qt>
 #include <QObject>
 #include "utils/lfqueue.h"
-#include "can_structs.h"
+#include "can/can_structs.h"
 #include "canbus.h"
 #include "canconconst.h"
 

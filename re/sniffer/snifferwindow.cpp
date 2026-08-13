@@ -6,7 +6,7 @@
 #include "helpwindow.h"
 #include "connections/canconmanager.h"
 #include "SnifferDelegate.h"
-#include "utility.h"
+#include "common/utility.h"
 
 SnifferWindow::SnifferWindow(QWidget *parent) :
     QDialog(parent),

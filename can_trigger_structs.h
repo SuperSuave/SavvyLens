@@ -1,7 +1,7 @@
 #ifndef CAN_TRIGGER_STRUCTS_H
 #define CAN_TRIGGER_STRUCTS_H
 
-#include "can_structs.h"
+#include "can/can_structs.h"
 
 #include <QList>
 #include <QUuid>

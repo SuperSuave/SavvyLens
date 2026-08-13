@@ -3,7 +3,7 @@
 #include "newgraphdialog.h"
 #include "mainwindow.h"
 #include "helpwindow.h"
-#include "utility.h"
+#include "common/utility.h"
 #include <QDebug>
 
 #include <algorithm>

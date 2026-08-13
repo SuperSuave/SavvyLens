@@ -2,7 +2,7 @@
 #include "ui_newgraphdialog.h"
 #include <QColorDialog>
 #include <QRandomGenerator>
-#include "utility.h"
+#include "common/utility.h"
 #include "helpwindow.h"
 
 NewGraphDialog::NewGraphDialog(DBCHandler *handler, QWidget *parent) :

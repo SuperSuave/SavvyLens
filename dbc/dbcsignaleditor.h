@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include "dbchandler.h"
-#include "utility.h"
+#include "common/utility.h"
 
 namespace Ui {
 class DBCSignalEditor;

@@ -6,11 +6,11 @@
 #include "re/controlcandidatemodel.h"
 #include "re/controlstatedetector.h"
 #include "re/bookmarkeventanalyzer.h"
-#include "can_structs.h"
+#include "can/can_structs.h"
 #include "connections/canconmanager.h"
 #include "connections/connectionwindow.h"
 #include "helpwindow.h"
-#include "utility.h"
+#include "common/utility.h"
 #include "filterutility.h"
 #include "framebytedatadelegate.h"
 

@@ -10,9 +10,9 @@
 #include <QTimer>
 #include <QVector>
 
-#include "can_structs.h"
+#include "can/can_structs.h"
 #include "isotp_message.h"
-#include "canfilter.h"
+#include "can/canfilter.h"
 
 class CANConnection;
 

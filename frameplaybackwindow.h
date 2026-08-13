@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include <QListWidget>
-#include "can_structs.h"
+#include "can/can_structs.h"
 #include "framefileio.h"
 #include "frameplaybackobject.h"
 

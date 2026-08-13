@@ -7,7 +7,7 @@
 #include <QVector>
 #include <QListWidgetItem>
 
-#include "can_structs.h"
+#include "can/can_structs.h"
 #include "bus_protocols/uds_handler.h"
 #include "filterutility.h"
 #include "bus_protocols/isotp_handler.h"

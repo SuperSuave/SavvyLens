@@ -1,5 +1,5 @@
 #include "scriptingwindow.h"
-#include "utility.h"
+#include "common/utility.h"
 #include "ui_scriptingwindow.h"
 #include "themes/thememanager.h"
 

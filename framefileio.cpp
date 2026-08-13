@@ -10,7 +10,7 @@
 #include <memory>
 #include "pcaplite.h"
 
-#include "utility.h"
+#include "common/utility.h"
 #include "blfhandler.h"
 #include "bookmarkmanager.h"
 

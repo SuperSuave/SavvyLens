@@ -4,7 +4,7 @@
 #include <Qt>
 #include <QByteArray>
 #include <QList>
-#include "can_structs.h"
+#include "can/can_structs.h"
 
 enum
 {

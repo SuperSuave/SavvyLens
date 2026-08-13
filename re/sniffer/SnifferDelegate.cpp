@@ -2,7 +2,7 @@
 #include <QPainter>
 #include <QApplication>
 #include <QDebug>
-#include "utility.h"
+#include "common/utility.h"
 #include "re/sniffer/snifferitem.h"
 
 SnifferDelegate::SnifferDelegate(QWidget *parent) : QItemDelegate(parent)

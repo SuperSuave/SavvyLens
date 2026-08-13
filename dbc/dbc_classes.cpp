@@ -1,6 +1,6 @@
 #include "dbc_classes.h"
 #include "dbchandler.h"
-#include "utility.h"
+#include "common/utility.h"
 #include <QtMath>
 
 DBC_MESSAGE::DBC_MESSAGE()

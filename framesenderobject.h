@@ -7,7 +7,7 @@
 #include <QThread>
 #include <QDebug>
 #include <QMutex>
-#include "can_structs.h"
+#include "can/can_structs.h"
 #include "connections/canconmanager.h"
 #include "can_trigger_structs.h"
 #include "dbc/dbchandler.h"

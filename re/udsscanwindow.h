@@ -1,7 +1,7 @@
 #ifndef UDSSCANWINDOW_H
 #define UDSSCANWINDOW_H
 
-#include "can_structs.h"
+#include "can/can_structs.h"
 #include "connections/canconnection.h"
 #include "bus_protocols/uds_handler.h"
 

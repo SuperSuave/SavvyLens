@@ -6,7 +6,7 @@
 #include <QSlider>
 
 #include "qcustomplot.h"
-#include "can_structs.h"
+#include "can/can_structs.h"
 
 namespace Ui {
 class FlowViewWindow;

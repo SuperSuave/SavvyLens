@@ -1,7 +1,7 @@
 #include "rangestatewindow.h"
 #include "ui_rangestatewindow.h"
 #include "mainwindow.h"
-#include "utility.h"
+#include "common/utility.h"
 #include "helpwindow.h"
 #include "filterutility.h"
 

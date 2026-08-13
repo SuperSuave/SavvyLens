@@ -12,7 +12,7 @@
 #include <QStringBuilder>
 #include <QtNetwork>
 
-#include "utility.h"
+#include "common/utility.h"
 #include "canserver.h"
 
 CANserver::CANserver(QString serverAddressString) :

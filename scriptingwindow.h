@@ -2,7 +2,7 @@
 #define SCRIPTINGWINDOW_H
 
 #include "scriptcontainer.h"
-#include "can_structs.h"
+#include "can/can_structs.h"
 #include "connections/canconnection.h"
 #include "jsedit.h"
 

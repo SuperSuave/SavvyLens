@@ -8,7 +8,7 @@
 #include <QJsonObject>
 #include <QMap>
 #include <QVector>
-#include "can_structs.h"
+#include "can/can_structs.h"
 #include "bus_protocols/uds_handler.h"
 
 struct TeslaNodeInfo

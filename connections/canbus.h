@@ -1,7 +1,7 @@
 #ifndef CANBus_H
 #define CANBus_H
 #include <QDataStream>
-#include "can_structs.h"
+#include "can/can_structs.h"
 
 class CANBus
 {

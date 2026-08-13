@@ -11,7 +11,7 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
-#include "utility.h"
+#include "common/utility.h"
 #include "connections/canconmanager.h"
 
 DBCHandler* DBCHandler::instance = nullptr;

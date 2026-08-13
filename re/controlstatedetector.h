@@ -8,7 +8,7 @@
 #include <QSet>
 #include <QString>
 #include <QPair>
-#include "can_structs.h"
+#include "can/can_structs.h"
 
 struct ControlStateKey
 {

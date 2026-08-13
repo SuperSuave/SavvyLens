@@ -4,7 +4,7 @@
 #include <QJsonArray>
 #include "../mainwindow.h"
 #include "../re/frameinfowindow.h"
-#include "../utility.h"
+#include "common/utility.h"
 #include "../connections/canconmanager.h"
 #include "../dbc/dbchandler.h"
 #include "../connections/connectionwindow.h"

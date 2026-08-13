@@ -7,7 +7,7 @@
 #include "framefileio.h"
 #include "dbc/dbc_classes.h"
 #include "dbc/dbchandler.h"
-#include "utility.h"
+#include "common/utility.h"
 
 namespace Ui {
 class DBCComparatorWindow;

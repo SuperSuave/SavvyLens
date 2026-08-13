@@ -5,7 +5,7 @@
 #include <QKeyEvent>
 #include <QColorDialog>
 #include "helpwindow.h"
-#include "utility.h"
+#include "common/utility.h"
 
 DBCNodeEditor::DBCNodeEditor(QWidget *parent) :
     QDialog(parent),

@@ -18,7 +18,7 @@
 #include <QTableWidget>
 
 #include "canframemodel.h"
-#include "can_structs.h"
+#include "can/can_structs.h"
 #include "framefileio.h"
 #include "dbc/dbchandler.h"
 #include "bus_protocols/isotp_handler.h"
@@ -110,7 +110,6 @@ public slots:
     void showScriptingWindow();
     void showDBCFileWindow();
     void showFuzzingWindow();
-    void showMCConfigWindow();
     void showUDSScanWindow();
     void showISOInterpreterWindow();
     void showSnifferWindow();

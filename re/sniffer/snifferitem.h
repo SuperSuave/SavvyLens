@@ -3,7 +3,7 @@
 
 #include <QVariant>
 #include <QElapsedTimer>
-#include "can_structs.h"
+#include "can/can_structs.h"
 
 struct fstCan
 {

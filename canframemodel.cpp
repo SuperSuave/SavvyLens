@@ -7,7 +7,7 @@
 #include <QBrush>
 #include <QDateTime>
 #include <QSettings>
-#include "utility.h"
+#include "common/utility.h"
 
 static inline qint64 frameTimestampMicros(const CANFrame &frame)
 {

@@ -2,7 +2,7 @@
 #include "ui_udsfirmwareuploaderwindow.h"
 #include "mainwindow.h"
 #include "connections/canconmanager.h"
-#include "utility.h"
+#include "common/utility.h"
 
 #include <QFile>
 #include <QFileDialog>

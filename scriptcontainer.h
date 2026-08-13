@@ -1,8 +1,8 @@
 #ifndef SCRIPTCONTAINER_H
 #define SCRIPTCONTAINER_H
 
-#include "can_structs.h"
-#include "canfilter.h"
+#include "can/can_structs.h"
+#include "can/canfilter.h"
 #include "bus_protocols/isotp_handler.h"
 #include "bus_protocols/isotp_message.h"
 #include "bus_protocols/uds_handler.h"

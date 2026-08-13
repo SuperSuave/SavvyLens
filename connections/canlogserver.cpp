@@ -5,7 +5,7 @@
 #include <QStringBuilder>
 #include <QtNetwork>
 
-#include "utility.h"
+#include "common/utility.h"
 #include "canlogserver.h"
 
 CanLogServer::CanLogServer(QString serverAddressString) :

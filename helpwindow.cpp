@@ -1,5 +1,5 @@
 #include <QtDebug>
-#include "utility.h"
+#include "common/utility.h"
 #include "helpwindow.h"
 #include "ui_helpwindow.h"
 

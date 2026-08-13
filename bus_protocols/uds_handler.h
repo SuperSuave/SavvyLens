@@ -4,7 +4,7 @@
 #include <Qt>
 #include <QObject>
 #include <QDebug>
-#include "can_structs.h"
+#include "can/can_structs.h"
 #include "isotp_message.h"
 
 class ISOTP_HANDLER;

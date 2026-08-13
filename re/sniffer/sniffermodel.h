@@ -6,7 +6,7 @@
 #include <QVariant>
 #include <QTimer>
 
-#include "can_structs.h"
+#include "can/can_structs.h"
 #include "connections/canconnection.h"
 #include "snifferitem.h"
 

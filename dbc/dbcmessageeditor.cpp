@@ -5,7 +5,7 @@
 #include <QKeyEvent>
 #include <QColorDialog>
 #include "helpwindow.h"
-#include "utility.h"
+#include "common/utility.h"
 
 DBCMessageEditor::DBCMessageEditor(QWidget *parent) :
     QDialog(parent),

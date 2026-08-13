@@ -5,7 +5,7 @@
 #include <QString>
 #include <QStringList>
 #include <QVariant>
-#include "can_structs.h"
+#include "can/can_structs.h"
 
 /*classes to encapsulate data from a DBC file. Really, the stuff of interest
   are the nodes, messages, signals, attributes, and comments.

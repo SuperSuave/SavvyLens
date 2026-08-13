@@ -6,7 +6,7 @@
 #include <QElapsedTimer>
 #include <QTime>
 #include <QMutex>
-#include "can_structs.h"
+#include "can/can_structs.h"
 #include "can_trigger_structs.h"
 #include "dbc/dbchandler.h"
 #include "triggerdialog.h"

@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QFileSystemWatcher>
 #include "dbc_classes.h"
-#include "can_structs.h"
+#include "can/can_structs.h"
 
     typedef enum
     {

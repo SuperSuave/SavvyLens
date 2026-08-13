@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include "can_structs.h"
+#include "can/can_structs.h"
 
 namespace Ui {
 class BisectWindow;

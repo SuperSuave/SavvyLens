@@ -5,7 +5,7 @@
 #include <QStringBuilder>
 #include <QtNetwork>
 
-#include "utility.h"
+#include "common/utility.h"
 #include "mqtt_bus.h"
 
 MQTT_BUS::MQTT_BUS(QString topicName) :
