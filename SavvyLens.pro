@@ -1,38 +1,116 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2015-04-25T22:57:44
+# SavvyLens qmake project
 #
 #-------------------------------------------------
 
 !versionAtLeast(QT_VERSION, 5.14.0) {
-    error("Current version of Qt ($${QT_VERSION}) is too old, this project requires Qt 5.14 or newer")
+    error("Current version of Qt ($${QT_VERSION}) is too old; SavvyLens requires Qt 5.14 or newer.")
 }
-
-QT = core gui printsupport qml serialbus serialport widgets help network opengl
-
-CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
-
-CONFIG += c++17
-CONFIG += NO_UNIT_TESTS
-
-DEFINES += QCUSTOMPLOT_USE_OPENGL
 
 TARGET = SavvyLens
 TEMPLATE = app
 
-QMAKE_INFO_PLIST = packaging/macos/Info.plist.template
-ICON = icons/SavvyLens.icns
+QT += \
+    core \
+    gui \
+    printsupport \
+    qml \
+    serialbus \
+    serialport \
+    widgets \
+    help \
+    network \
+    opengl
 
-# Project-root and source-root bases for explicit module-relative includes.
+CONFIG += \
+    c++17 \
+    NO_UNIT_TESTS
+
+CONFIG(release, debug|release) {
+    DEFINES += QT_NO_DEBUG_OUTPUT
+}
+
+DEFINES += QCUSTOMPLOT_USE_OPENGL
+
 INCLUDEPATH += \
     $$PWD \
     $$PWD/src
 
 DEPENDPATH += $$PWD/src
 
+#-------------------------------------------------
+# macOS
+#-------------------------------------------------
+
+macx {
+    QMAKE_INFO_PLIST = $$PWD/src/packaging/macos/Info.plist.template
+    ICON = $$PWD/icons/SavvyLens.icns
+}
+
+#-------------------------------------------------
+# Windows
+#-------------------------------------------------
+
+win32-msvc* {
+    LIBS += opengl32.lib
+    LIBS += Dbghelp.lib
+}
+
+win32-g++ {
+    LIBS += -lopengl32
+    LIBS += -ldbghelp
+}
+
+windows {
+    RC_ICONS = $$PWD/icons/SavvyLens.ico
+}
+
+#-------------------------------------------------
+# Linux / Unix installation
+# Excludes macOS because it uses application bundles.
+#-------------------------------------------------
+
+unix:!macx {
+    isEmpty(PREFIX) {
+        PREFIX = /usr/local
+    }
+
+    target.path = $$PREFIX/bin
+
+    shortcutfiles.files = $$PWD/src/packaging/linux/SavvyLens.desktop
+    shortcutfiles.path = $$PREFIX/share/applications
+
+    examplefiles.files = $$PWD/examples
+    examplefiles.path = $$PREFIX/share/SavvyLens/examples
+
+    iconfiles.files = $$PWD/icons
+    iconfiles.path = $$PREFIX/share/SavvyLens/icons
+
+    helpfiles.files = $$files($$PWD/help/*)
+    helpfiles.path = $$PREFIX/share/SavvyLens/help
+
+    templatefiles.files = $$files($$PWD/src/scripting/templates/*)
+    templatefiles.path = $$PREFIX/share/SavvyLens/templates
+
+    INSTALLS += \
+        target \
+        shortcutfiles \
+        examplefiles \
+        iconfiles \
+        helpfiles \
+        templatefiles
+
+    DISTFILES += $$PWD/src/packaging/linux/SavvyLens.desktop
+}
+
+#-------------------------------------------------
+# Source files
+#-------------------------------------------------
+
 SOURCES += \
     src/app/helpwindow.cpp \
-    src/app/main.cpp\
+    src/app/main.cpp \
     src/app/mainsettingsdialog.cpp \
     src/app/mainwindow.cpp \
     src/bookmarks/bookmarkmanager.cpp \
@@ -126,7 +204,11 @@ SOURCES += \
     src/widgets/framebytedatadelegate.cpp \
     src/widgets/plotting/qcpaxistickerhex.cpp
 
-HEADERS  += \
+#-------------------------------------------------
+# Header files
+#-------------------------------------------------
+
+HEADERS += \
     config.h \
     src/app/helpwindow.h \
     src/app/mainsettingsdialog.h \
@@ -232,7 +314,11 @@ HEADERS  += \
     src/widgets/framebytedatadelegate.h \
     src/widgets/plotting/qcpaxistickerhex.h
 
-FORMS    += \
+#-------------------------------------------------
+# Qt Designer forms
+#-------------------------------------------------
+
+FORMS += \
     triggerdialog.ui \
     ui/bisectwindow.ui \
     ui/bookmarkmanagerdialog.ui \
@@ -269,52 +355,14 @@ FORMS    += \
     ui/temporalgraphwindow.ui \
     ui/udsfirmwareuploaderwindow.ui \
     ui/udsscanwindow.ui
-    
+
+#-------------------------------------------------
+# Qt resources and translations
+#-------------------------------------------------
+
 RESOURCES += \
     icons.qrc \
     images.qrc
-
-win32-msvc* {
-   LIBS += opengl32.lib
-   LIBS += Dbghelp.lib
-}
-
-win32-g++ {
-   LIBS += libopengl32
-   LIBS += -ldbghelp
-}
-
-unix {
-   isEmpty(PREFIX) {
-      PREFIX=/usr/local
-   }
-   target.path = $$PREFIX/bin
-   INSTALLS += target
-   shortcutfiles.files = packaging/linux/SavvyLens.desktop
-   shortcutfiles.path = $$PREFIX/shasrc/re/applications
-   INSTALLS += shortcutfiles
-   DISTFILES += packaging/linux/SavvyLens.desktop
-}
-
-windows {
-RC_ICONS=icons/SavvyLens.ico
-}
-
-examplefiles.files=examples
-examplefiles.path = $$PREFIX/shasrc/re/SavvyLens/examples
-INSTALLS += examplefiles
-
-iconfiles.files=icons
-iconfiles.path = $$PREFIX/share
-INSTALLS += iconfiles
-
-helpfiles.files=help/*
-helpfiles.path = $$PREFIX/bin/help
-INSTALLS += helpfiles
-
-templatefiles.files = src/scripting/templates/*
-templatefiles.path = $$PREFIX/shasrc/re/SavvyLens/templates
-INSTALLS += templatefiles
 
 TRANSLATIONS += \
     translations/SavvyLens_en.ts \
