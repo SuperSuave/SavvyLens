@@ -803,48 +803,48 @@ void ScriptingWindow::updateScriptListItem(ScriptContainer *container)
     switch (container->state())
     {
     case ScriptContainer::ScriptRunState::Stopped:
-        prefix = QStringLiteral("○");
+        prefix = QStringLiteral("o");
         color = QColor(Qt::darkGray);
         tooltip = QStringLiteral("Stopped");
         break;
 
     case ScriptContainer::ScriptRunState::Starting:
-        prefix = QStringLiteral("◐");
+        prefix = QStringLiteral(">");
         color = QColor(30, 110, 200);
         tooltip = QStringLiteral("Starting");
         break;
 
     case ScriptContainer::ScriptRunState::Running:
-        prefix = QStringLiteral("●");
+        prefix = QStringLiteral("*");
         color = QColor(0, 130, 55);
         tooltip = QStringLiteral("Running");
         break;
 
     case ScriptContainer::ScriptRunState::Stopping:
-        prefix = QStringLiteral("◐");
+        prefix = QStringLiteral("~");
         color = QColor(210, 130, 0);
         tooltip = QStringLiteral("Stopping");
         break;
 
     case ScriptContainer::ScriptRunState::Error:
-        prefix = QStringLiteral("✕");
+        prefix = QStringLiteral("!");
         color = QColor(190, 0, 0);
         tooltip = QStringLiteral(
             "Stopped because the script produced a runtime error");
         break;
 
     case ScriptContainer::ScriptRunState::Disabled:
-        prefix = QStringLiteral("−");
+        prefix = QStringLiteral("-");
         color = QColor(Qt::lightGray);
         tooltip = QStringLiteral(
             "Disabled; excluded from Run All");
         break;
     }
 
-    item->setText(QStringLiteral("%1 %2 — %3")
-                      .arg(prefix,
-                           container->fileName,
-                           container->stateText()));
+    item->setText(QStringLiteral("%1 %2 - %3")
+                    .arg(prefix,
+                        container->fileName,
+                        container->stateText()));
 
     item->setForeground(QBrush(color));
     item->setToolTip(tooltip);

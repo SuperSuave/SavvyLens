@@ -118,9 +118,11 @@ jobs:
           set -euo pipefail
           mkdir -p SavvyLens.app/Contents/MacOS/translations
           mkdir -p SavvyLens.app/Contents/MacOS/help
+          mkdir -p SavvyLens.app/Contents/MacOS/templates
 
           cp translations/*.qm SavvyLens.app/Contents/MacOS/translations/
           cp -R help/. SavvyLens.app/Contents/MacOS/help/
+          cp -R src/scripting/templates/. SavvyLens.app/Contents/MacOS/templates/
 
           macdeployqt SavvyLens.app -dmg
           mv SavvyLens.dmg \
@@ -160,9 +162,11 @@ jobs:
           set -euo pipefail
           mkdir -p SavvyLens.app/Contents/MacOS/translations
           mkdir -p SavvyLens.app/Contents/MacOS/help
+          mkdir -p SavvyLens.app/Contents/MacOS/templates
 
           cp translations/*.qm SavvyLens.app/Contents/MacOS/translations/
           cp -R help/. SavvyLens.app/Contents/MacOS/help/
+          cp -R src/scripting/templates/. SavvyLens.app/Contents/MacOS/templates/
 
           macdeployqt SavvyLens.app -dmg
           mv SavvyLens.dmg \
@@ -201,6 +205,7 @@ jobs:
           Copy-Item "translations" "package/translations" -Recurse
           Copy-Item "help" "package/help" -Recurse
           Copy-Item "examples" "package/examples" -Recurse
+          Copy-Item "src/scripting/templates" "package/templates" -Recurse
 
           & "${Env:Qt5_Dir}\bin\windeployqt.exe" `
             --release `
