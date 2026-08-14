@@ -13,14 +13,13 @@
   <property name="windowTitle">
    <string>Scripting Interface</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,4">
+  <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,3">
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
       <widget class="QLabel" name="label_4">
        <property name="font">
         <font>
-         <weight>75</weight>
          <bold>true</bold>
         </font>
        </property>
@@ -39,7 +38,6 @@
       <widget class="QLabel" name="label">
        <property name="font">
         <font>
-         <weight>75</weight>
          <bold>true</bold>
         </font>
        </property>
@@ -55,25 +53,65 @@
       <widget class="QListWidget" name="listLoadedScripts"/>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
-       <item>
-        <widget class="QPushButton" name="btnNewScript">
-         <property name="text">
-          <string>&amp;New</string>
-         </property>
-        </widget>
-       </item>
-       <item>
+      <layout class="QGridLayout" name="gridLayout" columnstretch="1,1,0">
+       <item row="1" column="2">
         <widget class="QPushButton" name="btnRemoveScript">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text">
           <string>&amp;Del</string>
          </property>
         </widget>
        </item>
-       <item>
+       <item row="1" column="0">
+        <widget class="QPushButton" name="btnNewScript">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>&amp;New</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
         <widget class="QPushButton" name="btnLoadScript">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text">
           <string>&amp;Load</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QToolButton" name="btnInsertTemplate">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>Create an editable script from a scenario template</string>
+         </property>
+         <property name="text">
+          <string>Templates</string>
+         </property>
+         <property name="popupMode">
+          <enum>QToolButton::InstantPopup</enum>
+         </property>
+         <property name="toolButtonStyle">
+          <enum>Qt::ToolButtonTextOnly</enum>
          </property>
         </widget>
        </item>
@@ -82,12 +120,11 @@
     </layout>
    </item>
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,4,0,0">
+    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,4,0,0">
      <item>
       <widget class="QLabel" name="label_2">
        <property name="font">
         <font>
-         <weight>75</weight>
          <bold>true</bold>
         </font>
        </property>
@@ -130,9 +167,91 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="btnRecompile">
+        <widget class="QPushButton" name="btnValidateScript">
          <property name="text">
-          <string>Re&amp;compile</string>
+          <string>Va&amp;lidate</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QLabel" name="labelExecutionControls">
+       <property name="font">
+        <font>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Execution Controls</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_execution">
+       <item>
+        <widget class="QPushButton" name="btnRunScript">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>&amp;Run</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnStopScript">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>&amp;Stop</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnRestartScript">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>&amp;Restart</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnRunAllScripts">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Run A&amp;ll</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnStopAllScripts">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Stop A&amp;ll</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="cbScriptEnabled">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>&amp;Enabled</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -142,7 +261,6 @@
       <widget class="QLabel" name="label_3">
        <property name="font">
         <font>
-         <weight>75</weight>
          <bold>true</bold>
         </font>
        </property>
@@ -165,26 +283,22 @@
       </widget>
      </item>
      <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_log">
-            <property name="alignment">
-                <set>Qt::AlignCenter</set>
-            </property>
-            <property name="contentsMargins">10, 0, 10, 0</property>
-            <item>
-                <widget class="QPushButton" name="btnClearLog">
-                    <property name="text">
-                        <string>Clear Log &amp;Window</string>
-                    </property>
-                </widget>
-            </item>
-            <item>
-                <widget class="QPushButton" name="btnSaveLog">
-                    <property name="text">
-                        <string>Save L&amp;og</string>
-                    </property>
-                </widget>
-            </item>
-        </layout>
+      <layout class="QHBoxLayout" name="horizontalLayout_log">
+       <item>
+        <widget class="QPushButton" name="btnClearLog">
+         <property name="text">
+          <string>Clear Log &amp;Window</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnSaveLog">
+         <property name="text">
+          <string>Save L&amp;og</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>
@@ -194,14 +308,19 @@
   <tabstop>listLog</tabstop>
   <tabstop>btnNewScript</tabstop>
   <tabstop>btnRemoveScript</tabstop>
-  <tabstop>btnLoadScript</tabstop>
   <tabstop>listLoadedScripts</tabstop>
   <tabstop>tableVariables</tabstop>
   <tabstop>btnSaveScript</tabstop>
   <tabstop>btnSaveAsScript</tabstop>
   <tabstop>btnRevertScript</tabstop>
   <tabstop>btnReloadScript</tabstop>
-  <tabstop>btnRecompile</tabstop>
+  <tabstop>btnValidateScript</tabstop>
+  <tabstop>btnRunScript</tabstop>
+  <tabstop>btnStopScript</tabstop>
+  <tabstop>btnRestartScript</tabstop>
+  <tabstop>btnRunAllScripts</tabstop>
+  <tabstop>btnStopAllScripts</tabstop>
+  <tabstop>cbScriptEnabled</tabstop>
   <tabstop>cbAutoScroll</tabstop>
   <tabstop>btnClearLog</tabstop>
   <tabstop>btnSaveLog</tabstop>

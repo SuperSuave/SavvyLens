@@ -2,8 +2,8 @@
 #define TESTCANCON_H
 
 #include <QObject>
-#include "canconconst.h"
-#include "canconnection.h"
+#include "connections/canconconst.h"
+#include "connections/canconnection.h"
 
 class TestCanCon: public QObject
 {

@@ -1,113 +1,278 @@
-Custom Sender Window
-=====================
+# Custom Sender
 
 ![Custom Sender Window](./images/CustomSender.png)
 
-General Overview
-====================
+Custom Sender is a trigger-based CAN transmit tool. It lets you define outgoing frame rows, choose when each row sends, and optionally modify payload bytes using constants, the row’s existing data, or bytes from recently received frames.
 
-This window allows you to create custom frames that will be sent out on one of the can buses. The uses are endless.
-It can be used to generate valid traffic to control connected hardware. It can be used to test out various ideas
-you might have for now to interact with other devices. It can replay frames from one bus into the other bus but with
-modifications.
+It can be used to:
 
+- Send periodic frames.
+- Send a response after a matching incoming frame.
+- Delay or limit a response.
+- Construct an outgoing payload from observed traffic.
+- Test known CAN behavior in a controlled environment.
 
-Layout of the View
-=====================
+> **Safety notice:** Custom Sender can transmit automatically and repeatedly. Incorrect bus selection, ID selection, trigger logic, modifier logic, or timing can create unsafe traffic on a live network. Start with disabled rows, low-rate test traffic, a known-safe test bus, and a limited trigger count whenever possible.
 
-This screen is laid out as a data grid. 
+## Typical workflow
 
-* The first field is "En" which stands for Enabled. If the checkbox is checked
-  then this line will be active.
-* The second field is "Bus" and sets which bus to use for sending.
-* The third field is "ID" and is the ID to use for sending. It can be specified in hex or decimal formats.
-* The fourth field is "Len" and sets the number of data bytes for this frame.
-* The fifth field is "Data" and specifies what values will be sent for the next frame. These values can be
-  automatically updated by the modifiers which will be covered later on.
-* The sixth field is "Trigger" which specifies when this frame will be sent. Proper syntax for triggers is
-  covered later.
-* The seventh field is "Modifications" which specifies how the data bytes for this frame will be changed for
-  the next frame sent. Full syntax for this is covered later on.
-* The final field is "Count" and is automatically filled out with the number of frames that have been sent as
-  a result of this line. 
+1. Open Custom Sender.
+2. Add or configure one frame row.
+3. Select the target output bus.
+4. Enter the intended CAN ID, frame length, and initial payload data.
+5. Leave the row disabled while configuring and reviewing its trigger/modifier logic.
+6. Start with a simple, bounded trigger such as a low-rate timer or a one-time response.
+7. Enable the row.
+8. Watch the **Count** field and observed traffic.
+9. Disable the row immediately if behavior is unexpected.
 
+Before using dynamic modifiers, first test the same frame with a fixed payload. This makes it much easier to distinguish a payload-construction mistake from a bus, trigger, or timing issue.
 
-Writing Trigger Rules
-=======================
+## Frame rows
 
-It should first be noted that each line can contain multiple triggers. Each trigger is separated by a comma ','.
+Custom Sender is organized as a grid. Each row defines an independently configurable outgoing frame.
 
-Triggers are allowed to have one or more conditions. Each condition contained within a single trigger is separated
-by a space ' '.
+| Field | Meaning |
+|---|---|
+| `En` | Enables the row. Disabled rows do not send. |
+| `Bus` | Target bus used to transmit the frame. |
+| `ID` | Outgoing CAN ID. Decimal and `0x`-prefixed hexadecimal values are accepted. |
+| `Len` | Number of payload bytes to send. |
+| `Data` | Initial payload bytes. Modifiers can change these values before a frame is sent. |
+| `Trigger` | Rules that decide when this row sends. |
+| `Modifications` | Rules that update payload bytes before the row sends. |
+| `Count` | Number of frames sent by this row. |
 
-The program implements the following conditions:
+The `Count` column is useful for confirming that a trigger is firing at the rate you intended.
 
-* id - Set the trigger to activate when a frame with the given ID is received. The syntax is 'id' 
-  followed by the numeric ID you want to match. Example: 'id0x200'
-* ms - Set the number of milliseconds to wait. This condition acts differently depending on whether
-  you have set ID matching as well. If so then ms will cause a delay of the requested number of milliseconds
-  after receiving a frame with the ID. If not, the trigger will constantly fire every time the requested number
-  of milliseconds have elapsed. The syntax is the number of desired milliseconds followed by 'ms'. For example:
-  '40ms'.
-* x - Only allow this trigger to fire a set number of times. The syntax is the number of times you want the trigger
-  to fire followed by 'x'. For example: '100x'.
-* bus - Only trigger when a frame with the given ID comes in on the specified bus. Otherwise the triggering frame
-  could come from either bus. The syntax is 'bus' followed by either '0' or '1'. For example: 'bus0'
+## Trigger rules
 
-Now, a full example of a trigger line: "id0x200 5ms 10x bus0,1000ms" This trigger means: Trigger when a frame with ID 0x200 comes
-in on bus 0. Wait 5 milliseconds before sending and only allow this to happen at most 10 times. Also, always trigger every
-1 second and never stop doing this.
+A trigger defines when its row is eligible to send.
 
+A row can have multiple triggers. Separate individual triggers with a comma:
 
-Writing Modifications
-=======================
+```text
+trigger1,trigger2
+```
 
-As with the triggers, you can have multiple modifications per line; each of which is separated by a comma ','.
+Within one trigger, separate conditions with spaces:
 
-Modifications always start with a data byte to modify The syntax is 'D' or 'd' followed by a number 0 through 7.
-For example: 'D4'. This is then always followed by an equal sign '='. Thereafter there is a string of operands and
-operations. 
+```text
+condition1 condition2 condition3
+```
 
-Operands have a special syntax. Each operand can have multiple sections separated by colons ':'.
+### Trigger conditions
 
-* D - A data byte. Specifies which data byte 0 - 7 from the given frame to use for this operation. If specified
-  on its own it will reference the data in the "Data" section of this line. The syntax is 'd' or 'D' followed
-  by a number 0 - 7. Example: 'D3'.
-* ID - Instead of grabbing data from this line's data bytes grab it from the last frame received with the given ID.
-  Syntax: 'ID' followed by a colon ':' followed by the ID to match against. Example: 'ID:0x200'
-* BUS - Restrict which bus the frame used for grabbing the data bytes can come in on. Syntax: 'BUS' followed by
-  a colon ':' followed by 0 or 1 to specify which bus to use. Example: 'BUS:0'
-* <NUMBER> - Instead of using a data byte from somewhere you can instead use a numeric literal. The syntax is
-  the same as any number - either a series of numbers or 0x followed by a series of numbers and A - F to specify
-  a hexadecimal number. Example: 0x10.
+| Condition | Meaning | Example |
+|---|---|---|
+| `id<ID>` | Trigger when a frame with the specified CAN ID is received | `id0x200` |
+| `<milliseconds>ms` | Delay after an ID match, or trigger periodically when used without an ID condition | `40ms` |
+| `<count>x` | Limit the trigger to the specified number of firings | `100x` |
+| `bus<bus>` | Restrict an ID-based trigger to frames received on a specified bus | `bus0` |
 
-A few full examples of operands:
+### ID condition
 
-* "bus:0:id:0x120:D3" = Grab byte 3 from the last frame with ID 0x120 that came in on bus 0.
-* "0x200" = Use the numeric value 0x200 directly.
-* "id:0x200:D7" = Grab byte 7 from the last frame received with ID 0x200.
+Use `id` followed by the CAN ID:
 
-Each operand is usually followed by an operation and then a second operand. If no operation or second operand is found that
-is also OK. Thus a modifier can be as simple as "D0 = D1" if you choose. Operands can also be directly chained such that the
-output of the last operation is used as the left hand operand for the next operation. This will be shown later on.
+```text
+id0x200
+```
 
-Modifiers can use the following operations:
+This makes the trigger react when SavvyLens receives a frame with ID `0x200`.
 
-* \+ - Add the two operands together. Example: "D1 + D2"
-* \- - Subtract the second operand from the first operand. Example: "D1 - D2"
-* \* - Multiply the two operands together. Example: "D1 * D2"
-* \/ - Divide the first operand by the second operand. Example: "D1 / D2"
-* \& - Do the bitfield operation AND on the two operands. Example: D1 & 0x20    
-* \| - Do the bitfield operation OR on the two operands. Example: D1 | 0x10
-* \^ - Do the bitfield operation XOR on the two operands. Example: D1 ^ 0xD2
+### Time condition
 
-Putting all of that together yields complete modifiers. For simplicity all operations
-are done left to right. There is no special order of operations like in normal mathematics.
+Use a number followed by `ms`:
 
-Here are a few examples:    
+```text
+40ms
+```
 
-* "D0=D0+1" = Take the value in D0 within this line's data bytes, add 1, and store it back in D0.
-* "D1=ID:0x200:D3+ID:0x200:D4&0xF0" = Grab byte 3 from the most recently received frame with ID 0x200 and add it 
-  to byte 4 from the same received frame. AND this new value with 0xF0 and finally store it in D1 of the data bytes for this line.
-* "D2=D4 * 10 + D3 & 0x3F" = Multiply byte 4 by 10, add the new value to byte 3, AND the resulting value by 0x3F and store it in byte 2.
+Time conditions behave differently depending on the rest of the trigger:
 
+- With an ID condition, the row sends after the specified delay following a matching received frame.
+- Without an ID condition, the row sends repeatedly at the specified interval.
+
+### Count condition
+
+Use a number followed by `x`:
+
+```text
+10x
+```
+
+This limits the trigger to the specified number of firings.
+
+Use a count limit while testing whenever possible. An unbounded periodic trigger continues sending until the row is disabled or sending is stopped.
+
+### Bus condition
+
+Use `bus` followed by the expected incoming bus number:
+
+```text
+bus0
+```
+
+Without a bus condition, an ID-based trigger can react to matching frames received on any bus.
+
+### Trigger example
+
+```text
+id0x200 5ms 10x bus0,1000ms
+```
+
+This contains two triggers:
+
+1. When a frame with ID `0x200` arrives on bus `0`, wait 5 milliseconds and send the row. Allow this trigger to fire at most 10 times.
+2. Also send the row once every 1000 milliseconds without a count limit.
+
+> **Caution:** The second trigger in this example is an unbounded periodic sender. Use a bounded interval and a controlled bus while testing.
+
+## Modifications
+
+Modifiers change outgoing payload bytes before the row sends.
+
+A row can have multiple modifiers. Separate them with commas:
+
+```text
+modifier1,modifier2
+```
+
+Each modifier begins with the destination byte:
+
+```text
+D<byte>=expression
+```
+
+For example:
+
+```text
+D4=D3
+```
+
+This assigns the value of outgoing data byte `3` to outgoing data byte `4`.
+
+The destination byte must be written as `D` or `d` followed by a byte number from `0` through `7`.
+
+## Modifier operands
+
+An expression can use the following operand types.
+
+| Operand | Meaning | Example |
+|---|---|---|
+| `D<byte>` | A byte from the current row’s outgoing payload | `D3` |
+| `ID:<id>` | Select the most recently received frame with the specified CAN ID | `ID:0x200` |
+| `BUS:<bus>` | Restrict the selected received frame to a bus | `BUS:0` |
+| `<number>` | A decimal or hexadecimal literal | `0x10` |
+
+Operands can include several colon-separated qualifiers.
+
+### Current row data
+
+```text
+D3
+```
+
+References byte `3` from the row’s current outgoing payload.
+
+### Cached incoming frame data
+
+```text
+ID:0x200:D7
+```
+
+References byte `7` from the most recently received frame with ID `0x200`.
+
+```text
+BUS:0:ID:0x120:D3
+```
+
+References byte `3` from the most recently received frame with ID `0x120` on bus `0`.
+
+### Literal values
+
+```text
+0x200
+```
+
+Uses the literal numeric value `0x200`.
+
+## Modifier operators
+
+Modifiers evaluate supported operations from left to right.
+
+| Operator | Meaning | Example |
+|---|---|---|
+| `+` | Add | `D1+D2` |
+| `-` | Subtract | `D1-D2` |
+| `*` | Multiply | `D1*D2` |
+| `/` | Divide | `D1/D2` |
+| `&` | Bitwise AND | `D1&0x20` |
+| `|` | Bitwise OR | `D1|0x10` |
+| `^` | Bitwise XOR | `D1^0xD2` |
+
+> **Important:** Modifier expressions are evaluated strictly from left to right. They do not use normal mathematical operator precedence.
+
+For example:
+
+```text
+D2=D4*10+D3&0x3F
+```
+
+is evaluated as:
+
+1. `D4 * 10`
+2. Add `D3`
+3. Bitwise-AND the result with `0x3F`
+4. Store the result in `D2`
+
+## Modifier examples
+
+### Increment a byte
+
+```text
+D0=D0+1
+```
+
+Takes the current outgoing value of `D0`, adds `1`, and stores it back into `D0`.
+
+### Build a byte from a received frame
+
+```text
+D1=ID:0x200:D3+ID:0x200:D4&0xF0
+```
+
+1. Reads byte `3` from the most recently received frame with ID `0x200`.
+2. Adds byte `4` from that same frame.
+3. Bitwise-ANDs the result with `0xF0`.
+4. Stores the result in outgoing byte `D1`.
+
+### Combine local payload bytes
+
+```text
+D2=D4*10+D3&0x3F
+```
+
+Multiplies outgoing byte `D4` by `10`, adds outgoing byte `D3`, masks the result with `0x3F`, and stores it in `D2`.
+
+## Testing checklist
+
+Before enabling a row:
+
+- Confirm the target bus is the intended physical or logical bus.
+- Confirm the output CAN ID and frame length.
+- Confirm every data byte and modifier result.
+- Confirm whether the trigger reacts to every matching frame or only a limited count.
+- Add a count limit for initial testing.
+- Confirm the trigger’s source bus if more than one bus may carry the same ID.
+- Confirm that cached input IDs are present before using them in modifiers.
+- Use a low transmission rate and observe `Count` before increasing activity.
+- Keep a means of stopping transmission immediately.
+
+## Troubleshooting
+
+- **A row never sends:** Confirm `En` is checked, the bus is connected, the trigger syntax is valid, and a matching incoming frame is actually arriving when using an ID trigger.
+- **A row sends too often:** Check for an unbounded `<milliseconds>ms` trigger, a missing `<count>x` limit, or an ID trigger matching traffic on more buses than expected.
+- **The payload is incorrect:** Start with no modifiers and a fixed payload. Then add one modifier at a time and verify the latest source frame for every referenced ID/bus.
+- **The wrong bus triggers the row:** Add a `bus<bus>` condition to an ID-based trigger.
+- **The output is unsafe or unexpected:** Disable the row immediately, stop sending, and review its trigger, bus, ID, data, and modifier rules before trying again.

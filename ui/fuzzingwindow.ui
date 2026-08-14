@@ -534,7 +534,7 @@
   <customwidget>
    <class>CANDataGrid</class>
    <extends>QWidget</extends>
-   <header>candatagrid.h</header>
+   <header>widgets/candatagrid.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

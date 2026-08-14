@@ -1,33 +1,31 @@
 QT += core gui serialbus widgets testlib serialbus
 
-
 CONFIG += c++11
 
-INCLUDEPATH += ../ ../connections
+INCLUDEPATH += ../
 
 SOURCES += \
-    tst_lfqueue.cpp \
-    main.cpp \
-    tst_cancon.cpp \
-    ../connections/canconfactory.cpp \
-    ../connections/canconnection.cpp \
-    ../connections/gvretserial.cpp \
-    ../connections/socketcan.cpp \
-    ../canbus.cpp
-
+    test/tst_lfqueue.cpp \
+    test/main.cpp \
+    test/tst_cancon.cpp \
+    src/connections/canconfactory.cpp \
+    src/connections/canconnection.cpp \
+    src/connections/gvretserial.cpp \
+    src/connections/socketcan.cpp \
+    src/connections/canbus.cpp
 
 #HEADERS += \
-#    ../utils/lfqueue.h
+#    /utils/lfqueue.h
 
 target.path= .
 INSTALLS += target
 
 HEADERS += \
-    tst_lfqueue.h \
-    tst_cancon.h \
-    ../connections/canconconst.h \
-    ../connections/canconfactory.h \
-    ../connections/canconnection.h \
-    ../connections/gvretserial.h \
-    ../connections/socketcan.h \
-    ../canbus.h
+    test/tst_lfqueue.h \
+    test/tst_cancon.h \
+    /connections/canconconst.h \
+    /connections/canconfactory.h \
+    /connections/canconnection.h \
+    /connections/gvretserial.h \
+    /connections/socketcan.h \
+    /connections/canbus.h

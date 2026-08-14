@@ -20,225 +20,234 @@ DEFINES += QCUSTOMPLOT_USE_OPENGL
 TARGET = SavvyLens
 TEMPLATE = app
 
-QMAKE_INFO_PLIST = Info.plist.template
+QMAKE_INFO_PLIST = packaging/macos/Info.plist.template
 ICON = icons/SavvyLens.icns
 
-SOURCES += main.cpp\
-    utils/logger.cpp \
-    bookmarkmanager.cpp \
-    bookmarkmanagerdialog.cpp \
-    canbridgewindow.cpp \
-    connections/canlogserver.cpp \
-    connections/canserver.cpp \
-    connections/lawicel_serial.cpp \
-    connections/mqtt_bus.cpp \
-    dbc/dbcnodeduplicateeditor.cpp \
-    framebytedatadelegate.cpp \
-    framesenderobject.cpp \
-    mqtt/qmqtt_client.cpp \
-    mqtt/qmqtt_client_p.cpp \
-    mqtt/qmqtt_frame.cpp \
-    mqtt/qmqtt_message.cpp \
-    mqtt/qmqtt_network.cpp \
-    mqtt/qmqtt_router.cpp \
-    mqtt/qmqtt_routesubscription.cpp \
-    mqtt/qmqtt_socket.cpp \
-    mqtt/qmqtt_ssl_socket.cpp \
-    mqtt/qmqtt_timer.cpp \
-    mqtt/qmqtt_websocket.cpp \
-    mqtt/qmqtt_websocketiodevice.cpp \
-    qcpaxistickerhex.cpp \
-    re/dbccomparatorwindow.cpp \
-    mainwindow.cpp \
-    canframemodel.cpp \
-    simplecrypt.cpp \
-    themes/thememanager.cpp \
-    triggerdialog.cpp \
-    utility.cpp \
-    qcustomplot.cpp \
-    frameplaybackwindow.cpp \
-    candatagrid.cpp \
-    framesenderwindow.cpp \
-    framefileio.cpp \
-    mainsettingsdialog.cpp \
-    scriptingwindow.cpp \
-    scriptcontainer.cpp \
-    canfilter.cpp \
-    can_structs.cpp \
-    motorcontrollerconfigwindow.cpp \
-    connections/canconnection.cpp \
-    connections/serialbusconnection.cpp \
-    connections/canconfactory.cpp \
-    connections/gvretserial.cpp \
-    connections/socketcand.cpp \
-    connections/canconmanager.cpp \
-    re/sniffer/snifferitem.cpp \
-    re/sniffer/sniffermodel.cpp \
-    re/sniffer/snifferwindow.cpp \
-    dbc/dbcmessageeditor.cpp \
-    dbc/dbc_classes.cpp \
-    dbc/dbchandler.cpp \
-    dbc/dbcloadsavewindow.cpp \
-    dbc/dbcmaineditor.cpp \
-    dbc/dbcnodeeditor.cpp \
-    dbc/dbcsignaleditor.cpp \
-    dbc/dbcnoderebaseeditor.cpp \
-    re/discretestatewindow.cpp \
-    re/filecomparatorwindow.cpp \
-    re/flowviewwindow.cpp \
-    re/frameinfowindow.cpp \
-    re/fuzzingwindow.cpp \
-    re/isotp_interpreterwindow.cpp \
-    re/rangestatewindow.cpp \
-    re/udsscanwindow.cpp \
-    re/controlanalysisdialog.cpp \
-    re/controlcandidatemodel.cpp \
-    re/controlstatedetector.cpp \
-    connections/canbus.cpp \
-    connections/canconnectionmodel.cpp \
-    connections/connectionwindow.cpp \
-    re/graphingwindow.cpp \
-    re/newgraphdialog.cpp \
-    bisectwindow.cpp \
-    signalviewerwindow.cpp \
-    bus_protocols/isotp_handler.cpp \
-    bus_protocols/j1939_handler.cpp \
-    bus_protocols/uds_handler.cpp \
-    jsedit.cpp \
-    frameplaybackobject.cpp \
-    helpwindow.cpp \
-    blfhandler.cpp \
-    re/sniffer/SnifferDelegate.cpp \
-    connections/newconnectiondialog.cpp \
-    re/temporalgraphwindow.cpp \
-    re/udsfirmwareuploaderwindow.cpp \
-    filterutility.cpp \
-    pcaplite.cpp \
-    dbcsignalselectortree.cpp \
-    mcp/mcpserver.cpp \
-    mcp/mcptools_list.cpp \
-    mcp/mcptools_call.cpp \
-    re/bookmarkeventanalyzer.cpp
+# Project-root and source-root bases for explicit module-relative includes.
+INCLUDEPATH += \
+    $$PWD \
+    $$PWD/src
 
-HEADERS  += mainwindow.h \
-    utils/logger.h \
-    bookmarkmanager.h \
-    bookmarkmanagerdialog.h \
-    can_structs.h \
-    canbridgewindow.h \
-    canframemodel.h \
-    connections/canlogserver.h \
-    connections/canserver.h \
-    connections/lawicel_serial.h \
-    connections/socketcand.h \
-    connections/mqtt_bus.h \
-    dbc/dbcnodeduplicateeditor.h \
-    dbc/dbcnoderebaseeditor.h \
-    framebytedatadelegate.h \
-    framesenderobject.h \
-    mqtt/qmqtt.h \
-    mqtt/qmqtt_client.h \
-    mqtt/qmqtt_client_p.h \
-    mqtt/qmqtt_frame.h \
-    mqtt/qmqtt_global.h \
-    mqtt/qmqtt_message.h \
-    mqtt/qmqtt_message_p.h \
-    mqtt/qmqtt_network_p.h \
-    mqtt/qmqtt_networkinterface.h \
-    mqtt/qmqtt_routedmessage.h \
-    mqtt/qmqtt_router.h \
-    mqtt/qmqtt_routesubscription.h \
-    mqtt/qmqtt_socket_p.h \
-    mqtt/qmqtt_socketinterface.h \
-    mqtt/qmqtt_ssl_socket_p.h \
-    mqtt/qmqtt_timer_p.h \
-    mqtt/qmqtt_timerinterface.h \
-    mqtt/qmqtt_websocket_p.h \
-    mqtt/qmqtt_websocketiodevice_p.h \
-    qcpaxistickerhex.h \
-    re/dbccomparatorwindow.h \
-    simplecrypt.h \
-    themes/thememanager.h \
-    triggerdialog.h \
-    utility.h \
-    qcustomplot.h \
-    frameplaybackwindow.h \
-    candatagrid.h \
-    framesenderwindow.h \
-    can_trigger_structs.h \
-    framefileio.h \
+DEPENDPATH += $$PWD/src
+
+SOURCES += \
+    src/app/helpwindow.cpp \
+    src/app/main.cpp\
+    src/app/mainsettingsdialog.cpp \
+    src/app/mainwindow.cpp \
+    src/bookmarks/bookmarkmanager.cpp \
+    src/bookmarks/bookmarkmanagerdialog.cpp \
+    src/bus_protocols/isotp_handler.cpp \
+    src/bus_protocols/j1939_handler.cpp \
+    src/bus_protocols/uds_handler.cpp \
+    src/can/canfilter.cpp \
+    src/common/utility.cpp \
+    src/connections/canbridgewindow.cpp \
+    src/connections/canbus.cpp \
+    src/connections/canconfactory.cpp \
+    src/connections/canconmanager.cpp \
+    src/connections/canconnection.cpp \
+    src/connections/canconnectionmodel.cpp \
+    src/connections/canlogserver.cpp \
+    src/connections/canserver.cpp \
+    src/connections/connectionwindow.cpp \
+    src/connections/gvretserial.cpp \
+    src/connections/lawicel_serial.cpp \
+    src/connections/mqtt_bus.cpp \
+    src/connections/newconnectiondialog.cpp \
+    src/connections/serialbusconnection.cpp \
+    src/connections/socketcand.cpp \
+    src/dbc/dbc_classes.cpp \
+    src/dbc/dbchandler.cpp \
+    src/dbc/dbcloadsavewindow.cpp \
+    src/dbc/dbcmaineditor.cpp \
+    src/dbc/dbcmessageeditor.cpp \
+    src/dbc/dbcnodeduplicateeditor.cpp \
+    src/dbc/dbcnodeeditor.cpp \
+    src/dbc/dbcnoderebaseeditor.cpp \
+    src/dbc/dbcsignaleditor.cpp \
+    src/dbc/dbcsignalselectortree.cpp \
+    src/dbc/signalviewerwindow.cpp \
+    src/frames/canframemodel.cpp \
+    src/io/formats/blfhandler.cpp \
+    src/io/formats/pcaplite.cpp \
+    src/io/framefileio.cpp \
+    src/mcp/mcpserver.cpp \
+    src/mcp/mcptools_call.cpp \
+    src/mcp/mcptools_list.cpp \
+    src/mqtt/qmqtt_client_p.cpp \
+    src/mqtt/qmqtt_client.cpp \
+    src/mqtt/qmqtt_frame.cpp \
+    src/mqtt/qmqtt_message.cpp \
+    src/mqtt/qmqtt_network.cpp \
+    src/mqtt/qmqtt_router.cpp \
+    src/mqtt/qmqtt_routesubscription.cpp \
+    src/mqtt/qmqtt_socket.cpp \
+    src/mqtt/qmqtt_ssl_socket.cpp \
+    src/mqtt/qmqtt_timer.cpp \
+    src/mqtt/qmqtt_websocket.cpp \
+    src/mqtt/qmqtt_websocketiodevice.cpp \
+    src/playback/frameplaybackobject.cpp \
+    src/playback/frameplaybackwindow.cpp \
+    src/re/bisectwindow.cpp \
+    src/re/bookmarkeventanalyzer.cpp \
+    src/re/controlanalysisdialog.cpp \
+    src/re/controlcandidatemodel.cpp \
+    src/re/controlstatedetector.cpp \
+    src/re/dbccomparatorwindow.cpp \
+    src/re/discretestatewindow.cpp \
+    src/re/filecomparatorwindow.cpp \
+    src/re/flowviewwindow.cpp \
+    src/re/frameinfowindow.cpp \
+    src/re/fuzzingwindow.cpp \
+    src/re/graphingwindow.cpp \
+    src/re/isotp_interpreterwindow.cpp \
+    src/re/newgraphdialog.cpp \
+    src/re/rangestatewindow.cpp \
+    src/re/sniffer/SnifferDelegate.cpp \
+    src/re/sniffer/snifferitem.cpp \
+    src/re/sniffer/sniffermodel.cpp \
+    src/re/sniffer/snifferwindow.cpp \
+    src/re/temporalgraphwindow.cpp \
+    src/re/udsfirmwareuploaderwindow.cpp \
+    src/re/udsscanwindow.cpp \
+    src/scripting/jsedit.cpp \
+    src/scripting/scriptcontainer.cpp \
+    src/scripting/scriptingwindow.cpp \
+    src/sender/framesenderobject.cpp \
+    src/sender/framesenderwindow.cpp \
+    src/sender/triggerdialog.cpp \
+    src/themes/thememanager.cpp \
+    src/third_party/qcustomplot.cpp \
+    src/third_party/simplecrypt.cpp \
+    src/utils/logger.cpp \
+    src/widgets/candatagrid.cpp \
+    src/widgets/filterutility.cpp \
+    src/widgets/framebytedatadelegate.cpp \
+    src/widgets/plotting/qcpaxistickerhex.cpp
+
+HEADERS  += \
     config.h \
-    mainsettingsdialog.h \
-    scriptingwindow.h \
-    scriptcontainer.h \
-    canfilter.h \
-    utils/lfqueue.h \
-    motorcontrollerconfigwindow.h \
-    connections/canconnection.h \
-    connections/serialbusconnection.h \
-    connections/canconconst.h \
-    connections/canconfactory.h \
-    connections/gvretserial.h \
-    connections/canconmanager.h \
-    re/sniffer/snifferitem.h \
-    re/sniffer/sniffermodel.h \
-    re/sniffer/snifferwindow.h \
-    dbc/dbc_classes.h \
-    dbc/dbchandler.h \
-    dbc/dbcloadsavewindow.h \
-    dbc/dbcmaineditor.h \
-    dbc/dbcsignaleditor.h \
-    dbc/dbcmessageeditor.h \
-    dbc/dbcnodeeditor.h \
-    re/discretestatewindow.h \
-    re/filecomparatorwindow.h \
-    re/flowviewwindow.h \
-    re/frameinfowindow.h \
-    re/fuzzingwindow.h \
-    re/isotp_interpreterwindow.h \
-    re/rangestatewindow.h \
-    re/udsscanwindow.h \
-    re/controlanalysisdialog.h \
-    re/controlcandidatemodel.h \
-    re/controlstatedetector.h \
-    connections/canbus.h \
-    connections/canconnectionmodel.h \
-    connections/connectionwindow.h \
-    re/graphingwindow.h \
-    re/newgraphdialog.h \
-    bisectwindow.h \
-    signalviewerwindow.h \
-    bus_protocols/isotp_handler.h \
-    bus_protocols/j1939_handler.h \
-    bus_protocols/uds_handler.h \
-    bus_protocols/isotp_message.h \
-    jsedit.h \
-    frameplaybackobject.h \
-    helpwindow.h \
-    blfhandler.h \
-    re/sniffer/SnifferDelegate.h \
-    connections/newconnectiondialog.h \
-    re/temporalgraphwindow.h \
-    re/udsfirmwareuploaderwindow.h \
-    filterutility.h \
-    pcaplite.h \
-    dbcsignalselectortree.h \
-    mcp/mcpserver.h \
-    re/bookmarkeventanalyzer.h
+    src/app/helpwindow.h \
+    src/app/mainsettingsdialog.h \
+    src/app/mainwindow.h \
+    src/bookmarks/bookmarkmanager.h \
+    src/bookmarks/bookmarkmanagerdialog.h \
+    src/bus_protocols/isotp_handler.h \
+    src/bus_protocols/isotp_message.h \
+    src/bus_protocols/j1939_handler.h \
+    src/bus_protocols/uds_handler.h \
+    src/can/can_structs.h \
+    src/can/canfilter.h \
+    src/common/utility.h \
+    src/connections/canbridgewindow.h \
+    src/connections/canbus.h \
+    src/connections/canconconst.h \
+    src/connections/canconfactory.h \
+    src/connections/canconmanager.h \
+    src/connections/canconnection.h \
+    src/connections/canconnectionmodel.h \
+    src/connections/canlogserver.h \
+    src/connections/canserver.h \
+    src/connections/connectionwindow.h \
+    src/connections/gvretserial.h \
+    src/connections/lawicel_serial.h \
+    src/connections/mqtt_bus.h \
+    src/connections/newconnectiondialog.h \
+    src/connections/serialbusconnection.h \
+    src/connections/socketcand.h \
+    src/dbc/dbc_classes.h \
+    src/dbc/dbchandler.h \
+    src/dbc/dbcloadsavewindow.h \
+    src/dbc/dbcmaineditor.h \
+    src/dbc/dbcmessageeditor.h \
+    src/dbc/dbcnodeduplicateeditor.h \
+    src/dbc/dbcnodeeditor.h \
+    src/dbc/dbcnoderebaseeditor.h \
+    src/dbc/dbcsignaleditor.h \
+    src/dbc/dbcsignalselectortree.h \
+    src/dbc/signalviewerwindow.h \
+    src/frames/canframemodel.h \
+    src/io/formats/blfhandler.h \
+    src/io/formats/pcaplite.h \
+    src/io/framefileio.h \
+    src/mcp/mcpserver.h \
+    src/mqtt/qmqtt_client_p.h \
+    src/mqtt/qmqtt_client.h \
+    src/mqtt/qmqtt_frame.h \
+    src/mqtt/qmqtt_global.h \
+    src/mqtt/qmqtt_message_p.h \
+    src/mqtt/qmqtt_message.h \
+    src/mqtt/qmqtt_network_p.h \
+    src/mqtt/qmqtt_networkinterface.h \
+    src/mqtt/qmqtt_routedmessage.h \
+    src/mqtt/qmqtt_router.h \
+    src/mqtt/qmqtt_routesubscription.h \
+    src/mqtt/qmqtt_socket_p.h \
+    src/mqtt/qmqtt_socketinterface.h \
+    src/mqtt/qmqtt_ssl_socket_p.h \
+    src/mqtt/qmqtt_timer_p.h \
+    src/mqtt/qmqtt_timerinterface.h \
+    src/mqtt/qmqtt_websocket_p.h \
+    src/mqtt/qmqtt_websocketiodevice_p.h \
+    src/mqtt/qmqtt.h \
+    src/playback/frameplaybackobject.h \
+    src/playback/frameplaybackwindow.h \
+    src/re/bisectwindow.h \
+    src/re/bookmarkeventanalyzer.h \
+    src/re/controlanalysisdialog.h \
+    src/re/controlcandidatemodel.h \
+    src/re/controlstatedetector.h \
+    src/re/dbccomparatorwindow.h \
+    src/re/discretestatewindow.h \
+    src/re/filecomparatorwindow.h \
+    src/re/flowviewwindow.h \
+    src/re/frameinfowindow.h \
+    src/re/fuzzingwindow.h \
+    src/re/graphingwindow.h \
+    src/re/isotp_interpreterwindow.h \
+    src/re/newgraphdialog.h \
+    src/re/rangestatewindow.h \
+    src/re/sniffer/SnifferDelegate.h \
+    src/re/sniffer/snifferitem.h \
+    src/re/sniffer/sniffermodel.h \
+    src/re/sniffer/snifferwindow.h \
+    src/re/temporalgraphwindow.h \
+    src/re/udsfirmwareuploaderwindow.h \
+    src/re/udsscanwindow.h \
+    src/scripting/jsedit.h \
+    src/scripting/scriptcontainer.h \
+    src/scripting/scriptingwindow.h \
+    src/sender/can_trigger_structs.h \
+    src/sender/framesenderobject.h \
+    src/sender/framesenderwindow.h \
+    src/sender/triggerdialog.h \
+    src/themes/thememanager.h \
+    src/third_party/qcustomplot.h \
+    src/third_party/simplecrypt.h \
+    src/utils/lfqueue.h \
+    src/utils/logger.h \
+    src/widgets/candatagrid.h \
+    src/widgets/filterutility.h \
+    src/widgets/framebytedatadelegate.h \
+    src/widgets/plotting/qcpaxistickerhex.h
 
-FORMS    += ui/candatagrid.ui \
+FORMS    += \
     triggerdialog.ui \
+    ui/bisectwindow.ui \
     ui/bookmarkmanagerdialog.ui \
     ui/canbridgewindow.ui \
-    ui/dbcnodeduplicateeditor.ui \
-    ui/dbccomparatorwindow.ui \
-    ui/dbcmessageeditor.ui \
+    ui/candatagrid.ui \
     ui/connectionwindow.ui \
+    ui/dbccomparatorwindow.ui \
     ui/dbcloadsavewindow.ui \
     ui/dbcmaineditor.ui \
+    ui/dbcmessageeditor.ui \
+    ui/dbcnodeduplicateeditor.ui \
+    ui/dbcnodeeditor.ui \
     ui/dbcnoderebaseeditor.ui \
     ui/dbcsignaleditor.ui \
-    ui/dbcnodeeditor.ui \
+    ui/dbcsignalselectortree.ui \
     ui/discretestatewindow.ui \
     ui/filecomparatorwindow.ui \
     ui/flowviewwindow.ui \
@@ -247,22 +256,19 @@ FORMS    += ui/candatagrid.ui \
     ui/framesenderwindow.ui \
     ui/fuzzingwindow.ui \
     ui/graphingwindow.ui \
+    ui/helpwindow.ui \
     ui/isotp_interpreterwindow.ui \
     ui/mainsettingsdialog.ui \
     ui/mainwindow.ui \
-    ui/motorcontrollerconfigwindow.ui \
+    ui/newconnectiondialog.ui \
     ui/newgraphdialog.ui \
     ui/rangestatewindow.ui \
     ui/scriptingwindow.ui \
-    ui/snifferwindow.ui \
-    ui/udsscanwindow.ui \
-    ui/bisectwindow.ui \
     ui/signalviewerwindow.ui \
-    ui/helpwindow.ui \
-    ui/newconnectiondialog.ui \
+    ui/snifferwindow.ui \
     ui/temporalgraphwindow.ui \
     ui/udsfirmwareuploaderwindow.ui \
-    ui/dbcsignalselectortree.ui
+    ui/udsscanwindow.ui
     
 RESOURCES += \
     icons.qrc \
@@ -283,10 +289,11 @@ unix {
       PREFIX=/usr/local
    }
    target.path = $$PREFIX/bin
-   shortcutfiles.files=SavvyLens.desktop
-   shortcutfiles.path = $$PREFIX/share/applications
+   INSTALLS += target
+   shortcutfiles.files = packaging/linux/SavvyLens.desktop
+   shortcutfiles.path = $$PREFIX/shasrc/re/applications
    INSTALLS += shortcutfiles
-   DISTFILES += SavvyLens.desktop
+   DISTFILES += packaging/linux/SavvyLens.desktop
 }
 
 windows {
@@ -294,7 +301,7 @@ RC_ICONS=icons/SavvyLens.ico
 }
 
 examplefiles.files=examples
-examplefiles.path = $$PREFIX/share/SavvyLens/examples
+examplefiles.path = $$PREFIX/shasrc/re/SavvyLens/examples
 INSTALLS += examplefiles
 
 iconfiles.files=icons
@@ -305,7 +312,9 @@ helpfiles.files=help/*
 helpfiles.path = $$PREFIX/bin/help
 INSTALLS += helpfiles
 
-INSTALLS += target
+templatefiles.files = src/scripting/templates/*
+templatefiles.path = $$PREFIX/shasrc/re/SavvyLens/templates
+INSTALLS += templatefiles
 
 TRANSLATIONS += \
     translations/SavvyLens_en.ts \

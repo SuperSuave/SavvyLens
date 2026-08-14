@@ -1,8 +1,9 @@
-#include <QtTest>
-
+// SavvyLens headers
 #include "tst_lfqueue.h"
 #include "tst_cancon.h"
 
+// QT headers
+#include <QtTest>
 
 int main(int argc, char** argv)
 {
