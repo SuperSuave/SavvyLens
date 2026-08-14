@@ -236,8 +236,8 @@
               <property name="alignment">
                <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
               </property>
-              <property name="clearButtonEnabled">
-               <bool>false</bool>
+              <property name="clearButtonEnabled" stdset="0">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -978,7 +978,6 @@
     <addaction name="actionFuzzing"/>
     <addaction name="actionUDS_Scanner"/>
     <addaction name="actionUDS_Firmware_Update"/>
-    <addaction name="actionMotorControlConfig"/>
     <addaction name="actionCAN_Bridge"/>
    </widget>
    <widget class="QMenu" name="menuFile">
@@ -1176,11 +1175,6 @@
   <action name="actionFirmware_Update">
    <property name="text">
     <string>Firmware Update</string>
-   </property>
-  </action>
-  <action name="actionMotorControlConfig">
-   <property name="text">
-    <string>MotorControlConfig</string>
    </property>
   </action>
   <action name="actionCapture_Bisector">

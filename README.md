@@ -72,7 +72,7 @@ Additional MCP features:
 - Automatic DBC refresh on disk change via `QFileSystemWatcher` + manual refresh button in DBCLoadSaveWindow
 - Python bridge script (`mcp_bridge.py`) for non-native MCP clients
 
-See **[MCP_SERVER.md](MCP_SERVER.md)** for setup instructions.
+See **[MCP_SERVER.md](docs/MCP_SERVER.md)** for setup instructions.
 
 ---
 
@@ -108,7 +108,11 @@ The old triple-combobox signal selector has been replaced with a **hierarchical 
 
 ---
 
-## Core Features (from SavvyCAN)
+## SavvyCAN Foundation
+
+SavvyLens builds on the mature [SavvyCAN](https://github.com/collin80/SavvyCAN) codebase and continues to support its core CAN capture, analysis, protocol, and visualization capabilities.
+
+The SavvyLens-specific additions and community contributions are described above. The following capabilities remain part of the foundation inherited from—and continuously developed alongside—the SavvyCAN project:
 
 - Real-time CAN frame capture via SocketCAN, Vector, PeakCAN, TinyCAN, and GVRET/CANDue hardware
 - DBC file support — load, decode, and visualize signals
@@ -179,7 +183,7 @@ make
 Create a desktop shortcut on Linux:
 
 ```sh
-./install.sh
+./packaging/linux/install.sh
 ```
 
 ### Debug Build

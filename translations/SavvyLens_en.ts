@@ -2633,11 +2633,6 @@ and the value ranges by hypens
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="606"/>
-        <source>MotorControlConfig</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui/mainwindow.ui" line="611"/>
         <source>Capture Bisector</source>
         <translation type="unfinished"></translation>
@@ -2821,34 +2816,6 @@ and the value ranges by hypens
     <message>
         <location filename="../mainwindow.cpp" line="1559"/>
         <source>No file loaded</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>MotorControllerConfigWindow</name>
-    <message>
-        <location filename="../ui/motorcontrollerconfigwindow.ui" line="14"/>
-        <source>Controller Configuration</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/motorcontrollerconfigwindow.ui" line="32"/>
-        <source>Load Definition File</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/motorcontrollerconfigwindow.ui" line="39"/>
-        <source>Refresh</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/motorcontrollerconfigwindow.ui" line="46"/>
-        <source>Save</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../motorcontrollerconfigwindow.cpp" line="120"/>
-        <source>RMS Definition File (*.txt *.TXT)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

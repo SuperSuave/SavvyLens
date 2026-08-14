@@ -1,35 +1,90 @@
-Connection Window
-==============================
+# Connections
 
 ![Connection Window](./images/ConnectionWindow.png)
 
-The connection window is used to add, remove, and modify connections.
+The Connections workflow configures SavvyLens CAN interfaces and transport backends. Available backends depend on the platform and build configuration and may include serial/GVRET, LAWICEL, SocketCANd, MQTT, and server-oriented connections.
 
-Connecting To A Dongle
-==============================
-Click the button "Add New Device Connection" and fill out the screen with the proper settings. Some devices may create more than one bus but will still only take up one row in the list.
+The Connection Window is also used to add, remove, connect, disconnect, and modify configured devices and buses.
 
-Removing a Device
-==================
-Click on the device in the list in the upper lefthand side of the window then click the "Remove Selected Device" button
+## Typical workflow
 
-Modifying Device Settings
-=========================
-Once you have selected a bus from the list you can disconnect it or modify its settings in the parameters at the buttom left. You must click "Save Bus Settings" to confirm the new settings. If the device you have selected has multiple buses then you will see tabs appear below where it says "Bus Details", one for each bus.
+1. Open the Connection Window.
+2. Select **Add New Device Connection**.
+3. Select the backend and enter its transport settings.
+4. Connect and confirm that the expected bus appears.
+5. Verify incoming frames in the main frame table before using transmit-capable tools.
 
-Debugging Connection Problems
-==============================
-GVRET devices present as serial ports and have significant configuration options. 
-However, the ability to configure so many things and the ability to compile the firmware 
-yourself both come as a double edged sword. They present many opportunities for things 
-to go wrong. Because of this there is a debugging console present on the connection window. 
-Click a bus in the table then click "Enable Console" to cause it to start logging serial 
-traffic. From this console you can see what is going on. It shows what SavvyLens is sending 
-and what it is getting back. It has extended status messages that might help to narrow down 
-what is going wrong. Additionally, if you're feeling adventurous you can send traffic to 
-the serial device from the Send line. "Send Hex" accepts a set of hex values separated 
-by spaces. "Send Text" will send the raw text you type on the line. GVRET traffic is 
-ordinarily binary so "Send Text" won't work very well for that. But, there is also a 
-text console possible on GVRET devices. If you connect to them with a serial program you can
-configure things via a text console. Type ? and follow it up with some form of line 
-ending (Cr, Lf, CrLf, any will work).
+Some devices can expose more than one CAN bus while appearing as a single configured device in the connection list.
+
+## Managing connections
+
+### Adding a connection
+
+Select **Add New Device Connection** and enter the settings for the required backend.
+
+The required values depend on the connection type. They may include:
+
+- Serial port and baud rate.
+- Network hostname and port.
+- SocketCAN interface name.
+- MQTT broker address, port, topic, and credentials.
+- Device-specific CAN bitrate or protocol settings.
+
+After saving or connecting, confirm that the expected bus or buses appear in the connection list.
+
+### Modifying a connection
+
+Select a bus or device from the connection list. You can disconnect it or adjust its settings in the parameter area.
+
+Select **Save Bus Settings** to apply changes.
+
+Devices with multiple buses show separate tabs in the **Bus Details** area. Confirm that you are editing the intended bus before saving changes.
+
+### Removing a connection
+
+Select the device in the connection list and choose **Remove Selected Device**.
+
+Removing a device removes its configured connection entry. Stop playback, frame sending, scripts, bridging, or other traffic-dependent tools before removing an active connection.
+
+## Before transmitting
+
+Confirm all of the following:
+
+- The selected bus number is the intended physical or logical bus.
+- The connection is receiving expected traffic.
+- Bitrate and interface settings match the target network.
+- You understand whether the backend supports transmission, reception, or both.
+- The device is not configured in listen-only mode if you intend to transmit.
+- Playback, scripting, custom sender, fuzzing, or CAN Bridge are configured for the correct bus.
+
+Verify reception first whenever possible. A known-good passive capture is usually safer than immediately testing transmission on an unfamiliar network.
+
+## Troubleshooting
+
+- Verify cabling, adapter power, interface name, and permissions.
+- For serial backends, verify the selected port and baud settings.
+- For SocketCAN-style backends, verify the interface is up and configured.
+- Confirm CAN bitrate and physical bus wiring match the target network.
+- If frames are absent, test with a known-good passive capture setup before changing application filters.
+- If a configured device exposes multiple buses, confirm that you are monitoring the correct bus tab and bus number.
+
+## GVRET debugging console
+
+GVRET devices are serial devices with substantial configuration options. This flexibility can also make them harder to troubleshoot.
+
+The Connection Window includes a debugging console for supported GVRET connections:
+
+1. Select the relevant bus in the connection table.
+2. Select **Enable Console**.
+3. Review the serial traffic and extended status messages.
+
+The console can show what SavvyLens sends to the device and what it receives in return. This can help identify incorrect port selection, firmware behavior, protocol mismatches, or connection problems.
+
+The console also provides manual send controls:
+
+- **Send Hex** sends space-separated hexadecimal byte values.
+- **Send Text** sends the entered text as raw text.
+
+GVRET traffic is normally binary, so **Send Text** is generally not useful for normal GVRET protocol traffic. Some GVRET firmware supports a text console, however. When using a serial terminal with such firmware, entering `?` followed by a line ending such as `CR`, `LF`, or `CRLF` may display its supported text commands.
+
+> **Caution:** Manual console transmission can alter device behavior. Use it only when you understand the target device and protocol.

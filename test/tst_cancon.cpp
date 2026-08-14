@@ -2,8 +2,8 @@
 #include <QVector>
 
 #include "tst_cancon.h"
-#include "canconnection.h"
-#include "canconfactory.h"
+#include "connections/canconnection.h"
+#include "connections/canconfactory.h"
 
 
 #define QVERIFYB(statement) \
