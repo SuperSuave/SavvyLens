@@ -2072,35 +2072,42 @@ void MainWindow::showSettingsDialog()
     settingsDialog->show();
 }
 
-//always gets unfiltered list. You ask for the graphs so there is no need to send filtered frames
-//now always creates a new window. This allows for multiple independent graphing windows
+// always gets unfiltered list. You ask for the graphs so there is no need to send filtered frames
+// now always creates a new window. This allows for multiple independent graphing windows
 void MainWindow::showGraphingWindow()
 {
-/* could only allow the latest window to have these centering signals.
-   if (lastGraphingWindow)
-    {
-        disconnect(lastGraphingWindow, SIGNAL(sendCenterTimeID(uint32_t,double)), this, SLOT(gotCenterTimeID(int32_t,double)));
-        disconnect(this, SIGNAL(sendCenterTimeID(uint32_t,double)), lastGraphingWindow, SLOT(gotCenterTimeID(int32_t,double)));
-        if (flowViewWindow)
+    /* could only allow the latest window to have these centering signals.
+       if (lastGraphingWindow)
         {
-            disconnect(lastGraphingWindow, SIGNAL(sendCenterTimeID(uint32_t,double)), flowViewWindow, SLOT(gotCenterTimeID(int32_t,double)));
-            disconnect(flowViewWindow, SIGNAL(sendCenterTimeID(uint32_t,double)), lastGraphingWindow, SLOT(gotCenterTimeID(int32_t,double)));
+            disconnect(lastGraphingWindow, SIGNAL(sendCenterTimeID(uint32_t,double)), this, SLOT(gotCenterTimeID(int32_t,double)));
+            disconnect(this, SIGNAL(sendCenterTimeID(uint32_t,double)), lastGraphingWindow, SLOT(gotCenterTimeID(int32_t,double)));
+            if (flowViewWindow)
+            {
+                disconnect(lastGraphingWindow, SIGNAL(sendCenterTimeID(uint32_t,double)), flowViewWindow, SLOT(gotCenterTimeID(int32_t,double)));
+                disconnect(flowViewWindow, SIGNAL(sendCenterTimeID(uint32_t,double)), lastGraphingWindow, SLOT(gotCenterTimeID(int32_t,double)));
+            }
         }
-    }
-*/
+    */
     lastGraphingWindow = new GraphingWindow(model->getListReference());
+    lastGraphingWindow->setSelectionContext(currentSelectionContext());
     graphWindows.append(lastGraphingWindow);
 
-    connect(lastGraphingWindow, SIGNAL(sendCenterTimeID(uint32_t,double)), this, SLOT(gotCenterTimeID(uint32_t,double)));
-    connect(this, SIGNAL(sendCenterTimeID(uint32_t,double)), lastGraphingWindow, SLOT(gotCenterTimeID(uint32_t,double)));
+    connect(lastGraphingWindow, SIGNAL(sendCenterTimeID(uint32_t, double)),
+            this, SLOT(gotCenterTimeID(uint32_t, double)));
+    connect(this, SIGNAL(sendCenterTimeID(uint32_t, double)),
+            lastGraphingWindow, SLOT(gotCenterTimeID(uint32_t, double)));
 
-    if (flowViewWindow) //connect the two external windows together
+    if (flowViewWindow)
     {
-        connect(lastGraphingWindow, SIGNAL(sendCenterTimeID(uint32_t,double)), flowViewWindow, SLOT(gotCenterTimeID(uint32_t,double)));
-        connect(flowViewWindow, SIGNAL(sendCenterTimeID(uint32_t,double)), lastGraphingWindow, SLOT(gotCenterTimeID(uint32_t,double)));
+        connect(lastGraphingWindow, SIGNAL(sendCenterTimeID(uint32_t, double)),
+                flowViewWindow, SLOT(gotCenterTimeID(uint32_t, double)));
+        connect(flowViewWindow, SIGNAL(sendCenterTimeID(uint32_t, double)),
+                lastGraphingWindow, SLOT(gotCenterTimeID(uint32_t, double)));
     }
 
     lastGraphingWindow->show();
+    lastGraphingWindow->raise();
+    lastGraphingWindow->activateWindow();
 }
 
 void MainWindow::showTemporalGraphWindow()
