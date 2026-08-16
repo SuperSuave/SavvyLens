@@ -113,6 +113,7 @@ unix:!macx {
 #-------------------------------------------------
 
 SOURCES += \
+    src/analysis/analysismarker.cpp \
     src/analysis/selectioncontext.cpp \
     src/app/helpwindow.cpp \
     src/app/main.cpp \
@@ -216,6 +217,7 @@ SOURCES += \
 
 HEADERS += \
     config.h \
+    src/analysis/analysismarker.h \
     src/analysis/selectioncontext.h \
     src/app/helpwindow.h \
     src/app/mainsettingsdialog.h \
