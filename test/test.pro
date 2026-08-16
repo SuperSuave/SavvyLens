@@ -11,23 +11,27 @@ INCLUDEPATH += \
 DEPENDPATH += $$PROJECT_ROOT/src
 
 SOURCES += \
-    tst_lfqueue.cpp \
+    tst_analysissession.cpp \
     tst_frameaggregatestore.cpp \
     tst_framecomparison.cpp \
     tst_framehistory.cpp \
+    tst_lfqueue.cpp \
     tst_payloaddiff.cpp \
     main.cpp \
+    $$PROJECT_ROOT/src/analysis/analysissession.cpp \
     $$PROJECT_ROOT/src/analysis/frameaggregatestore.cpp \
     $$PROJECT_ROOT/src/analysis/framecomparison.cpp \
     $$PROJECT_ROOT/src/analysis/framehistory.cpp \
     $$PROJECT_ROOT/src/analysis/payloaddiff.cpp
 
 HEADERS += \
-    tst_lfqueue.h \
+    tst_analysissession.h \
     tst_frameaggregatestore.h \
     tst_framecomparison.h \
     tst_framehistory.h \
+    tst_lfqueue.h \
     tst_payloaddiff.h \
+    $$PROJECT_ROOT/src/analysis/analysissession.h \
     $$PROJECT_ROOT/src/analysis/frameaggregatestore.h \
     $$PROJECT_ROOT/src/analysis/framecomparison.h \
     $$PROJECT_ROOT/src/analysis/framehistory.h \
