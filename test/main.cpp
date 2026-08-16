@@ -1,6 +1,7 @@
 // SavvyLens headers
 #include "tst_lfqueue.h"
 #include "tst_frameaggregatestore.h"
+#include "tst_payloaddiff.h"
 
 // Qt headers
 #include <QtTest>
@@ -17,6 +18,7 @@ int main(int argc, char **argv)
   };
 
   ASSERT_TEST(new TestFrameAggregateStore());
+  ASSERT_TEST(new TestPayloadDiff());
   ASSERT_TEST(new TestLFQueue());
 
   return status;
