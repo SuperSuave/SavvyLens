@@ -87,6 +87,9 @@ unix:!macx {
     iconfiles.files = $$PWD/icons
     iconfiles.path = $$PREFIX/share/SavvyLens/icons
 
+    linuxiconfiles.files = $$PWD/icons/hicolor
+    linuxiconfiles.path = $$PREFIX/share/icons
+
     helpfiles.files = $$files($$PWD/help/*)
     helpfiles.path = $$PREFIX/share/SavvyLens/help
 
@@ -94,11 +97,12 @@ unix:!macx {
     templatefiles.path = $$PREFIX/share/SavvyLens/templates
 
     INSTALLS += \
-        target \
-        shortcutfiles \
         examplefiles \
-        iconfiles \
         helpfiles \
+        iconfiles \
+        linuxiconfiles \
+        shortcutfiles \
+        target \
         templatefiles
 
     DISTFILES += $$PWD/src/packaging/linux/SavvyLens.desktop
