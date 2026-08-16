@@ -1,31 +1,26 @@
-QT += core gui serialbus widgets testlib serialbus
+QT += core gui serialbus testlib
 
 CONFIG += c++11
 
-INCLUDEPATH += ../
+PROJECT_ROOT = $$clean_path($$PWD/..)
+
+INCLUDEPATH += \
+    $$PROJECT_ROOT \
+    $$PROJECT_ROOT/src
+
+DEPENDPATH += $$PROJECT_ROOT/src
 
 SOURCES += \
-    test/tst_lfqueue.cpp \
-    test/main.cpp \
-    test/tst_cancon.cpp \
-    src/connections/canconfactory.cpp \
-    src/connections/canconnection.cpp \
-    src/connections/gvretserial.cpp \
-    src/connections/socketcan.cpp \
-    src/connections/canbus.cpp
-
-#HEADERS += \
-#    /utils/lfqueue.h
-
-target.path= .
-INSTALLS += target
+    tst_lfqueue.cpp \
+    tst_frameaggregatestore.cpp \
+    main.cpp \
+    $$PROJECT_ROOT/src/analysis/frameaggregatestore.cpp
 
 HEADERS += \
-    test/tst_lfqueue.h \
-    test/tst_cancon.h \
-    /connections/canconconst.h \
-    /connections/canconfactory.h \
-    /connections/canconnection.h \
-    /connections/gvretserial.h \
-    /connections/socketcan.h \
-    /connections/canbus.h
+    tst_lfqueue.h \
+    tst_frameaggregatestore.h \
+    $$PROJECT_ROOT/src/analysis/frameaggregatestore.h \
+    $$PROJECT_ROOT/src/can/can_structs.h
+
+target.path = .
+INSTALLS += target
