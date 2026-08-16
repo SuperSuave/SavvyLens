@@ -14,14 +14,20 @@ TEMPLATE = app
 QT += \
     core \
     gui \
-    printsupport \
-    qml \
-    serialbus \
-    serialport \
-    widgets \
     help \
     network \
-    opengl
+    opengl \
+    printsupport \
+    qml \
+    quick \
+    quickwidgets \
+    serialbus \
+    serialport \
+    widgets
+
+greaterThan(QT_MAJOR_VERSION, 5) {
+    QT += openglwidgets
+}
 
 CONFIG += \
     c++17 \
@@ -121,6 +127,7 @@ SOURCES += \
     src/analysis/payloaddiff.cpp \
     src/analysis/selectioncontext.cpp \
     src/app/helpwindow.cpp \
+    src/app/livechangeexplorerhost.cpp \
     src/app/main.cpp \
     src/app/mainsettingsdialog.cpp \
     src/app/mainwindow.cpp \
@@ -230,6 +237,7 @@ HEADERS += \
     src/analysis/payloaddiff.h \
     src/analysis/selectioncontext.h \
     src/app/helpwindow.h \
+    src/app/livechangeexplorerhost.h \
     src/app/mainsettingsdialog.h \
     src/app/mainwindow.h \
     src/bookmarks/bookmarkmanager.h \
@@ -382,7 +390,9 @@ FORMS += \
 
 RESOURCES += \
     icons.qrc \
-    images.qrc
+    images.qrc \
+    qml.qrc \
+    qml.qrc
 
 TRANSLATIONS += \
     translations/SavvyLens_en.ts \

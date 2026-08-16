@@ -11,6 +11,7 @@
 #include "common/utility.h"
 #include "connections/canconmanager.h"
 #include "connections/connectionwindow.h"
+#include "livechangeexplorerhost.h"
 #include "re/bookmarkeventanalyzer.h"
 #include "re/controlanalysisdialog.h"
 #include "re/controlcandidatemodel.h"
@@ -121,6 +122,24 @@ MainWindow::MainWindow(QWidget *parent) :
             this, &MainWindow::jumpToControlCandidate);
     connect(controlAnalysisDialog, &ControlAnalysisDialog::bookmarkCandidateRequested,
             this, &MainWindow::bookmarkControlCandidate);
+
+    connect(ui->actionLiveChangeExplorer,
+            &QAction::triggered,
+            this,
+            [this]()
+            {
+                if (!liveChangeExplorerHost_)
+                {
+                    liveChangeExplorerHost_ = new LiveChangeExplorerHost(this);
+                    liveChangeExplorerHost_->setWindowTitle(
+                        tr("Live Change Explorer"));
+                    liveChangeExplorerHost_->resize(900, 500);
+                }
+
+                liveChangeExplorerHost_->show();
+                liveChangeExplorerHost_->raise();
+                liveChangeExplorerHost_->activateWindow();
+            });
 
     setupEmbeddedAnalysisViews();
 

@@ -66,6 +66,7 @@ class ControlAnalysisDialog;
 class ControlCandidateModel;
 class ControlStateDetector;
 class ISOTP_InterpreterWindow;
+class LiveChangeExplorerHost;
 class ScriptingWindow;
 
 class QAction;
@@ -266,6 +267,7 @@ private:
     TemporalGraphWindow *temporalGraphWindow;
     DBCComparatorWindow *dbcComparatorWindow;
     CANBridgeWindow *canBridgeWindow;
+    LiveChangeExplorerHost *liveChangeExplorerHost_ = nullptr;
 
     //various private storage
     QLabel lbStatusConnected;
