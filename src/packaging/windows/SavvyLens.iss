@@ -41,8 +41,8 @@ AppUpdatesURL={#MyAppURL}/releases
 DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 
-WizardImageFile=assets\installer-wizard.bmp
-WizardSmallImageFile=assets\installer-header.bmp
+WizardImageFile=src\packaging\windows\assets\installer-wizard.bmp
+WizardSmallImageFile=src\packaging\windows\assets\installer-header.bmp
 
 UninstallDisplayName={#MyAppName} {#MyAppVersion}
 UninstallDisplayIcon={app}\{#MyAppExeName}
