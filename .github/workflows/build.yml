@@ -288,7 +288,7 @@ jobs:
             "src\packaging\windows\SavvyLens.iss"
 
           Move-Item `
-            "src\packaging\windows\Output\SavvyLens_Setup.exe" `
+            "Output\SavvyLens_Setup.exe" `
             "SavvyLens-$Env:VERSION-Windows_x64.exe"
 
       - name: Upload Windows artifact
