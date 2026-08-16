@@ -60,6 +60,8 @@ Reusable widgets include the CAN bit grid, byte-change item delegate, and filter
 
 ## Traffic Circle Boundaries
 
+Core domain objects remain UI-framework-neutral. Qt Widget and QML/Qt Quick frontends consume them through feature-specific Qt models or QObject adapters.
+
 | Directory          | Owns                                                                                              | Must not own                                           |
 | ------------------ | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
 | src/app            | Application lifecycle, main window, workspace registration, global navigation, app-level settings | CAN decoding, capture processing, RE algorithms        |
