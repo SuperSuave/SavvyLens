@@ -6,6 +6,7 @@
 #include "bookmarks/bookmarkmanager.h"
 #include "bookmarks/bookmarkmanagerdialog.h"
 #include "can/can_structs.h"
+#include "common/savvylenspaths.h"
 #include "common/utility.h"
 #include "connections/canconmanager.h"
 #include "connections/connectionwindow.h"
@@ -1680,7 +1681,7 @@ void MainWindow::handleSaveFilters()
     QStringList filters;
     filters.append(QString(tr("Filter list (*.ftl)")));
 
-    dialog.setDirectory(settings.value("Filters/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value("Filters/LoadSaveDirectory", SavvyLensPaths::definitionsDir()).toString());
     dialog.setFileMode(QFileDialog::AnyFile);
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);
@@ -1704,7 +1705,7 @@ void MainWindow::handleLoadFilters()
     QStringList filters;
     filters.append(QString(tr("Filter List (*.ftl)")));
 
-    dialog.setDirectory(settings.value("Filters/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value("Filters/LoadSaveDirectory", SavvyLensPaths::definitionsDir()).toString());
     dialog.setFileMode(QFileDialog::ExistingFile);
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);
@@ -1738,7 +1739,7 @@ void MainWindow::handleSaveDecodedMethod(bool csv)
     if (!csv) filters.append(QString(tr("Text File (*.txt *.TXT)")));
     else filters.append(QString(tr("CSV File (*.csv *.CSV)")));
 
-    dialog.setDirectory(settings.value("FileIO/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value("FileIO/LoadSaveDirectory", SavvyLensPaths::exportsDir()).toString());
     dialog.setFileMode(QFileDialog::AnyFile);
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);

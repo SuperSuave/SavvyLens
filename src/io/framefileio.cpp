@@ -2,6 +2,7 @@
 
 // SavvyLens headers
 #include "bookmarks/bookmarkmanager.h"
+#include "common/savvylenspaths.h"
 #include "common/utility.h"
 #include "io/formats/blfhandler.h"
 #include "io/formats/pcaplite.h"
@@ -60,7 +61,7 @@ bool FrameFileIO::saveFrameFile(QString &fileName, const QVector<CANFrame>* fram
     filters.append(QString(tr("CANalyzer Ascii Log (*.asc *.ASC)")));
     filters.append(QString(tr("CARBUS Analyzer (*.trc *.TRC)")));
 
-    dialog.setDirectory(settings.value("FileIO/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value("FileIO/LoadSaveDirectory", SavvyLensPaths::capturesDir()).toString());
     dialog.setFileMode(QFileDialog::AnyFile);
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);

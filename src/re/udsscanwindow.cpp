@@ -4,6 +4,7 @@
 // SavvyLens headers
 #include "app/helpwindow.h"
 #include "app/mainwindow.h"
+#include "common/savvylenspaths.h"
 #include "bus_protocols/uds_handler.h"
 #include "common/utility.h"
 #include "connections/canconmanager.h"
@@ -220,7 +221,7 @@ void UDSScanWindow::loadScans()
     QStringList filters;
     filters.append(QString(tr("UDS Test Specification (*.uds *.UDS)")));
 
-    dialog.setDirectory(settings.value("FileIO/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value("FileIO/LoadSaveDirectory", SavvyLensPaths::exportsDir()).toString());
     dialog.setFileMode(QFileDialog::AnyFile);
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);
@@ -282,7 +283,7 @@ void UDSScanWindow::saveScans()
     QStringList filters;
     filters.append(QString(tr("UDS Test Specification (*.uds *.UDS)")));
 
-    dialog.setDirectory(settings.value("FileIO/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value("FileIO/LoadSaveDirectory", SavvyLensPaths::exportsDir()).toString());
     dialog.setFileMode(QFileDialog::AnyFile);
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);
@@ -548,7 +549,7 @@ void UDSScanWindow::saveResults()
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);
     dialog.setAcceptMode(QFileDialog::AcceptSave);
-    dialog.setDirectory(settings.value("UDSScan/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value("UDSScan/LoadSaveDirectory", SavvyLensPaths::exportsDir()).toString());
 
     if (dialog.exec() == QDialog::Accepted)
     {

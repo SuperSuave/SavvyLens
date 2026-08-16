@@ -4,6 +4,7 @@
 // SavvyLens headers
 #include "app/helpwindow.h"
 #include "app/mainwindow.h"
+#include "common/savvylenspaths.h"
 #include "common/utility.h"
 #include "re/newgraphdialog.h"
 
@@ -728,7 +729,7 @@ void GraphingWindow::saveGraphs()
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);
     dialog.setAcceptMode(QFileDialog::AcceptSave);
-    dialog.setDirectory(settings.value("Graphing/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value("Graphing/LoadSaveDirectory", SavvyLensPaths::exportsDir()).toString());
 
     if (dialog.exec() == QDialog::Accepted)
     {

@@ -119,6 +119,7 @@ SOURCES += \
     src/bus_protocols/j1939_handler.cpp \
     src/bus_protocols/uds_handler.cpp \
     src/can/canfilter.cpp \
+    src/common/savvylenspaths.cpp \
     src/common/utility.cpp \
     src/connections/canbridgewindow.cpp \
     src/connections/canbus.cpp \
@@ -221,6 +222,7 @@ HEADERS += \
     src/bus_protocols/uds_handler.h \
     src/can/can_structs.h \
     src/can/canfilter.h \
+    src/common/savvylenspaths.h \
     src/common/utility.h \
     src/connections/canbridgewindow.h \
     src/connections/canbus.h \
