@@ -95,8 +95,9 @@ app shell
 ```
 
 - `widgets` may be used at any UI level, but should not contain domain logic.
+- Generic reusable widgets belong in `src/widgets`; feature-specific windows/widgets belong beside their feature. All UI depends downward on domain services, never the reverse.
 - `app` composes services/workspaces; lower layers must never include or call `mainwindow`.
-
+- If it answers “what frames are available?”, it belongs in `frames`. If it answers “what do the frames mean or how did they change?”, it belongs in `analysis`.
 
 ## Adding new files
 
