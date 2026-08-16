@@ -114,6 +114,11 @@ unix:!macx {
 
 SOURCES += \
     src/analysis/analysismarker.cpp \
+    src/analysis/analysissession.cpp \
+    src/analysis/frameaggregatestore.cpp \
+    src/analysis/framecomparison.cpp \
+    src/analysis/framehistory.cpp \
+    src/analysis/payloaddiff.cpp \
     src/analysis/selectioncontext.cpp \
     src/app/helpwindow.cpp \
     src/app/main.cpp \
@@ -218,6 +223,11 @@ SOURCES += \
 HEADERS += \
     config.h \
     src/analysis/analysismarker.h \
+    src/analysis/analysissession.h \
+    src/analysis/frameaggregatestore.h \
+    src/analysis/framecomparison.h \
+    src/analysis/framehistory.h \
+    src/analysis/payloaddiff.h \
     src/analysis/selectioncontext.h \
     src/app/helpwindow.h \
     src/app/mainsettingsdialog.h \

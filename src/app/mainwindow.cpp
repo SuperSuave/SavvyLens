@@ -21,6 +21,7 @@
 // Qt headers
 #include <QClipboard>
 #include <QDateTime>
+#include <QDebug>
 #include <QDockWidget>
 #include <QFileDialog>
 #include <QFormLayout>
@@ -302,6 +303,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(model, &CANFrameModel::updatedFiltersList, this, &MainWindow::updateFilterList);
     connect(CANConManager::getInstance(), &CANConManager::framesReceived, model, &CANFrameModel::addFrames);
+
+    connect(CANConManager::getInstance(),
+            &CANConManager::framesReceived,
+            this,
+            [this](CANConnection *, QVector<CANFrame> &frames)
+            {
+                for (const CANFrame &frame : frames)
+                {
+                    analysisSession.ingest(frame);
+                }
+            });
 
     //new implementation for continuous logging
     connect(CANConManager::getInstance(), &CANConManager::framesReceived, this, &MainWindow::logReceivedFrame);
@@ -1527,6 +1539,7 @@ void MainWindow::clearFrames()
 {
     ui->canFramesView->scrollToTop();
     model->clearFrames();
+    analysisSession.clear();
     CANConManager::getInstance()->resetTimeBasis();
     ui->lbNumFrames->setText(QString::number(model->rowCount()));
     bDirty = false;

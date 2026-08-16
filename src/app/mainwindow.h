@@ -4,6 +4,7 @@
 #include "config.h"
 
 // SavvyLens headers
+#include "analysis/analysissession.h"
 #include "analysis/selectioncontext.h"
 #include "app/mainsettingsdialog.h"
 #include "bookmarks/bookmarkmanager.h"
@@ -87,7 +88,8 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     static QString loadedFileName;
     static MainWindow *getReference();
-    CANFrameModel * getCANFrameModel();
+    CANFrameModel *getCANFrameModel();
+    AnalysisSession analysisSession;
     ~MainWindow();
 
     void handleDroppedFile(const QString &filename);
