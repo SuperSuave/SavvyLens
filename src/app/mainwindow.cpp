@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 
 // SavvyLens headers
+#include "analysis/selectioncontext.h"
 #include "app/helpwindow.h"
 #include "bookmarks/bookmarkmanager.h"
 #include "bookmarks/bookmarkmanagerdialog.h"
@@ -245,7 +246,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionSetup, SIGNAL(triggered(bool)), SLOT(showConnectionSettingsWindow()));
     connect(ui->actionOpen_Log_File, &QAction::triggered, this, &MainWindow::handleLoadFile);
     connect(ui->actionGraph_Dta, &QAction::triggered, this, &MainWindow::showGraphingWindow);
-    connect(ui->actionFrame_Data_Analysis, &QAction::triggered, this, &MainWindow::showFrameDataAnalysis);
+    connect(ui->actionFrame_Data_Analysis, &QAction::triggered, this, &MainWindow::analyzeSelectedFrameData);
     connect(ui->actionSave_Log_File, &QAction::triggered, this, &MainWindow::handleSaveFile);
     connect(ui->actionSave_Filtered_Log_File, &QAction::triggered, this, &MainWindow::handleSaveFilteredFile);
     connect(ui->actionLoad_Filter_Definition, &QAction::triggered, this, &MainWindow::handleLoadFilters);
@@ -526,6 +527,40 @@ bool MainWindow::getSelectedFrameInfo(CANFrame &outFrame, QModelIndex *outIndex)
     if (outIndex)
         *outIndex = sourceIndex;
     return true;
+}
+
+SelectionContext MainWindow::currentSelectionContext() const
+{
+    SelectionContext context;
+
+    if (ui == nullptr || ui->canFramesView == nullptr)
+        return context;
+
+    QItemSelectionModel *selectionModel =
+        ui->canFramesView->selectionModel();
+
+    if (selectionModel == nullptr)
+        return context;
+
+    const QModelIndexList selectedRows =
+        selectionModel->selectedRows();
+
+    QSet<uint32_t> selectedIds;
+
+    for (const QModelIndex &index : selectedRows)
+    {
+        const QVariant idValue =
+            index.data(CANFrameModel::CanIDRole);
+
+        if (!idValue.isValid())
+            continue;
+
+        selectedIds.insert(
+            static_cast<uint32_t>(idValue.toULongLong()));
+    }
+
+    context.setCanIds(selectedIds);
+    return context;
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
@@ -1325,42 +1360,13 @@ void MainWindow::actionFilterToSelectedIds()
 {
     qDebug() << "Filter to selected IDs action triggered";
 
-    if (ui->canFramesView == nullptr)
+    const SelectionContext context = currentSelectionContext();
+    const QSet<uint32_t> &selectedIds = context.canIds();
+
+    if (selectedIds.isEmpty())
     {
-        qDebug() << "No canFramesView";
+        qDebug() << "No valid CAN IDs found in selected rows";
         return;
-    }
-
-    QItemSelectionModel *selectionModel =
-        ui->canFramesView->selectionModel();
-
-    if (selectionModel == nullptr)
-    {
-        qDebug() << "No CAN-frame selection model";
-        return;
-    }
-
-    const QModelIndexList selectedRows =
-        selectionModel->selectedRows();
-
-    if (selectedRows.isEmpty())
-    {
-        qDebug() << "No selected CAN frame rows";
-        return;
-    }
-
-    QSet<uint32_t> selectedIds;
-
-    for (const QModelIndex &index : selectedRows)
-    {
-        const QVariant idValue =
-            index.data(CANFrameModel::CanIDRole);
-
-        if (!idValue.isValid())
-            continue;
-
-        selectedIds.insert(
-            static_cast<uint32_t>(idValue.toULongLong()));
     }
 
     qDebug() << "Unique selected CAN IDs:"
@@ -1372,12 +1378,6 @@ void MainWindow::actionFilterToSelectedIds()
                  << QStringLiteral("0x%1")
                         .arg(id, 0, 16)
                         .toUpper();
-    }
-
-    if (selectedIds.isEmpty())
-    {
-        qDebug() << "No valid CAN IDs found in selected rows";
-        return;
     }
 
     filterToFrameIds(selectedIds);
@@ -2147,9 +2147,28 @@ void MainWindow::showFrameDataAnalysis()
 void MainWindow::analyzeFrameData(QString frameId)
 {
     showFrameDataAnalysis();
-    if (frameInfoWindow) {
+
+    if (frameInfoWindow == nullptr)
+        return;
+
+    if (!frameId.isEmpty())
+    {
         frameInfoWindow->selectID(frameId);
+        return;
     }
+
+    const SelectionContext context = currentSelectionContext();
+    frameInfoWindow->setSelectionContext(context);
+}
+
+void MainWindow::analyzeSelectedFrameData()
+{
+    showFrameDataAnalysis();
+
+    if (frameInfoWindow == nullptr)
+        return;
+
+    frameInfoWindow->setSelectionContext(currentSelectionContext());
 }
 
 FrameInfoWindow* MainWindow::getFrameInfoWindow()

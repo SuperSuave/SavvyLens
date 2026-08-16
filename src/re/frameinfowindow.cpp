@@ -1162,3 +1162,13 @@ void FrameInfoWindow::applyPlotTheme(QCustomPlot *plot)
 
     plot->replot();
 }
+
+void FrameInfoWindow::setSelectionContext(const SelectionContext &context)
+{
+    if (!context.hasSingleCanId())
+        return;
+
+    selectID(QStringLiteral("0x%1")
+                 .arg(context.canId(), 0, 16)
+                 .toUpper());
+}

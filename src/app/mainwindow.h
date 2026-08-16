@@ -4,6 +4,7 @@
 #include "config.h"
 
 // SavvyLens headers
+#include "analysis/selectioncontext.h"
 #include "app/mainsettingsdialog.h"
 #include "bookmarks/bookmarkmanager.h"
 #include "bookmarks/bookmarkmanagerdialog.h"
@@ -174,6 +175,7 @@ public slots:
 
 public slots:
     void analyzeFrameData(QString frameId);
+    void analyzeSelectedFrameData();
     void updateCopilotStatus(int count);
     FrameInfoWindow* getFrameInfoWindow();
     SnifferWindow* getSnifferWindow() const;
@@ -356,6 +358,7 @@ private:
     QString getSignalNameFromPosition(QPoint pos);
     uint32_t getMessageIDFromPosition(QPoint pos);
     bool getSelectedFrameInfo(CANFrame &outFrame, QModelIndex *outIndex = nullptr);
+    SelectionContext currentSelectionContext() const;
     bool selectFrameByOriginalIndex(int originalIndex);
     void copySelection();
     void handleSaveDecodedMethod(bool csv);
