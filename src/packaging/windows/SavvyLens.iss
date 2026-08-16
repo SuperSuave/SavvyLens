@@ -43,7 +43,7 @@ OutputBaseFilename=SavvyLens_Setup
 
 ; The script is in src/packaging/windows/, so four levels up
 ; is the repository root, where CI creates package\.
-SourceDir=..\..\..\..
+SourceDir=..\..\..
 
 Compression=lzma2/ultra64
 SolidCompression=yes
