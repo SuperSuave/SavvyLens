@@ -35,6 +35,9 @@ AppUpdatesURL={#MyAppURL}/releases
 DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 
+WizardImageFile=assets\installer-wizard.bmp
+WizardSmallImageFile=assets\installer-header.bmp
+
 UninstallDisplayName={#MyAppName} {#MyAppVersion}
 UninstallDisplayIcon={app}\{#MyAppExeName}
 
@@ -165,3 +168,24 @@ Root: HKA; \
 Filename: "{app}\{#MyAppExeName}"; \
   Description: "Launch {#MyAppName}"; \
   Flags: nowait postinstall skipifsilent
+
+[Code]
+
+var
+  WorkspacePage: TOutputMsgWizardPage;
+
+procedure InitializeWizard;
+begin
+  WorkspacePage :=
+    CreateOutputMsgPage(
+      wpWelcome,
+      'Your SavvyLens workspace',
+      'A home for captures, definitions, and exports',
+      'SavvyLens creates a workspace at:' + #13#10 + #13#10 +
+      'Documents\SavvyLens' + #13#10 + #13#10 +
+      'It contains folders for CAN captures, DBC files, definitions, exports, ' +
+      'and reusable script templates. You can organize or back up this folder ' +
+      'independently of the application.' + #13#10 + #13#10 +
+      'The workspace is not removed when SavvyLens is uninstalled.'
+    );
+end;
