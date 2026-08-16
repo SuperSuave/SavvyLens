@@ -64,7 +64,6 @@ jobs:
         uses: jurplel/install-qt-action@v4
         with:
           version: "5.15.2"
-          modules: "qtserialbus qtserialport"
           cache: true
 
       - name: Compile
@@ -123,7 +122,6 @@ jobs:
         uses: jurplel/install-qt-action@v4
         with:
           version: "5.15.2"
-          modules: "qtserialbus qtserialport"
           cache: true
 
       - name: Compile
@@ -179,7 +177,6 @@ jobs:
         uses: jurplel/install-qt-action@v4
         with:
           version: "5.15.2"
-          modules: "qtserialbus qtserialport"
           cache: true
 
       - name: Compile
@@ -235,7 +232,6 @@ jobs:
         uses: jurplel/install-qt-action@v4
         with:
           version: "5.15.2"
-          modules: "qtserialbus qtserialport"
           cache: true
 
       - name: Compile
