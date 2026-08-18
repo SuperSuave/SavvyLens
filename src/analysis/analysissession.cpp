@@ -30,6 +30,11 @@ bool AnalysisSession::empty() const noexcept
     return aggregateStore.empty();
 }
 
+QVector<FrameAggregateKey> AnalysisSession::aggregateKeys() const
+{
+    return aggregateStore.keys();
+}
+
 const FrameAggregate *AnalysisSession::findAggregate(
     const FrameAggregateKey &key) const noexcept
 {

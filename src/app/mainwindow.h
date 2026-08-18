@@ -5,6 +5,7 @@
 
 // SavvyLens headers
 #include "analysis/analysissession.h"
+#include "analysis/livechangeexplorermodel.h"
 #include "analysis/selectioncontext.h"
 #include "app/mainsettingsdialog.h"
 #include "bookmarks/bookmarkmanager.h"
@@ -90,7 +91,6 @@ public:
     static QString loadedFileName;
     static MainWindow *getReference();
     CANFrameModel *getCANFrameModel();
-    AnalysisSession analysisSession;
     ~MainWindow();
 
     void handleDroppedFile(const QString &filename);
@@ -213,6 +213,10 @@ private:
     QAction *copyAct;
     static MainWindow *selfRef;
 
+    AnalysisSession analysisSession;
+    LiveChangeExplorerModel *liveChangeExplorerModel = nullptr;
+    LiveChangeExplorerHost *liveChangeExplorerHost_ = nullptr;
+
     //canbus related data
     CANFrameModel *model;
     DBCHandler *dbcHandler;
@@ -267,7 +271,6 @@ private:
     TemporalGraphWindow *temporalGraphWindow;
     DBCComparatorWindow *dbcComparatorWindow;
     CANBridgeWindow *canBridgeWindow;
-    LiveChangeExplorerHost *liveChangeExplorerHost_ = nullptr;
 
     //various private storage
     QLabel lbStatusConnected;

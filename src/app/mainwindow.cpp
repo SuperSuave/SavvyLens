@@ -103,6 +103,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    liveChangeExplorerModel = new LiveChangeExplorerModel(analysisSession, this);
     QShortcut *bookmarkShortcut = new QShortcut(QKeySequence(Qt::Key_F2), this);
     bookmarkShortcut->setContext(Qt::WidgetWithChildrenShortcut);
     bookmarkShortcut->setAutoRepeat(false);
@@ -130,7 +131,7 @@ MainWindow::MainWindow(QWidget *parent) :
             {
                 if (!liveChangeExplorerHost_)
                 {
-                    liveChangeExplorerHost_ = new LiveChangeExplorerHost(this);
+                    liveChangeExplorerHost_ = new LiveChangeExplorerHost(liveChangeExplorerModel, this);
                     liveChangeExplorerHost_->setWindowTitle(
                         tr("Live Change Explorer"));
                     liveChangeExplorerHost_->resize(900, 500);
@@ -1508,6 +1509,13 @@ void MainWindow::tickGUIUpdate()
         }
 
         rxFrames = 0;
+
+        if (liveChangeExplorerHost_ &&
+            liveChangeExplorerHost_->isVisible() &&
+            liveChangeExplorerModel)
+        {
+            liveChangeExplorerModel->refresh();
+        }
     //}
 }
 
@@ -1559,6 +1567,14 @@ void MainWindow::clearFrames()
     ui->canFramesView->scrollToTop();
     model->clearFrames();
     analysisSession.clear();
+    if (liveChangeExplorerModel)
+    {
+        liveChangeExplorerModel->refresh();
+    }
+
+    liveChangeExplorerHost_->show();
+    liveChangeExplorerHost_->raise();
+    liveChangeExplorerHost_->activateWindow();
     CANConManager::getInstance()->resetTimeBasis();
     ui->lbNumFrames->setText(QString::number(model->rowCount()));
     bDirty = false;

@@ -1,9 +1,18 @@
-#pragma once
+#ifndef LIVECHANGEEXPLORERMODEL_H
+#define LIVECHANGEEXPLORERMODEL_H
 
+// SavvyLens headers
+#include "frameaggregatestore.h"
+
+// Qt headers
 #include <QAbstractTableModel>
+#include <QByteArray>
 #include <QVector>
 
-#include "analysissession.h"
+// C++ standard headers
+#include <cstdint>
+
+class AnalysisSession;
 
 class LiveChangeExplorerModel final : public QAbstractTableModel
 {
@@ -12,7 +21,7 @@ class LiveChangeExplorerModel final : public QAbstractTableModel
 public:
     enum Column
     {
-        BusColumn,
+        BusColumn = 0,
         CanIdColumn,
         DirectionColumn,
         FormatColumn,
@@ -28,31 +37,62 @@ public:
     {
         BusRole = Qt::UserRole + 1,
         CanIdRole,
+        CanIdTextRole,
         DirectionRole,
+        DirectionTextRole,
         IsExtendedRole,
+        FormatTextRole,
         FrameTypeRole,
+        FrameTypeTextRole,
         OccurrenceCountRole,
         LatestPayloadRole,
+        LatestPayloadTextRole,
         ChangedByteMaskRole,
         ChangedBitMaskRole,
+        ChangedByteIndexesRole,
         HasPreviousRole,
         PayloadLengthChangedRole,
         PreviousPayloadLengthRole,
-        LatestPayloadLengthRole
+        LatestPayloadLengthRole,
+        ChangedBytesTextRole
     };
     Q_ENUM(Role)
+
+    struct Row
+    {
+        FrameAggregateKey key;
+        quint64 occurrenceCount = 0;
+
+        QByteArray latestPayload;
+
+        QByteArray changedByteMask;
+        QByteArray changedBitMask;
+
+        bool hasPrevious = false;
+        bool payloadLengthChanged = false;
+        int previousPayloadLength = 0;
+        int latestPayloadLength = 0;
+    };
 
     explicit LiveChangeExplorerModel(
         const AnalysisSession &session,
         QObject *parent = nullptr);
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
+    int rowCount(
+        const QModelIndex &parent = QModelIndex()) const override;
+
+    int columnCount(
+        const QModelIndex &parent = QModelIndex()) const override;
+
+    QVariant data(
+        const QModelIndex &index,
+        int role = Qt::DisplayRole) const override;
+
     QVariant headerData(
         int section,
         Qt::Orientation orientation,
         int role = Qt::DisplayRole) const override;
+
     QHash<int, QByteArray> roleNames() const override;
 
 public slots:
@@ -60,19 +100,8 @@ public slots:
     void clear();
 
 private:
-    struct Row
-    {
-        FrameAggregateKey key;
-        quint64 occurrenceCount = 0;
-        QByteArray latestPayload;
-        QByteArray changedByteMask;
-        QByteArray changedBitMask;
-        bool hasPrevious = false;
-        bool payloadLengthChanged = false;
-        int previousPayloadLength = 0;
-        int latestPayloadLength = 0;
-    };
-
     const AnalysisSession &session_;
     QVector<Row> rows_;
 };
+
+#endif // LIVECHANGEEXPLORERMODEL_H

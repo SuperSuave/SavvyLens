@@ -4,6 +4,7 @@
 // Qt headers
 #include <QByteArray>
 #include <QCanBusFrame>
+#include <QVector>
 
 // C++ standard-library headers
 #include <cstddef>
@@ -57,6 +58,7 @@ public:
     const FrameAggregate *find(const FrameAggregateKey &key) const noexcept;
 
     static FrameAggregateKey makeKey(const CANFrame &frame);
+    QVector<FrameAggregateKey> keys() const;
 
 private:
     struct KeyHash

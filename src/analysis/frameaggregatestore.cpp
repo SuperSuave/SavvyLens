@@ -1,5 +1,6 @@
-// SavvyLens headers
 #include "frameaggregatestore.h"
+
+// SavvyLens headers
 #include "can/can_structs.h"
 
 // C++ standard-library headers
@@ -49,6 +50,19 @@ void FrameAggregateStore::ingest(const CANFrame &frame)
     aggregate.lastIngested.payload = frame.payload();
     aggregate.lastIngested.sourceTimedelta = frame.timedelta;
     aggregate.lastIngested.sourceFrameCount = frame.frameCount;
+}
+
+QVector<FrameAggregateKey> FrameAggregateStore::keys() const
+{
+    QVector<FrameAggregateKey> result;
+    result.reserve(static_cast<int>(aggregates.size()));
+
+    for (const auto &entry : aggregates)
+    {
+        result.append(entry.first);
+    }
+
+    return result;
 }
 
 void FrameAggregateStore::clear() noexcept

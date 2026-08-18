@@ -6,6 +6,9 @@
 #include "analysis/framecomparison.h"
 #include "analysis/framehistory.h"
 
+// Qt headers
+#include <QVector>
+
 // C++ standard-library headers
 #include <cstddef>
 
@@ -23,6 +26,8 @@ public:
     std::size_t aggregateCount() const noexcept;
     bool empty() const noexcept;
 
+    QVector<FrameAggregateKey> aggregateKeys() const;
+    
     const FrameAggregate *findAggregate(
         const FrameAggregateKey &key) const noexcept;
 

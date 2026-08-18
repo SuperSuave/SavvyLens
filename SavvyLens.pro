@@ -124,6 +124,7 @@ SOURCES += \
     src/analysis/frameaggregatestore.cpp \
     src/analysis/framecomparison.cpp \
     src/analysis/framehistory.cpp \
+    src/analysis/livechangeexplorermodel.cpp \
     src/analysis/payloaddiff.cpp \
     src/analysis/selectioncontext.cpp \
     src/app/helpwindow.cpp \
@@ -234,6 +235,7 @@ HEADERS += \
     src/analysis/frameaggregatestore.h \
     src/analysis/framecomparison.h \
     src/analysis/framehistory.h \
+    src/analysis/livechangeexplorermodel.h \
     src/analysis/payloaddiff.h \
     src/analysis/selectioncontext.h \
     src/app/helpwindow.h \
