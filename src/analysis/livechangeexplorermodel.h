@@ -3,6 +3,7 @@
 
 // SavvyLens headers
 #include "frameaggregatestore.h"
+#include "selectioncontext.h"
 
 // Qt headers
 #include <QAbstractTableModel>
@@ -94,6 +95,8 @@ public:
         int role = Qt::DisplayRole) const override;
 
     QHash<int, QByteArray> roleNames() const override;
+    
+    SelectionContext selectionContextForRow(int row) const;
 
 public slots:
     void refresh();

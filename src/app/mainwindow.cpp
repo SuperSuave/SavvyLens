@@ -4,6 +4,7 @@
 // SavvyLens headers
 #include "analysis/selectioncontext.h"
 #include "app/helpwindow.h"
+#include "app/livechangeexplorerhost.h"
 #include "bookmarks/bookmarkmanager.h"
 #include "bookmarks/bookmarkmanagerdialog.h"
 #include "can/can_structs.h"
@@ -131,7 +132,21 @@ MainWindow::MainWindow(QWidget *parent) :
             {
                 if (!liveChangeExplorerHost_)
                 {
-                    liveChangeExplorerHost_ = new LiveChangeExplorerHost(liveChangeExplorerModel, this);
+                    liveChangeExplorerHost_ =
+                        new LiveChangeExplorerHost(
+                            liveChangeExplorerModel,
+                            this);
+
+                    connect(liveChangeExplorerHost_,
+                            &LiveChangeExplorerHost::openFrameInfoRequested,
+                            this,
+                            &MainWindow::openExplorerFrameInfo);
+
+                    connect(liveChangeExplorerHost_,
+                            &LiveChangeExplorerHost::openGraphingRequested,
+                            this,
+                            &MainWindow::openExplorerGraphing);
+
                     liveChangeExplorerHost_->setWindowTitle(
                         tr("Live Change Explorer"));
                     liveChangeExplorerHost_->resize(900, 500);
@@ -266,7 +281,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //handlers for all menu entries
     connect(ui->actionSetup, SIGNAL(triggered(bool)), SLOT(showConnectionSettingsWindow()));
     connect(ui->actionOpen_Log_File, &QAction::triggered, this, &MainWindow::handleLoadFile);
-    connect(ui->actionGraph_Dta, &QAction::triggered, this, &MainWindow::showGraphingWindow);
+    connect(ui->actionGraph_Dta, &QAction::triggered, this, static_cast<void (MainWindow::*)()>(&MainWindow::showGraphingWindow));
     connect(ui->actionFrame_Data_Analysis, &QAction::triggered, this, &MainWindow::analyzeSelectedFrameData);
     connect(ui->actionSave_Log_File, &QAction::triggered, this, &MainWindow::handleSaveFile);
     connect(ui->actionSave_Filtered_Log_File, &QAction::triggered, this, &MainWindow::handleSaveFilteredFile);
@@ -2120,9 +2135,55 @@ void MainWindow::showSettingsDialog()
     settingsDialog->show();
 }
 
+void MainWindow::openExplorerFrameInfo(int row)
+{
+    if (liveChangeExplorerModel == nullptr)
+    {
+        return;
+    }
+
+    const SelectionContext context =
+        liveChangeExplorerModel->selectionContextForRow(row);
+
+    if (context.isEmpty())
+    {
+        return;
+    }
+
+    showFrameDataAnalysis();
+
+    if (frameInfoWindow != nullptr)
+    {
+        frameInfoWindow->setSelectionContext(context);
+    }
+}
+
+void MainWindow::showGraphingWindow()
+{
+    showGraphingWindow(currentSelectionContext());
+}
+
+void MainWindow::openExplorerGraphing(int row)
+{
+    if (liveChangeExplorerModel == nullptr)
+    {
+        return;
+    }
+
+    const SelectionContext context =
+        liveChangeExplorerModel->selectionContextForRow(row);
+
+    if (context.isEmpty())
+    {
+        return;
+    }
+
+    showGraphingWindow(context);
+}
+
 // always gets unfiltered list. You ask for the graphs so there is no need to send filtered frames
 // now always creates a new window. This allows for multiple independent graphing windows
-void MainWindow::showGraphingWindow()
+void MainWindow::showGraphingWindow(const SelectionContext &context)
 {
     /* could only allow the latest window to have these centering signals.
        if (lastGraphingWindow)
@@ -2137,7 +2198,7 @@ void MainWindow::showGraphingWindow()
         }
     */
     lastGraphingWindow = new GraphingWindow(model->getListReference());
-    lastGraphingWindow->setSelectionContext(currentSelectionContext());
+    lastGraphingWindow->setSelectionContext(context);
     graphWindows.append(lastGraphingWindow);
 
     connect(lastGraphingWindow, SIGNAL(sendCenterTimeID(uint32_t, double)),

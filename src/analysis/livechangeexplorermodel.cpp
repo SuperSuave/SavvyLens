@@ -178,6 +178,24 @@ int LiveChangeExplorerModel::columnCount(
     return ColumnCount;
 }
 
+SelectionContext LiveChangeExplorerModel::selectionContextForRow(
+    int row) const
+{
+    SelectionContext context;
+
+    if (row < 0 || row >= rows_.size())
+    {
+        return context;
+    }
+
+    const Row &selectedRow = rows_.at(row);
+
+    context.setCanId(selectedRow.key.frameId);
+    context.setBus(selectedRow.key.bus);
+
+    return context;
+}
+
 QVariant LiveChangeExplorerModel::data(
     const QModelIndex &index,
     int role) const

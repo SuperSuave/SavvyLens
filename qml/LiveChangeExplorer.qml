@@ -248,6 +248,7 @@ Rectangle {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
+            anchors.bottomMargin: 44
 
             clip: true
             boundsBehavior: Flickable.StopAtBounds
@@ -549,6 +550,108 @@ Rectangle {
                     implicitWidth: 8
                     radius: 4
                     color: root.borderStrong
+                }
+            }
+        }
+
+        Rectangle {
+            id: selectionActions
+
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+
+            height: 44
+            color: root.surfaceRaised
+            border.color: root.border
+            border.width: 1
+
+            Row {
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 8
+
+                Text {
+                    text: root.selectedRow >= 0
+                        ? "Selected row " + (root.selectedRow + 1)
+                        : "Select a frame to inspect"
+                    color: root.selectedRow >= 0
+                        ? root.textMuted
+                        : root.textFaint
+                    font.pixelSize: 11
+                }
+
+                Rectangle {
+                    width: 1
+                    height: 18
+                    color: root.border
+                }
+
+                Button {
+                    id: openFrameInfoButton
+
+                    text: "Open Frame Info"
+                    enabled: root.selectedRow >= 0
+
+                    background: Rectangle {
+                        radius: 3
+                        color: openFrameInfoButton.enabled
+                            ? root.accentSubtle
+                            : root.surfaceInset
+                        border.color: openFrameInfoButton.enabled
+                            ? root.accent
+                            : root.border
+                        border.width: 1
+                    }
+
+                    contentItem: Text {
+                        text: openFrameInfoButton.text
+                        color: openFrameInfoButton.enabled
+                            ? root.textPrimary
+                            : root.textFaint
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        font.pixelSize: 11
+                    }
+
+                    onClicked: {
+                        liveChangeExplorerHost.openFrameInfoForRow(
+                            root.selectedRow)
+                    }
+                }
+
+                Button {
+                    id: graphSelectedIdButton
+
+                    text: "Graph Selected ID"
+                    enabled: root.selectedRow >= 0
+
+                    background: Rectangle {
+                        radius: 3
+                        color: graphSelectedIdButton.enabled
+                            ? root.accentSubtle
+                            : root.surfaceInset
+                        border.color: graphSelectedIdButton.enabled
+                            ? root.accent
+                            : root.border
+                        border.width: 1
+                    }
+
+                    contentItem: Text {
+                        text: graphSelectedIdButton.text
+                        color: graphSelectedIdButton.enabled
+                            ? root.textPrimary
+                            : root.textFaint
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        font.pixelSize: 11
+                    }
+
+                    onClicked: {
+                        liveChangeExplorerHost.openGraphingForRow(
+                            root.selectedRow)
+                    }
                 }
             }
         }

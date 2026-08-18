@@ -24,8 +24,32 @@ LiveChangeExplorerHost::LiveChangeExplorerHost(
         QStringLiteral("liveChangeExplorerModel"),
         model);
 
+    quickWidget->rootContext()->setContextProperty(
+        QStringLiteral("liveChangeExplorerHost"),
+        this);
+
     quickWidget->setSource(
         QUrl(QStringLiteral("qrc:/qml/LiveChangeExplorer.qml")));
 
     layout->addWidget(quickWidget);
+}
+
+void LiveChangeExplorerHost::openFrameInfoForRow(int row)
+{
+    if (row < 0)
+    {
+        return;
+    }
+
+    emit openFrameInfoRequested(row);
+}
+
+void LiveChangeExplorerHost::openGraphingForRow(int row)
+{
+    if (row < 0)
+    {
+        return;
+    }
+
+    emit openGraphingRequested(row);
 }

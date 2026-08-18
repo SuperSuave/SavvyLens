@@ -103,6 +103,7 @@ public slots:
     void handleLoadFilters();
     void handleContinousLogging();
     void showGraphingWindow();
+    void showGraphingWindow(const SelectionContext &context);
     void showFrameDataAnalysis();
     void clearFrames();
     void expandAllRows();
@@ -377,6 +378,8 @@ private:
     void onDbcNeedsRefresh(int idx);
 
 private slots:
+    void openExplorerFrameInfo(int row);
+    void openExplorerGraphing(int row);
     void killEmAll();
     void killWindow(QDialog *win);
     void readSettings();
