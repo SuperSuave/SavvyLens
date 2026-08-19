@@ -4,9 +4,11 @@
 #include "analysis/livechangeexplorermodel.h"
 
 // Qt headers
-#include <QQuickWidget>
 #include <QQmlContext>
+#include <QQuickItem>
+#include <QQuickWidget>
 #include <QUrl>
+#include <QVariant>
 #include <QVBoxLayout>
 
 LiveChangeExplorerHost::LiveChangeExplorerHost(
@@ -17,21 +19,21 @@ LiveChangeExplorerHost::LiveChangeExplorerHost(
     auto *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
 
-    auto *quickWidget = new QQuickWidget(this);
-    quickWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    quickWidget_ = new QQuickWidget(this);
+    quickWidget_->setResizeMode(QQuickWidget::SizeRootObjectToView);
 
-    quickWidget->rootContext()->setContextProperty(
+    quickWidget_->rootContext()->setContextProperty(
         QStringLiteral("liveChangeExplorerModel"),
         model);
 
-    quickWidget->rootContext()->setContextProperty(
+    quickWidget_->rootContext()->setContextProperty(
         QStringLiteral("liveChangeExplorerHost"),
         this);
 
-    quickWidget->setSource(
+    quickWidget_->setSource(
         QUrl(QStringLiteral("qrc:/qml/LiveChangeExplorer.qml")));
 
-    layout->addWidget(quickWidget);
+    layout->addWidget(quickWidget_);
 }
 
 void LiveChangeExplorerHost::openFrameInfoForRow(int row)
@@ -62,4 +64,23 @@ void LiveChangeExplorerHost::createMarkerForRow(int row)
     }
 
     emit createMarkerRequested(row);
+}
+
+void LiveChangeExplorerHost::openAnalysisMarkers()
+{
+    emit openAnalysisMarkersRequested();
+}
+
+void LiveChangeExplorerHost::showAnalysisMarkers(
+    const QVariantList &markers)
+{
+    if (quickWidget_ == nullptr || quickWidget_->rootObject() == nullptr)
+    {
+        return;
+    }
+
+    QMetaObject::invokeMethod(
+        quickWidget_->rootObject(),
+        "openAnalysisMarkersDialog",
+        Q_ARG(QVariant, QVariant::fromValue(markers)));
 }

@@ -87,6 +87,18 @@ Rectangle {
         }
     }
 
+    AnalysisMarkersDialog {
+        id: analysisMarkersDialog
+
+        parent: root
+        markersModel: []
+    }
+
+    function openAnalysisMarkersDialog(markers) {
+        analysisMarkersDialog.markersModel = markers
+        analysisMarkersDialog.open()
+    }
+
     Rectangle {
         id: workspaceHeader
 
@@ -653,6 +665,7 @@ Rectangle {
                             root.selectedRow)
                     }
                 }
+                
                 Button {
                     id: createMarkerForRow
 
@@ -683,6 +696,36 @@ Rectangle {
                     onClicked: {
                         liveChangeExplorerHost.createMarkerForRow(
                             root.selectedRow)
+                    }
+                }
+                Button {
+                    id: openAnalysisMarkers
+
+                    text: "Analysis Markers"
+
+                    background: Rectangle {
+                        radius: 3
+                        color: openAnalysisMarkers.enabled
+                               ? root.accentSubtle
+                               : root.surfaceInset
+                        border.color: openAnalysisMarkers.enabled
+                                      ? root.accent
+                                      : root.border
+                        border.width: 1
+                    }
+
+                    contentItem: Text {
+                        text: openAnalysisMarkers.text
+                        color: openAnalysisMarkers.enabled
+                               ? root.textPrimary
+                               : root.textFaint
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        font.pixelSize: 11
+                    }
+
+                    onClicked: {
+                        liveChangeExplorerHost.openAnalysisMarkers()
                     }
                 }
             }

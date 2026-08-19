@@ -41,6 +41,8 @@
 #include <QSpinBox>
 #include <QTableWidgetItem>
 #include <QtSerialPort/QSerialPortInfo>
+#include <QVariantList>
+#include <QVariantMap>
 #include <QVBoxLayout>
 
 // C++ standard-library headers
@@ -151,6 +153,11 @@ MainWindow::MainWindow(QWidget *parent) :
                             &LiveChangeExplorerHost::openGraphingRequested,
                             this,
                             &MainWindow::openExplorerGraphing);
+
+                    connect(liveChangeExplorerHost_,
+                            &LiveChangeExplorerHost::openAnalysisMarkersRequested,
+                            this,
+                            &MainWindow::showAnalysisMarkers);
 
                     liveChangeExplorerHost_->setWindowTitle(
                         tr("Live Change Explorer"));
@@ -2156,13 +2163,60 @@ void MainWindow::createExplorerMarker(int row)
     }
 
     analysisSession.addMarker(context);
+}
 
-    const bool added = analysisSession.addMarker(context);
+void MainWindow::showAnalysisMarkers()
+{
+    if (liveChangeExplorerHost_ == nullptr)
+    {
+        return;
+    }
 
-    qDebug() << "Explorer marker created:" << added
-             << "count:" << analysisSession.markers().count()
-             << "bus:" << context.bus()
-             << "CAN ID:" << QStringLiteral("0x%1").arg(context.canId(), 0, 16).toUpper();
+    QVariantList markerRows;
+    const QVector<AnalysisMarker> &markers = analysisSession.markers();
+
+    for (int index = 0; index < markers.size(); ++index)
+    {
+        const AnalysisMarker &marker = markers.at(index);
+
+        QString anchorType = QStringLiteral("Unknown");
+        QString bus = QStringLiteral("—");
+        QString canId = QStringLiteral("—");
+
+        if (marker.hasSelectionContext())
+        {
+            anchorType = QStringLiteral("Selection context");
+
+            const SelectionContext &context = marker.selectionContext();
+
+            if (context.hasBus())
+            {
+                bus = QString::number(context.bus());
+            }
+
+            if (context.hasSingleCanId())
+            {
+                canId = QStringLiteral("0x%1")
+                            .arg(context.canId(), 0, 16)
+                            .toUpper();
+            }
+        }
+        else if (marker.hasFrameIndex())
+        {
+            anchorType = QStringLiteral("Frame index");
+        }
+
+        QVariantMap row;
+        row.insert(QStringLiteral("number"), index + 1);
+        row.insert(QStringLiteral("anchorType"), anchorType);
+        row.insert(QStringLiteral("bus"), bus);
+        row.insert(QStringLiteral("canId"), canId);
+        row.insert(QStringLiteral("label"), marker.label());
+
+        markerRows.append(row);
+    }
+
+    liveChangeExplorerHost_->showAnalysisMarkers(markerRows);
 }
 
 void MainWindow::openExplorerFrameInfo(int row)
