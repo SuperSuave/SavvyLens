@@ -5,6 +5,7 @@
 
 // Qt headers
 #include <QQmlContext>
+#include <QQmlEngine>
 #include <QQuickItem>
 #include <QQuickWidget>
 #include <QUrl>
@@ -21,6 +22,9 @@ LiveChangeExplorerHost::LiveChangeExplorerHost(
 
     quickWidget_ = new QQuickWidget(this);
     quickWidget_->setResizeMode(QQuickWidget::SizeRootObjectToView);
+
+    quickWidget_->engine()->addImportPath(
+        QStringLiteral("qrc:/qml"));
 
     quickWidget_->rootContext()->setContextProperty(
         QStringLiteral("liveChangeExplorerModel"),

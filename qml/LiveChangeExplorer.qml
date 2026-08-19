@@ -1,36 +1,14 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import SavvyLens 1.0
 
 Rectangle {
     id: root
 
     implicitWidth: 1130
     implicitHeight: 640
-    
-    color: "#12111e"
 
-    readonly property color background: "#12111e"
-    readonly property color surface: "#1a1928"
-    readonly property color surfaceRaised: "#201f32"
-    readonly property color surfaceInset: "#252438"
-    readonly property color border: "#2e2d44"
-    readonly property color borderStrong: "#4a4868"
-
-    readonly property color textPrimary: "#e8e8f0"
-    readonly property color textMuted: "#7a7a99"
-    readonly property color textFaint: "#4a4a60"
-
-    readonly property color accent: "#00d4d4"
-    readonly property color accentSubtle: "#173f46"
-
-    readonly property color success: "#39d353"
-    readonly property color successSubtle: "#173d2a"
-
-    readonly property color warning: "#f5a623"
-    readonly property color warningSubtle: "#463514"
-
-    readonly property color error: "#ff4d4d"
-    readonly property color errorSubtle: "#472126"
+    color: Theme.background
 
     property int selectedRow: -1
 
@@ -107,7 +85,7 @@ Rectangle {
         anchors.right: parent.right
 
         height: 70
-        color: root.surface
+        color: Theme.surface
 
         Rectangle {
             anchors.left: parent.left
@@ -115,7 +93,7 @@ Rectangle {
             anchors.bottom: parent.bottom
 
             width: 5
-            color: root.accent
+            color: Theme.accent
         }
 
         Rectangle {
@@ -124,7 +102,7 @@ Rectangle {
             anchors.bottom: parent.bottom
 
             height: 1
-            color: root.border
+            color: Theme.border
         }
 
         Column {
@@ -135,7 +113,7 @@ Rectangle {
 
             Text {
                 text: "LIVE CHANGE EXPLORER"
-                color: root.textPrimary
+                color: Theme.textPrimary
 
                 font.bold: true
                 font.pixelSize: 16
@@ -144,7 +122,7 @@ Rectangle {
 
             Text {
                 text: "CAN identity and payload-difference analysis"
-                color: root.textMuted
+                color: Theme.textMuted
                 font.pixelSize: 12
             }
         }
@@ -158,7 +136,7 @@ Rectangle {
             height: 26
             radius: 13
 
-            color: root.successSubtle
+            color: Theme.successSubtle
             border.color: "#268d3a"
             border.width: 1
 
@@ -170,12 +148,12 @@ Rectangle {
                     width: 7
                     height: 7
                     radius: 4
-                    color: root.success
+                    color: Theme.success
                 }
 
                 Text {
                     text: "LIVE"
-                    color: root.success
+                    color: Theme.success
 
                     font.bold: true
                     font.pixelSize: 10
@@ -198,8 +176,8 @@ Rectangle {
         anchors.bottomMargin: 16
 
         radius: 6
-        color: root.surface
-        border.color: root.border
+        color: Theme.surface
+        border.color: Theme.border
         border.width: 1
 
         Rectangle {
@@ -210,7 +188,7 @@ Rectangle {
             anchors.top: parent.top
 
             height: 2
-            color: root.accent
+            color: Theme.accent
             opacity: 0.7
         }
 
@@ -230,8 +208,8 @@ Rectangle {
                     width: root.columnWidths[index]
                     height: headerRow.height
 
-                    color: root.surfaceRaised
-                    border.color: root.border
+                    color: Theme.surfaceRaised
+                    border.color: Theme.border
                     border.width: 1
 
                     Text {
@@ -243,7 +221,7 @@ Rectangle {
                         elide: Text.ElideRight
 
                         text: root.columnHeaders[index]
-                        color: root.textMuted
+                        color: Theme.textMuted
 
                         font.bold: true
                         font.pixelSize: 11
@@ -290,27 +268,27 @@ Rectangle {
 
                 color: {
                     if (isSelected)
-                        return root.accentSubtle
+                        return Theme.accentSubtle
 
                     if (isChangeColumn && lengthChanged)
-                        return root.warningSubtle
+                        return Theme.warningSubtle
 
                     if (isChangeColumn && payloadChanged)
-                        return root.successSubtle
+                        return Theme.successSubtle
 
                     return row % 2 === 0
-                            ? root.surface
-                            : root.surfaceInset
+                            ? Theme.surface
+                            : Theme.surfaceInset
                 }
 
                 border.color: {
                     if (isChangeColumn && lengthChanged)
-                        return "#88601a"
+                        return Theme.warningBorder
 
                     if (isChangeColumn && payloadChanged)
-                        return "#277b3a"
+                        return Theme.successBorder
 
-                    return root.border
+                    return Theme.border
                 }
 
                 border.width: isSelected ? 0 : 1
@@ -323,7 +301,7 @@ Rectangle {
                     anchors.bottom: parent.bottom
 
                     height: 1
-                    color: root.border
+                    color: Theme.border
                 }
 
                 Rectangle {
@@ -334,7 +312,7 @@ Rectangle {
                     anchors.top: parent.top
 
                     height: 1
-                    color: root.accent
+                    color: Theme.accent
                 }
 
                 Rectangle {
@@ -345,7 +323,7 @@ Rectangle {
                     anchors.bottom: parent.bottom
 
                     height: 1
-                    color: root.accent
+                    color: Theme.accent
                 }
 
                 Rectangle {
@@ -356,7 +334,7 @@ Rectangle {
                     anchors.bottom: parent.bottom
 
                     width: 3
-                    color: root.accent
+                    color: Theme.accent
                 }
 
                 Rectangle {
@@ -368,7 +346,7 @@ Rectangle {
                     anchors.bottom: parent.bottom
 
                     width: 1
-                    color: root.accent
+                    color: Theme.accent
                 }
                 Row {
                     anchors.fill: parent
@@ -396,7 +374,7 @@ Rectangle {
                             height: 7
                             radius: width / 2
 
-                            color: lengthChanged ? root.warning : root.success
+                            color: lengthChanged ? Theme.warning : Theme.success
                         }
                     }
 
@@ -426,7 +404,7 @@ Rectangle {
                             elide: Text.ElideRight
 
                             text: latestPayloadText
-                            color: root.textPrimary
+                            color: Theme.textPrimary
 
                             font.family: "Consolas"
                             font.pixelSize: 12
@@ -459,8 +437,8 @@ Rectangle {
                                             return "transparent"
 
                                         return payloadLengthChanged
-                                            ? root.warningSubtle
-                                            : root.successSubtle
+                                            ? Theme.warningSubtle
+                                            : Theme.successSubtle
                                     }
 
                                     border.color: {
@@ -468,8 +446,8 @@ Rectangle {
                                             return "transparent"
 
                                         return payloadLengthChanged
-                                            ? "#88601a"
-                                            : "#277b3a"
+                                            ? Theme.warningBorder
+                                            : Theme.successBorder
                                     }
 
                                     border.width: isChangedByte ? 1 : 0
@@ -482,9 +460,9 @@ Rectangle {
 
                                         color: isChangedByte
                                             ? (payloadLengthChanged
-                                                ? root.warning
-                                                : root.success)
-                                            : root.textPrimary
+                                                ? Theme.warning
+                                                : Theme.success)
+                                            : Theme.textPrimary
 
                                         font.family: "Consolas"
                                         font.pixelSize: 12
@@ -518,26 +496,26 @@ Rectangle {
 
                         color: {
                             if (column === 0)
-                                return root.textMuted
+                                return Theme.textMuted
 
                             if (column === 1)
-                                return root.accent
+                                return Theme.accent
 
                             if (column === 2)
                                 return directionText === "Rx"
-                                    ? root.success
-                                    : root.warning
+                                    ? Theme.success
+                                    : Theme.warning
 
                             if (column === 7 && !comparisonAvailable)
-                                return root.textFaint
+                                return Theme.textFaint
 
                             if (column === 7 && lengthChanged)
-                                return root.warning
+                                return Theme.warning
 
                             if (column === 7 && payloadChanged)
-                                return root.success
+                                return Theme.success
 
-                            return root.textPrimary
+                            return Theme.textPrimary
                         }
 
                         font.family: "Consolas"
@@ -561,7 +539,7 @@ Rectangle {
                 contentItem: Rectangle {
                     implicitWidth: 8
                     radius: 4
-                    color: root.borderStrong
+                    color: Theme.borderStrong
                 }
             }
         }
@@ -574,8 +552,8 @@ Rectangle {
             anchors.bottom: parent.bottom
 
             height: 44
-            color: root.surfaceRaised
-            border.color: root.border
+            color: Theme.surfaceRaised
+            border.color: Theme.border
             border.width: 1
 
             Row {
@@ -589,15 +567,15 @@ Rectangle {
                         ? "Selected row " + (root.selectedRow + 1)
                         : "Select a frame to inspect"
                     color: root.selectedRow >= 0
-                        ? root.textMuted
-                        : root.textFaint
+                        ? Theme.textMuted
+                        : Theme.textFaint
                     font.pixelSize: 11
                 }
 
                 Rectangle {
                     width: 1
                     height: 18
-                    color: root.border
+                    color: Theme.border
                 }
 
                 Button {
@@ -609,19 +587,19 @@ Rectangle {
                     background: Rectangle {
                         radius: 3
                         color: openFrameInfoButton.enabled
-                            ? root.accentSubtle
-                            : root.surfaceInset
+                            ? Theme.accentSubtle
+                            : Theme.surfaceInset
                         border.color: openFrameInfoButton.enabled
-                            ? root.accent
-                            : root.border
+                            ? Theme.accent
+                            : Theme.border
                         border.width: 1
                     }
 
                     contentItem: Text {
                         text: openFrameInfoButton.text
                         color: openFrameInfoButton.enabled
-                            ? root.textPrimary
-                            : root.textFaint
+                            ? Theme.textPrimary
+                            : Theme.textFaint
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                         font.pixelSize: 11
@@ -642,19 +620,19 @@ Rectangle {
                     background: Rectangle {
                         radius: 3
                         color: graphSelectedIdButton.enabled
-                            ? root.accentSubtle
-                            : root.surfaceInset
+                            ? Theme.accentSubtle
+                            : Theme.surfaceInset
                         border.color: graphSelectedIdButton.enabled
-                            ? root.accent
-                            : root.border
+                            ? Theme.accent
+                            : Theme.border
                         border.width: 1
                     }
 
                     contentItem: Text {
                         text: graphSelectedIdButton.text
                         color: graphSelectedIdButton.enabled
-                            ? root.textPrimary
-                            : root.textFaint
+                            ? Theme.textPrimary
+                            : Theme.textFaint
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                         font.pixelSize: 11
@@ -675,19 +653,19 @@ Rectangle {
                     background: Rectangle {
                         radius: 3
                         color: createMarkerForRow.enabled
-                            ? root.accentSubtle
-                            : root.surfaceInset
+                            ? Theme.accentSubtle
+                            : Theme.surfaceInset
                         border.color: createMarkerForRow.enabled
-                            ? root.accent
-                            : root.border
+                            ? Theme.accent
+                            : Theme.border
                         border.width: 1
                     }
 
                     contentItem: Text {
                         text: createMarkerForRow.text
                         color: createMarkerForRow.enabled
-                            ? root.textPrimary
-                            : root.textFaint
+                            ? Theme.textPrimary
+                            : Theme.textFaint
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                         font.pixelSize: 11
@@ -706,19 +684,19 @@ Rectangle {
                     background: Rectangle {
                         radius: 3
                         color: openAnalysisMarkers.enabled
-                               ? root.accentSubtle
-                               : root.surfaceInset
+                               ? Theme.accentSubtle
+                               : Theme.surfaceInset
                         border.color: openAnalysisMarkers.enabled
-                                      ? root.accent
-                                      : root.border
+                                      ? Theme.accent
+                                      : Theme.border
                         border.width: 1
                     }
 
                     contentItem: Text {
                         text: openAnalysisMarkers.text
                         color: openAnalysisMarkers.enabled
-                               ? root.textPrimary
-                               : root.textFaint
+                               ? Theme.textPrimary
+                               : Theme.textFaint
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                         font.pixelSize: 11
@@ -736,7 +714,7 @@ Rectangle {
             visible: tableView.rows === 0
 
             text: "Waiting for live CAN traffic"
-            color: root.textMuted
+            color: Theme.textMuted
             font.pixelSize: 16
         }
     }
