@@ -5,6 +5,7 @@
 
 // Qt headers
 #include <QQmlContext>
+#include <QQmlEngine>
 #include <QQuickItem>
 #include <QQuickWidget>
 #include <QUrl>
@@ -21,6 +22,9 @@ LiveChangeExplorerHost::LiveChangeExplorerHost(
 
     quickWidget_ = new QQuickWidget(this);
     quickWidget_->setResizeMode(QQuickWidget::SizeRootObjectToView);
+
+    quickWidget_->engine()->addImportPath(
+        QStringLiteral("qrc:/qml"));
 
     quickWidget_->rootContext()->setContextProperty(
         QStringLiteral("liveChangeExplorerModel"),
@@ -56,14 +60,14 @@ void LiveChangeExplorerHost::openGraphingForRow(int row)
     emit openGraphingRequested(row);
 }
 
-void LiveChangeExplorerHost::createMarkerForRow(int row)
+void LiveChangeExplorerHost::createMarkerForRow(int row, const QString &label)
 {
     if (row < 0)
     {
         return;
     }
 
-    emit createMarkerRequested(row);
+    emit createMarkerRequested(row, label);
 }
 
 void LiveChangeExplorerHost::openAnalysisMarkers()

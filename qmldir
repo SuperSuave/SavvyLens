@@ -1,3 +1,4 @@
 module SavvyLens
 AnalysisMarkersDialog 1.0 qml\AnalysisMarkersDialog.qml
 LiveChangeExplorer 1.0 qml\LiveChangeExplorer.qml
+Theme 1.0 qml\SavvyLens\Theme.qml

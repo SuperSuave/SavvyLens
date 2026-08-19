@@ -1,6 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>qml/LiveChangeExplorer.qml</file>
-        <file>qml/AnalysisMarkersDialog.qml</file>
-    </qresource>
-</RCC>

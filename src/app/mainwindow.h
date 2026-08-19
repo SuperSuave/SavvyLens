@@ -380,7 +380,7 @@ private:
 private slots:
     void openExplorerFrameInfo(int row);
     void openExplorerGraphing(int row);
-    void createExplorerMarker(int row);
+    void createExplorerMarker(int row, const QString &label);
     void showAnalysisMarkers();
     void killEmAll();
     void killWindow(QDialog *win);

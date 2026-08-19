@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/qml">
+        <file>LiveChangeExplorer.qml</file>
+        <file>AnalysisMarkersDialog.qml</file>
+        <file>SavvyLens/qmldir</file>
+        <file>SavvyLens/Theme.qml</file>
+    </qresource>
+</RCC>

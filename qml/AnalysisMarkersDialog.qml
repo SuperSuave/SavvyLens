@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
+import SavvyLens 1.0
 
 Popup {
     id: root
@@ -20,13 +21,13 @@ Popup {
 
     background: Rectangle {
         radius: 5
-        color: "#1a1928"
-        border.color: "#4a4868"
+        color: Theme.surface
+        border.color: Theme.borderStrong
         border.width: 1
     }
 
     contentItem: Rectangle {
-        color: "#1a1928"
+        color: Theme.surface
 
         ColumnLayout {
             anchors.fill: parent
@@ -35,7 +36,7 @@ Popup {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 58
-                color: "#201f32"
+                color: Theme.surfaceRaised
 
                 Rectangle {
                     anchors.left: parent.left
@@ -43,7 +44,7 @@ Popup {
                     anchors.bottom: parent.bottom
 
                     width: 5
-                    color: "#00d4d4"
+                    color: Theme.accent
                 }
 
                 Rectangle {
@@ -52,7 +53,7 @@ Popup {
                     anchors.bottom: parent.bottom
 
                     height: 1
-                    color: "#2e2d44"
+                    color: Theme.border
                 }
 
                 Column {
@@ -63,7 +64,7 @@ Popup {
 
                     Text {
                         text: "ANALYSIS MARKERS"
-                        color: "#e8e8f0"
+                        color: Theme.textPrimary
 
                         font.bold: true
                         font.pixelSize: 15
@@ -72,7 +73,7 @@ Popup {
 
                     Text {
                         text: "Session-only markers created from Live Change Explorer"
-                        color: "#7a7a99"
+                        color: Theme.textMuted
                         font.pixelSize: 11
                     }
                 }
@@ -91,17 +92,17 @@ Popup {
                     background: Rectangle {
                         radius: 3
                         color: closeButton.hovered
-                               ? "#252438"
+                               ? Theme.surfaceInset
                                : "transparent"
                         border.color: closeButton.hovered
-                                      ? "#4a4868"
+                                      ? Theme.borderStrong
                                       : "transparent"
                         border.width: 1
                     }
 
                     contentItem: Text {
                         text: closeButton.text
-                        color: "#e8e8f0"
+                        color: Theme.textPrimary
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                         font.pixelSize: 20
@@ -123,7 +124,7 @@ Popup {
                     Text {
                         Layout.fillWidth: true
                         text: "Read-only in-memory analysis markers. These are separate from legacy bookmarks."
-                        color: "#7a7a99"
+                        color: Theme.textMuted
                         font.pixelSize: 11
                         wrapMode: Text.WordWrap
                     }
@@ -131,15 +132,15 @@ Popup {
                     Rectangle {
                         Layout.fillWidth: true
                         height: 1
-                        color: "#2e2d44"
+                        color: Theme.border
                     }
 
                     Rectangle {
                         Layout.fillWidth: true
                         height: 30
                         radius: 3
-                        color: "#252438"
-                        border.color: "#2e2d44"
+                        color: Theme.surfaceInset
+                        border.color: Theme.border
                         border.width: 1
 
                         RowLayout {
@@ -151,7 +152,7 @@ Popup {
                             Text {
                                 Layout.preferredWidth: 62
                                 text: "MARKER"
-                                color: "#7a7a99"
+                                color: Theme.textMuted
                                 font.bold: true
                                 font.pixelSize: 10
                                 font.letterSpacing: 0.8
@@ -160,7 +161,7 @@ Popup {
                             Text {
                                 Layout.preferredWidth: 145
                                 text: "ANCHOR"
-                                color: "#7a7a99"
+                                color: Theme.textMuted
                                 font.bold: true
                                 font.pixelSize: 10
                                 font.letterSpacing: 0.8
@@ -169,7 +170,7 @@ Popup {
                             Text {
                                 Layout.preferredWidth: 55
                                 text: "BUS"
-                                color: "#7a7a99"
+                                color: Theme.textMuted
                                 font.bold: true
                                 font.pixelSize: 10
                                 font.letterSpacing: 0.8
@@ -178,7 +179,7 @@ Popup {
                             Text {
                                 Layout.preferredWidth: 105
                                 text: "CAN ID"
-                                color: "#7a7a99"
+                                color: Theme.textMuted
                                 font.bold: true
                                 font.pixelSize: 10
                                 font.letterSpacing: 0.8
@@ -187,7 +188,7 @@ Popup {
                             Text {
                                 Layout.fillWidth: true
                                 text: "LABEL"
-                                color: "#7a7a99"
+                                color: Theme.textMuted
                                 font.bold: true
                                 font.pixelSize: 10
                                 font.letterSpacing: 0.8
@@ -199,8 +200,8 @@ Popup {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         radius: 3
-                        color: "#1a1928"
-                        border.color: "#2e2d44"
+                        color: Theme.surface
+                        border.color: Theme.border
                         border.width: 1
                         clip: true
 
@@ -223,10 +224,10 @@ Popup {
                                 radius: 3
 
                                 color: index % 2 === 0
-                                       ? "#201f32"
-                                       : "#252438"
+                                       ? Theme.surfaceRaised
+                                       : Theme.surfaceInset
 
-                                border.color: Qt.rgba(0.180, 0.176, 0.267, 1.0)
+                                border.color: Theme.border
                                 border.width: 1
 
                                 Rectangle {
@@ -235,7 +236,7 @@ Popup {
                                     anchors.bottom: parent.bottom
 
                                     width: 3
-                                    color: "#00d4d4"
+                                    color: Theme.accent
                                 }
 
                                 RowLayout {
@@ -247,14 +248,14 @@ Popup {
                                     Text {
                                         Layout.preferredWidth: 62
                                         text: modelData.number
-                                        color: "#e8e8f0"
+                                        color: Theme.textPrimary
                                         font.pixelSize: 11
                                     }
 
                                     Text {
                                         Layout.preferredWidth: 145
                                         text: modelData.anchorType
-                                        color: "#e8e8f0"
+                                        color: Theme.textPrimary
                                         font.pixelSize: 11
                                         elide: Text.ElideRight
                                     }
@@ -262,14 +263,14 @@ Popup {
                                     Text {
                                         Layout.preferredWidth: 55
                                         text: modelData.bus
-                                        color: "#e8e8f0"
+                                        color: Theme.textPrimary
                                         font.pixelSize: 11
                                     }
 
                                     Text {
                                         Layout.preferredWidth: 105
                                         text: modelData.canId
-                                        color: "#00d4d4"
+                                        color: Theme.accent
                                         font.family: "Consolas"
                                         font.pixelSize: 11
                                     }
@@ -280,8 +281,8 @@ Popup {
                                               ? modelData.label
                                               : "—"
                                         color: modelData.label.length > 0
-                                               ? "#e8e8f0"
-                                               : "#4a4a60"
+                                               ? Theme.textPrimary
+                                               : Theme.textFaint
                                         font.pixelSize: 11
                                         elide: Text.ElideRight
                                     }
@@ -293,7 +294,7 @@ Popup {
                                 visible: markerList.count === 0
 
                                 text: "No analysis markers have been created in this session."
-                                color: "#7a7a99"
+                                color: Theme.textMuted
                                 font.pixelSize: 12
                             }
                         }

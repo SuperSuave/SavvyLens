@@ -2147,7 +2147,9 @@ void MainWindow::showSettingsDialog()
     settingsDialog->show();
 }
 
-void MainWindow::createExplorerMarker(int row)
+void MainWindow::createExplorerMarker(
+    int row,
+    const QString &label)
 {
     if (liveChangeExplorerModel == nullptr)
     {
@@ -2162,7 +2164,7 @@ void MainWindow::createExplorerMarker(int row)
         return;
     }
 
-    analysisSession.addMarker(context);
+    analysisSession.addMarker(context, label);
 }
 
 void MainWindow::showAnalysisMarkers()

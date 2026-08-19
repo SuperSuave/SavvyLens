@@ -395,8 +395,7 @@ FORMS += \
 RESOURCES += \
     icons.qrc \
     images.qrc \
-    qml.qrc \
-    qml.qrc
+    qml/qml.qrc
 
 TRANSLATIONS += \
     translations/SavvyLens_en.ts \
