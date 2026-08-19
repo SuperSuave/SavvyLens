@@ -653,6 +653,38 @@ Rectangle {
                             root.selectedRow)
                     }
                 }
+                Button {
+                    id: createMarkerForRow
+
+                    text: "Create Marker"
+                    enabled: root.selectedRow >= 0
+
+                    background: Rectangle {
+                        radius: 3
+                        color: createMarkerForRow.enabled
+                            ? root.accentSubtle
+                            : root.surfaceInset
+                        border.color: createMarkerForRow.enabled
+                            ? root.accent
+                            : root.border
+                        border.width: 1
+                    }
+
+                    contentItem: Text {
+                        text: createMarkerForRow.text
+                        color: createMarkerForRow.enabled
+                            ? root.textPrimary
+                            : root.textFaint
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        font.pixelSize: 11
+                    }
+
+                    onClicked: {
+                        liveChangeExplorerHost.createMarkerForRow(
+                            root.selectedRow)
+                    }
+                }
             }
         }
 

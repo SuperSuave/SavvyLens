@@ -18,6 +18,7 @@ void AnalysisSession::clear() noexcept
 {
     aggregateStore.clear();
     frameHistory.clear();
+    markerStore.clear();
 }
 
 std::size_t AnalysisSession::aggregateCount() const noexcept
@@ -83,4 +84,23 @@ FrameAggregateKey AnalysisSession::makeKey(const CANFrame &frame)
         frame.frameType(),
         frame.hasExtendedFrameFormat(),
         frame.isReceived};
+}
+
+bool AnalysisSession::addMarker(
+    const SelectionContext &context,
+    const QString &label)
+{
+    if (!context.hasBus() || !context.hasSingleCanId())
+    {
+        return false;
+    }
+
+    markerStore.addMarker(AnalysisMarker(context, label));
+
+    return true;
+}
+
+const QVector<AnalysisMarker> &AnalysisSession::markers() const noexcept
+{
+    return markerStore.markers();
 }

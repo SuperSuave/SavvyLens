@@ -2,9 +2,11 @@
 #define ANALYSISSESSION_H
 
 // SavvyLens headers
+#include "analysis/analysismarkerstore.h"
 #include "analysis/frameaggregatestore.h"
 #include "analysis/framecomparison.h"
 #include "analysis/framehistory.h"
+#include "analysis/selectioncontext.h"
 
 // Qt headers
 #include <QVector>
@@ -43,9 +45,16 @@ public:
 
     static FrameAggregateKey makeKey(const CANFrame &frame);
 
+    bool addMarker(
+        const SelectionContext &context,
+        const QString &label = QString());
+
+    const QVector<AnalysisMarker> &markers() const noexcept;
+
 private:
     FrameAggregateStore aggregateStore;
     FrameHistory frameHistory;
+    AnalysisMarkerStore markerStore;
 };
 
 #endif // ANALYSISSESSION_H

@@ -53,3 +53,13 @@ void LiveChangeExplorerHost::openGraphingForRow(int row)
 
     emit openGraphingRequested(row);
 }
+
+void LiveChangeExplorerHost::createMarkerForRow(int row)
+{
+    if (row < 0)
+    {
+        return;
+    }
+
+    emit createMarkerRequested(row);
+}

@@ -120,6 +120,7 @@ unix:!macx {
 
 SOURCES += \
     src/analysis/analysismarker.cpp \
+    src/analysis/analysismarkerstore.cpp \
     src/analysis/analysissession.cpp \
     src/analysis/frameaggregatestore.cpp \
     src/analysis/framecomparison.cpp \
@@ -231,6 +232,7 @@ SOURCES += \
 HEADERS += \
     config.h \
     src/analysis/analysismarker.h \
+    src/analysis/analysismarkerstore.h \
     src/analysis/analysissession.h \
     src/analysis/frameaggregatestore.h \
     src/analysis/framecomparison.h \

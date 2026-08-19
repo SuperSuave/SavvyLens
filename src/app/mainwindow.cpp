@@ -138,6 +138,11 @@ MainWindow::MainWindow(QWidget *parent) :
                             this);
 
                     connect(liveChangeExplorerHost_,
+                            &LiveChangeExplorerHost::createMarkerRequested,
+                            this,
+                            &MainWindow::createExplorerMarker);
+
+                    connect(liveChangeExplorerHost_,
                             &LiveChangeExplorerHost::openFrameInfoRequested,
                             this,
                             &MainWindow::openExplorerFrameInfo);
@@ -2133,6 +2138,31 @@ void MainWindow::showSettingsDialog()
         connect (settingsDialog, SIGNAL(updatedSettings()), this, SLOT(readUpdateableSettings()));
     }
     settingsDialog->show();
+}
+
+void MainWindow::createExplorerMarker(int row)
+{
+    if (liveChangeExplorerModel == nullptr)
+    {
+        return;
+    }
+
+    const SelectionContext context =
+        liveChangeExplorerModel->selectionContextForRow(row);
+
+    if (context.isEmpty())
+    {
+        return;
+    }
+
+    analysisSession.addMarker(context);
+
+    const bool added = analysisSession.addMarker(context);
+
+    qDebug() << "Explorer marker created:" << added
+             << "count:" << analysisSession.markers().count()
+             << "bus:" << context.bus()
+             << "CAN ID:" << QStringLiteral("0x%1").arg(context.canId(), 0, 16).toUpper();
 }
 
 void MainWindow::openExplorerFrameInfo(int row)
