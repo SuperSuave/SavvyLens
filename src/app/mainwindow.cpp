@@ -1596,21 +1596,25 @@ void MainWindow::gotCenterTimeID(uint32_t ID, double timestamp)
 void MainWindow::clearFrames()
 {
     ui->canFramesView->scrollToTop();
+
     model->clearFrames();
     analysisSession.clear();
+
     if (liveChangeExplorerModel)
     {
         liveChangeExplorerModel->refresh();
     }
 
-    liveChangeExplorerHost_->show();
-    liveChangeExplorerHost_->raise();
-    liveChangeExplorerHost_->activateWindow();
     CANConManager::getInstance()->resetTimeBasis();
-    ui->lbNumFrames->setText(QString::number(model->rowCount()));
+
+    ui->lbNumFrames->setText(
+        QString::number(model->rowCount()));
+
     bDirty = false;
     loadedFileName = "";
+
     updateFileStatus();
+
     emit framesUpdated(-1);
 }
 
