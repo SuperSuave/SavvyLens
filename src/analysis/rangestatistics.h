@@ -91,10 +91,19 @@ struct RangeScanConfig
     bool populateSamples = true;
 };
 
+struct RangeSignalPayloadSupport
+{
+    bool isSupported = false;
+    int highestPayloadByteIndex = -1;
+};
+
 class RangeStatistics
 {
 public:
     // Value extraction primitives
+    static RangeSignalPayloadSupport payloadSupport(int payloadLengthBytes,
+                                                    const RangeSignalSpec &spec);
+                                                    
     static qint64 extractValue(const QByteArray &payload,
                                int startBit,
                                int bitLength,
@@ -107,13 +116,13 @@ public:
     static QVector<qint64> extractSignalValues(const QVector<CANFrame> &frames,
                                               const RangeSignalSpec &spec);
 
-    // Byte-level statistics
+    // Byte-level statistics for one exact CAN ID, including CAN ID 0x000.
     static ByteRangeStats computeByteStats(const QVector<CANFrame> &frames,
                                            int byteIndex,
-                                           quint32 canId = 0);
+                                           quint32 canId);
 
     static QVector<ByteRangeStats> computeAllByteStats(const QVector<CANFrame> &frames,
-                                                      quint32 canId = 0);
+                                                      quint32 canId);
 
     // Single signal evaluation
     static RangeSignalCandidate evaluateSignal(const QVector<CANFrame> &frames,

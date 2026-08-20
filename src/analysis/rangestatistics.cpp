@@ -66,11 +66,73 @@ int ByteRangeStats::signedSpan() const
     return static_cast<int>(maxSigned) - static_cast<int>(minSigned);
 }
 
-qint64 RangeStatistics::extractValue(const QByteArray &payload,
-                                    int startBit,
-                                    int bitLength,
-                                    bool isLittleEndian,
-                                    bool isSigned)
+RangeSignalPayloadSupport RangeStatistics::payloadSupport(
+    int payloadLengthBytes,
+    const RangeSignalSpec &spec)
+{
+    RangeSignalPayloadSupport support;
+
+    if (payloadLengthBytes <= 0 || !spec.isValid())
+    {
+        return support;
+    }
+
+    if (spec.isLittleEndian)
+    {
+        const int payloadBits = payloadLengthBytes * 8;
+
+        if (spec.startBit + spec.bitLength > payloadBits)
+        {
+            return support;
+        }
+
+        support.isSupported = true;
+        support.highestPayloadByteIndex =
+            (spec.startBit + spec.bitLength - 1) / 8;
+
+        return support;
+    }
+
+    int bit = spec.startBit;
+    int highestByteIndex = -1;
+
+    for (int bitPosition = 0;
+         bitPosition < spec.bitLength;
+         ++bitPosition)
+    {
+        const int byteIndex = bit / 8;
+
+        if (byteIndex < 0 || byteIndex >= payloadLengthBytes)
+        {
+            return support;
+        }
+
+        highestByteIndex = qMax(highestByteIndex, byteIndex);
+
+        const int bitInByte = bit % 8;
+
+        if (bitInByte == 0)
+        {
+            bit += 15;
+        }
+        else
+        {
+            --bit;
+        }
+    }
+
+    support.isSupported = true;
+    support.highestPayloadByteIndex = highestByteIndex;
+
+    return support;
+}
+
+qint64 RangeStatistics::extractValue(
+    const QByteArray &payload,
+    int startBit,
+    int bitLength,
+    bool isLittleEndian,
+    bool isSigned)
 {
     if (bitLength <= 0 || bitLength > 64 || startBit < 0 || payload.isEmpty()) {
         return 0;
@@ -133,16 +195,30 @@ qint64 RangeStatistics::extractValue(const QByteArray &payload,
     return extractValue(payload, spec.startBit, spec.bitLength, spec.isLittleEndian, spec.isSigned);
 }
 
-QVector<qint64> RangeStatistics::extractSignalValues(const QVector<CANFrame> &frames,
-                                                    const RangeSignalSpec &spec)
+QVector<qint64> RangeStatistics::extractSignalValues(
+    const QVector<CANFrame> &frames,
+    const RangeSignalSpec &spec)
 {
     QVector<qint64> values;
     values.reserve(frames.size());
 
-    for (const CANFrame &frame : frames) {
-        if (spec.canId == 0 || frame.frameId() == spec.canId) {
-            values.append(extractValue(frame.payload(), spec));
+    for (const CANFrame &frame : frames)
+    {
+        if (frame.frameId() != spec.canId)
+        {
+            continue;
         }
+
+        const RangeSignalPayloadSupport support = payloadSupport(
+            frame.payload().size(),
+            spec);
+
+        if (!support.isSupported)
+        {
+            continue;
+        }
+
+        values.append(extractValue(frame.payload(), spec));
     }
 
     return values;
@@ -164,7 +240,7 @@ ByteRangeStats RangeStatistics::computeByteStats(const QVector<CANFrame> &frames
     bool hasFirst = false;
 
     for (const CANFrame &frame : frames) {
-        if (canId != 0 && frame.frameId() != canId) {
+        if (frame.frameId() != canId) {
             continue;
         }
 
@@ -213,7 +289,7 @@ QVector<ByteRangeStats> RangeStatistics::computeAllByteStats(const QVector<CANFr
 {
     int maxLen = 0;
     for (const CANFrame &frame : frames) {
-        if (canId == 0 || frame.frameId() == canId) {
+        if (frame.frameId() == canId) {
             maxLen = std::max(maxLen, frame.payload().size());
         }
     }
@@ -418,8 +494,19 @@ QVector<RangeSignalCandidate> RangeStatistics::scanCandidates(
         return candidates;
     }
 
-    const int payloadBits = idFrames.first().payload().size() * 8;
-    if (payloadBits <= 0) {
+    int minimumPayloadBytes = idFrames.first().payload().size();
+
+    for (const CANFrame &frame : idFrames)
+    {
+        minimumPayloadBytes = qMin(
+            minimumPayloadBytes,
+            frame.payload().size());
+    }
+
+    const int payloadBits = minimumPayloadBytes * 8;
+
+    if (payloadBits <= 0)
+    {
         return candidates;
     }
 
@@ -476,7 +563,20 @@ QVector<RangeSignalCandidate> RangeStatistics::scanCandidates(
                     spec.isLittleEndian = isLittleEndian;
                     spec.isSigned = isSigned;
 
-                    RangeSignalCandidate candidate = evaluateSignal(idFrames, spec, config.sensitivity, config.populateSamples);
+                    const RangeSignalPayloadSupport support = payloadSupport(
+                        minimumPayloadBytes,
+                        spec);
+
+                    if (!support.isSupported)
+                    {
+                        continue;
+                    }
+
+                    RangeSignalCandidate candidate = evaluateSignal(
+                        idFrames,
+                        spec,
+                        config.sensitivity,
+                        config.populateSamples);
                     if (candidate.isRanging) {
                         candidates.append(candidate);
                         if (candidates.size() >= config.maxCandidates) {

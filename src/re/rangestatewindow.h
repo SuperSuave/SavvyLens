@@ -2,6 +2,7 @@
 #define RANGESTATEWINDOW_H
 
 // SavvyLens headers
+#include "analysis/rangestatistics.h"
 #include "can/can_structs.h"
 
 // QT headers
@@ -29,16 +30,13 @@ private slots:
 private:
     Ui::RangeStateWindow *ui;
     const QVector<CANFrame> *modelFrames;
-    QVector<CANFrame> frameCache;
-    QList<int64_t> foundSignals;
+    QVector<RangeSignalCandidate> foundCandidates;
     QMap<int, bool> idFilters;
 
     void refreshFilterList();
     void closeEvent(QCloseEvent *event);
     void readSettings();
     void writeSettings();
-    void signalsFactory();
-    bool processSignal(int startBit, int bitLength, int sensitivity, bool bigEndian, bool isSigned);
     void createGraph(QVector<int> values);
     bool eventFilter(QObject *obj, QEvent *event);
 };
