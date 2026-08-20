@@ -6,7 +6,9 @@
 
 // Qt headers
 #include <QCanBusFrame>
+#include <QRegularExpression>
 #include <QString>
+#include <QStringList>
 #include <QVariantList>
 
 // C++ standard-library headers
@@ -156,6 +158,26 @@ LiveChangeExplorerModel::LiveChangeExplorerModel(
 {
 }
 
+QString LiveChangeExplorerModel::filterText() const
+{
+    return filterText_;
+}
+
+void LiveChangeExplorerModel::setFilterText(
+    const QString &filterText)
+{
+    if (filterText_ == filterText)
+    {
+        return;
+    }
+
+    filterText_ = filterText;
+
+    emit filterTextChanged();
+
+    refresh();
+}
+
 int LiveChangeExplorerModel::rowCount(
     const QModelIndex &parent) const
 {
@@ -283,7 +305,7 @@ QVariant LiveChangeExplorerModel::data(
 
     case ChangedBitMaskRole:
         return row.changedBitMask;
-        
+
     case ChangedByteIndexesRole:
     {
         QVariantList indexes;
@@ -398,8 +420,32 @@ void LiveChangeExplorerModel::refresh()
     const QVector<FrameAggregateKey> keys = session_.aggregateKeys();
     refreshedRows.reserve(keys.size());
 
+    const QStringList filterTerms = filterText_.split(
+        QRegularExpression(QStringLiteral("[,\\s]+")),
+        Qt::SkipEmptyParts);
+
     for (const FrameAggregateKey &key : keys)
     {
+        const QString displayCanId = canIdText(key.frameId);
+
+        bool matchesFilter = filterTerms.isEmpty();
+
+        for (const QString &filterTerm : filterTerms)
+        {
+            if (displayCanId.contains(
+                    filterTerm,
+                    Qt::CaseInsensitive))
+            {
+                matchesFilter = true;
+                break;
+            }
+        }
+
+        if (!matchesFilter)
+        {
+            continue;
+        }
+
         const FrameAggregate *aggregate = session_.findAggregate(key);
 
         if (!aggregate)

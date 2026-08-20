@@ -8,6 +8,7 @@
 // Qt headers
 #include <QAbstractTableModel>
 #include <QByteArray>
+#include <QString>
 #include <QVector>
 
 // C++ standard headers
@@ -18,6 +19,12 @@ class AnalysisSession;
 class LiveChangeExplorerModel final : public QAbstractTableModel
 {
     Q_OBJECT
+
+    Q_PROPERTY(
+        QString filterText
+        READ filterText
+        WRITE setFilterText
+        NOTIFY filterTextChanged)
 
 public:
     enum Column
@@ -95,14 +102,21 @@ public:
         int role = Qt::DisplayRole) const override;
 
     QHash<int, QByteArray> roleNames() const override;
-    
+
     SelectionContext selectionContextForRow(int row) const;
+
+    QString filterText() const;
+    void setFilterText(const QString &filterText);
+
+signals:
+    void filterTextChanged();
 
 public slots:
     void refresh();
     void clear();
 
 private:
+    QString filterText_;
     const AnalysisSession &session_;
     QVector<Row> rows_;
 };

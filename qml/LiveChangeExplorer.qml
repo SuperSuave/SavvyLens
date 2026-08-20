@@ -150,8 +150,8 @@ Rectangle {
 
                     onAccepted: {
                         liveChangeExplorerHost.createMarkerForRow(
-                            markerLabelDialog.markerRow,
-                            markerLabelField.text.trim())
+                                    markerLabelDialog.markerRow,
+                                    markerLabelField.text.trim())
 
                         markerLabelDialog.close()
                     }
@@ -210,8 +210,8 @@ Rectangle {
 
                         onClicked: {
                             liveChangeExplorerHost.createMarkerForRow(
-                                markerLabelDialog.markerRow,
-                                markerLabelField.text.trim())
+                                        markerLabelDialog.markerRow,
+                                        markerLabelField.text.trim())
 
                             markerLabelDialog.close()
                         }
@@ -578,8 +578,8 @@ Rectangle {
 
                             Repeater {
                                 model: payloadCell.payloadHasChanges
-                                    ? latestPayloadText.split(" ")
-                                    : []
+                                       ? latestPayloadText.split(" ")
+                                       : []
 
                                 Rectangle {
                                     readonly property bool isChangedByte:
@@ -594,8 +594,8 @@ Rectangle {
                                             return "transparent"
 
                                         return payloadLengthChanged
-                                            ? Theme.warningSubtle
-                                            : Theme.successSubtle
+                                                ? Theme.warningSubtle
+                                                : Theme.successSubtle
                                     }
 
                                     border.color: {
@@ -603,8 +603,8 @@ Rectangle {
                                             return "transparent"
 
                                         return payloadLengthChanged
-                                            ? Theme.warningBorder
-                                            : Theme.successBorder
+                                                ? Theme.warningBorder
+                                                : Theme.successBorder
                                     }
 
                                     border.width: isChangedByte ? 1 : 0
@@ -616,10 +616,10 @@ Rectangle {
                                         text: modelData
 
                                         color: isChangedByte
-                                            ? (payloadLengthChanged
-                                                ? Theme.warning
-                                                : Theme.success)
-                                            : Theme.textPrimary
+                                               ? (payloadLengthChanged
+                                                  ? Theme.warning
+                                                  : Theme.success)
+                                               : Theme.textPrimary
 
                                         font.family: "Consolas"
                                         font.pixelSize: 12
@@ -641,15 +641,15 @@ Rectangle {
                         verticalAlignment: Text.AlignVCenter
 
                         text: root.cellText(
-                            column,
-                            bus,
-                            canIdText,
-                            directionText,
-                            formatText,
-                            frameTypeText,
-                            occurrenceCount,
-                            latestPayloadText,
-                            changedBytesText)
+                                  column,
+                                  bus,
+                                  canIdText,
+                                  directionText,
+                                  formatText,
+                                  frameTypeText,
+                                  occurrenceCount,
+                                  latestPayloadText,
+                                  changedBytesText)
 
                         color: {
                             if (column === 0)
@@ -660,8 +660,8 @@ Rectangle {
 
                             if (column === 2)
                                 return directionText === "Rx"
-                                    ? Theme.success
-                                    : Theme.warning
+                                        ? Theme.success
+                                        : Theme.warning
 
                             if (column === 7 && !comparisonAvailable)
                                 return Theme.textFaint
@@ -679,7 +679,7 @@ Rectangle {
                         font.pixelSize: 12
                     }
                 }
-                
+
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
@@ -701,6 +701,15 @@ Rectangle {
             }
         }
 
+        Connections {
+            target: liveChangeExplorerModel
+
+            function onModelReset() {
+                root.selectedRow = -1
+                tableView.contentY = 0
+            }
+        }
+
         Rectangle {
             id: selectionActions
 
@@ -719,20 +728,57 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: 8
 
-                Text {
-                    text: root.selectedRow >= 0
-                        ? "Selected row " + (root.selectedRow + 1)
-                        : "Select a frame to inspect"
-                    color: root.selectedRow >= 0
-                        ? Theme.textMuted
-                        : Theme.textFaint
-                    font.pixelSize: 11
-                }
+                    Text {
+                        text: "Search IDs:"
+                        color: Theme.textMuted
+                        font.pixelSize: 11
+                    }
+
+                    TextField {
+                        id: filterIdsField
+
+                        width: 190
+                        height: 28
+
+                        text: liveChangeExplorerModel.filterText
+                        placeholderText: "e.g. 123, 7E0 0x646"
+                        placeholderTextColor: Theme.textFaint
+                        color: Theme.textPrimary
+                        selectByMouse: true
+
+                        ToolTip.visible: hovered
+                        ToolTip.text:
+                            "Comma- or space-separated CAN ID text; matches any term"
+
+                        background: Rectangle {
+                            radius: 3
+                            color: Theme.surfaceInset
+                            border.color: filterIdsField.activeFocus
+                                          ? Theme.accent
+                                          : Theme.border
+                            border.width: 1
+                        }
+
+                        onTextEdited: {
+                            root.selectedRow = -1
+                            liveChangeExplorerModel.filterText = text
+                        }
+                    }
 
                 Rectangle {
                     width: 1
                     height: 18
                     color: Theme.border
+                }
+
+                Text {
+                    text: root.selectedRow >= 0
+                          ? "Selected row " + (root.selectedRow + 1)
+                          : "Select a frame to inspect"
+                    color: root.selectedRow >= 0
+                           ? Theme.textMuted
+                           : Theme.textFaint
+                    font.pixelSize: 11
                 }
 
                 Button {
@@ -744,19 +790,19 @@ Rectangle {
                     background: Rectangle {
                         radius: 3
                         color: openFrameInfoButton.enabled
-                            ? Theme.accentSubtle
-                            : Theme.surfaceInset
+                               ? Theme.accentSubtle
+                               : Theme.surfaceInset
                         border.color: openFrameInfoButton.enabled
-                            ? Theme.accent
-                            : Theme.border
+                                      ? Theme.accent
+                                      : Theme.border
                         border.width: 1
                     }
 
                     contentItem: Text {
                         text: openFrameInfoButton.text
                         color: openFrameInfoButton.enabled
-                            ? Theme.textPrimary
-                            : Theme.textFaint
+                               ? Theme.textPrimary
+                               : Theme.textFaint
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                         font.pixelSize: 11
@@ -764,7 +810,7 @@ Rectangle {
 
                     onClicked: {
                         liveChangeExplorerHost.openFrameInfoForRow(
-                            root.selectedRow)
+                                    root.selectedRow)
                     }
                 }
 
@@ -777,19 +823,19 @@ Rectangle {
                     background: Rectangle {
                         radius: 3
                         color: graphSelectedIdButton.enabled
-                            ? Theme.accentSubtle
-                            : Theme.surfaceInset
+                               ? Theme.accentSubtle
+                               : Theme.surfaceInset
                         border.color: graphSelectedIdButton.enabled
-                            ? Theme.accent
-                            : Theme.border
+                                      ? Theme.accent
+                                      : Theme.border
                         border.width: 1
                     }
 
                     contentItem: Text {
                         text: graphSelectedIdButton.text
                         color: graphSelectedIdButton.enabled
-                            ? Theme.textPrimary
-                            : Theme.textFaint
+                               ? Theme.textPrimary
+                               : Theme.textFaint
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                         font.pixelSize: 11
@@ -797,10 +843,10 @@ Rectangle {
 
                     onClicked: {
                         liveChangeExplorerHost.openGraphingForRow(
-                            root.selectedRow)
+                                    root.selectedRow)
                     }
                 }
-                
+
                 Button {
                     id: createMarkerForRow
 
@@ -810,19 +856,19 @@ Rectangle {
                     background: Rectangle {
                         radius: 3
                         color: createMarkerForRow.enabled
-                            ? Theme.accentSubtle
-                            : Theme.surfaceInset
+                               ? Theme.accentSubtle
+                               : Theme.surfaceInset
                         border.color: createMarkerForRow.enabled
-                            ? Theme.accent
-                            : Theme.border
+                                      ? Theme.accent
+                                      : Theme.border
                         border.width: 1
                     }
 
                     contentItem: Text {
                         text: createMarkerForRow.text
                         color: createMarkerForRow.enabled
-                            ? Theme.textPrimary
-                            : Theme.textFaint
+                               ? Theme.textPrimary
+                               : Theme.textFaint
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                         font.pixelSize: 11
