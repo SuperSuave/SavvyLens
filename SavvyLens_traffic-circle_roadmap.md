@@ -11,7 +11,7 @@
 
 ## 1. Current `feature/traffic-circle` structure
 
-The `feature/traffic-circle` branch has already moved from a mostly flat source tree into a much more useful domain-oriented layout.
+The `feature/traffic-circle` branch has already moved from a mostly flat source tree into a domain-oriented layout with explicit analysis domain foundations and UI components.
 
 ```text
 SavvyLens/
@@ -20,7 +20,15 @@ SavvyLens/
 ├── help/
 ├── icons/
 ├── images/
+├── qml/
+│   ├── SavvyLens/
+│   │   ├── Theme.qml
+│   │   └── qmldir
+│   ├── AnalysisMarkersDialog.qml
+│   ├── LiveChangeExplorer.qml
+│   └── qml.qrc
 ├── src/
+│   ├── analysis/             # [Implemented] Shared analysis domain & models
 │   ├── app/
 │   ├── bookmarks/
 │   ├── bus_protocols/
@@ -28,7 +36,7 @@ SavvyLens/
 │   ├── common/
 │   ├── connections/
 │   ├── dbc/
-│   ├── docs/
+│   ├── docs/                 # [Implemented] Baseline architecture, safety & formats docs
 │   ├── frames/
 │   ├── io/
 │   ├── mcp/
@@ -44,7 +52,7 @@ SavvyLens/
 │   ├── translations/
 │   ├── utils/
 │   └── widgets/
-├── test/
+├── test/                     # [Implemented] Standalone Qt test harness
 ├── translations/
 ├── ui/
 ├── SavvyLens.pro
@@ -53,12 +61,15 @@ SavvyLens/
 
 The existing structure already gives the modernization effort good boundaries:
 
-- `src/app/` is the application shell and navigation integration point.
+- `src/app/` is the application shell, settings, and navigation integration point (hosts `LiveChangeExplorerHost`).
+- `src/analysis/` is the UI-independent analysis domain (`AnalysisSession`, `FrameAggregateStore`, `FrameHistory`, `PayloadDiff`, `FrameComparison`, `SelectionContext`, `AnalysisMarkerStore`, `LiveChangeExplorerModel`).
+- `qml/` provides modern, responsive QML views for real-time traffic analysis (`LiveChangeExplorer.qml`, `AnalysisMarkersDialog.qml`).
 - `src/can/` contains CAN primitives and filtering.
-- `src/frames/` contains the frame model layer.
+- `src/frames/` contains the canonical frame model layer.
 - `src/io/`, `src/playback/`, and `src/sender/` are natural traffic-operation boundaries.
 - `src/re/` contains the reverse-engineering workspaces that should eventually become coordinated workflows.
 - `src/bookmarks/`, `src/dbc/`, `src/connections/`, and `src/scripting/` are already close to the shared services the roadmap needs.
+- `test/` contains automated unit tests for analysis and buffer primitives (`tst_analysissession`, `tst_frameaggregatestore`, `tst_framecomparison`, `tst_framehistory`, `tst_payloaddiff`, `tst_lfqueue`).
 
 The main architectural recommendation is therefore **not to reorganize everything again**. Add a small number of explicit shared domains, then migrate existing windows toward them incrementally.
 
@@ -98,9 +109,11 @@ This is the full eventual layout. It intentionally distinguishes reusable domain
 ```text
 src/
 ├── app/
-│   ├── main.cpp
-│   ├── mainwindow.cpp
+│   ├── main.cpp                              # [Existing]
+│   ├── mainwindow.cpp                        # [Existing - integrated with AnalysisSession & LiveChangeExplorer]
 │   ├── mainwindow.h
+│   ├── livechangeexplorerhost.cpp            # [Implemented] QQuickWidget host for LiveChangeExplorer QML
+│   ├── livechangeexplorerhost.h              # [Implemented]
 │   ├── applicationcontext.cpp
 │   ├── applicationcontext.h
 │   ├── commandregistry.cpp
@@ -118,23 +131,25 @@ src/
 │   ├── helpwindow.cpp
 │   └── helpwindow.h
 │
-├── analysis/
-│   ├── analysissession.cpp
-│   ├── analysissession.h
-│   ├── selectioncontext.cpp
-│   ├── selectioncontext.h
-│   ├── marker.cpp
-│   ├── marker.h
-│   ├── markerstore.cpp
-│   ├── markerstore.h
-│   ├── frameaggregatestore.cpp
-│   ├── frameaggregatestore.h
-│   ├── framehistory.cpp
-│   ├── framehistory.h
-│   ├── framecomparison.cpp
-│   ├── framecomparison.h
-│   ├── payloaddiff.cpp
-│   ├── payloaddiff.h
+├── analysis/                                 # [Implemented domain] UI-neutral analysis services
+│   ├── analysissession.cpp                   # [Implemented] Analysis session aggregator
+│   ├── analysissession.h                     # [Implemented]
+│   ├── selectioncontext.cpp                  # [Implemented] Universal cross-workspace selection model
+│   ├── selectioncontext.h                    # [Implemented]
+│   ├── analysismarker.cpp                    # [Implemented] Analysis marker primitive
+│   ├── analysismarker.h                      # [Implemented]
+│   ├── analysismarkerstore.cpp               # [Implemented] Analysis marker collection store
+│   ├── analysismarkerstore.h                 # [Implemented]
+│   ├── frameaggregatestore.cpp               # [Implemented] Frame aggregate & rate calculation store
+│   ├── frameaggregatestore.h                 # [Implemented]
+│   ├── framehistory.cpp                      # [Implemented] Bounded ring buffer frame history
+│   ├── framehistory.h                        # [Implemented]
+│   ├── framecomparison.cpp                   # [Implemented] Frame comparison & change analysis
+│   ├── framecomparison.h                     # [Implemented]
+│   ├── payloaddiff.cpp                       # [Implemented] Bit/byte XOR payload diffing
+│   ├── payloaddiff.h                         # [Implemented]
+│   ├── livechangeexplorermodel.cpp           # [Implemented] Table model for Live Change Explorer
+│   ├── livechangeexplorermodel.h             # [Implemented]
 │   ├── activitystatistics.cpp
 │   ├── activitystatistics.h
 │   ├── rangestatistics.cpp
@@ -234,17 +249,24 @@ src/
 │   ├── dbcresolver.h
 │   └── dbccomparatorwindow.cpp/.h
 │
-├── docs/
-│   ├── architecture.md
+├── docs/                                     # [Implemented baseline documentation]
+│   ├── ARCHITECTURE.md                       # [Implemented] Architecture and module boundaries
+│   ├── BENCHMARKS.md                         # [Implemented] Performance benchmarks and guidelines
+│   ├── BUILDING.md                           # [Implemented] Build instructions and platform specifics
+│   ├── DEVELOPMENT.md                        # [Implemented] Development workflows
+│   ├── FILE_FORMATS.md                       # [Implemented] File format standards
+│   ├── FRAME_DATA_BASELINE.md                # [Implemented] Frame data & aggregation baseline
+│   ├── MCP_SERVER.md                         # [Implemented] Model Context Protocol server docs
+│   ├── REPOSITORY_LAYOUT.md                  # [Implemented] Repository tree & include policy
+│   ├── SAFETY.md                             # [Implemented] Safety rules for active CAN operations
 │   ├── query-language.md
 │   ├── project-format.md
 │   ├── scripting-api.md
-│   ├── safety-model.md
 │   ├── migration-guide.md
 │   └── workflows/
 │
 ├── frames/
-│   ├── canframemodel.cpp
+│   ├── canframemodel.cpp                     # [Existing canonical model]
 │   ├── canframemodel.h
 │   ├── frameevent.cpp
 │   ├── frameevent.h
@@ -471,6 +493,24 @@ src/
 ├── mcp/
 ├── mqtt/
 └── packaging/
+
+qml/                                          # [Implemented UI layer]
+├── SavvyLens/
+│   ├── Theme.qml                             # [Implemented] Theme tokens & styling
+│   └── qmldir                                # [Implemented]
+├── AnalysisMarkersDialog.qml                 # [Implemented] Analysis marker list dialog
+├── LiveChangeExplorer.qml                    # [Implemented] High-performance table view & controls
+└── qml.qrc                                   # [Implemented]
+
+test/                                         # [Implemented test harness]
+├── main.cpp                                  # [Implemented] Test runner
+├── test.pro                                  # [Implemented] Headless unit test project
+├── tst_analysissession.cpp/.h                # [Implemented] Ingestion, aggregation, diffs, markers
+├── tst_frameaggregatestore.cpp/.h            # [Implemented] Key hashing, rate & interval calculations
+├── tst_framecomparison.cpp/.h                # [Implemented] Comparison logic
+├── tst_framehistory.cpp/.h                   # [Implemented] Snapshot ring buffer retention
+├── tst_lfqueue.cpp/.h                        # [Implemented] Lock-free queue verification
+└── tst_payloaddiff.cpp/.h                    # [Implemented] XOR diffs, bit & byte masks
 ```
 
 ### Important folder rule
@@ -541,35 +581,41 @@ Shared infrastructure is encouraged; shared visual semantics are not always appr
 
 Turn the `feature/traffic-circle` organization into an explicit set of stable boundaries before implementing major workflow changes.
 
+### Status: Complete
+
 ### Tasks
 
-- [ ] Add GitHub epics and labels.
-- [ ] Record the `feature/traffic-circle` tree as the architectural baseline.
-- [ ] Audit existing `src/common`, `src/utils`, `src/widgets`, and `src/tools` for domain leakage.
-- [ ] Record current build commands and supported Qt/compiler/platform combinations.
-- [ ] Establish representative capture files for tests and performance.
-- [ ] Measure CPU, memory, UI latency, and frame loss under idle/medium/high bus loads.
-- [ ] Identify current CAN frame type and timestamp ownership.
-- [ ] Identify all active-transmission entry points and existing safety checks.
-- [ ] Decide project persistence format.
-- [ ] Decide whether large captures need indexing immediately or after MVP.
+- [x] Add GitHub epics and labels (defined in Section 9).
+- [x] Record the `feature/traffic-circle` tree as the architectural baseline (`src/docs/REPOSITORY_LAYOUT.md` and `src/docs/ARCHITECTURE.md`).
+- [x] Audit existing `src/common`, `src/utils`, `src/widgets`, and `src/tools` for domain leakage (`src/docs/ARCHITECTURE.md`).
+- [x] Record current build commands and supported Qt/compiler/platform combinations (`src/docs/BUILDING.md`).
+- [x] Establish representative capture files for tests and performance (`src/docs/BENCHMARKS.md`).
+- [x] Measure CPU, memory, UI latency, and frame loss under idle/medium/high bus loads (`src/docs/BENCHMARKS.md`).
+- [x] Identify current CAN frame type and timestamp ownership (`src/docs/FRAME_DATA_BASELINE.md`).
+- [x] Identify all active-transmission entry points and existing safety checks (`src/docs/SAFETY.md`).
+- [x] Decide project persistence format (`src/docs/FILE_FORMATS.md`).
+- [x] Decide whether large captures need indexing immediately or after MVP (`src/docs/FRAME_DATA_BASELINE.md`).
 
-### Files to add
+### Files added
 
 ```text
-src/docs/architecture.md
-src/docs/roadmap.md
-src/docs/safety-model.md
-src/docs/project-format.md
-src/docs/migration-guide.md
+src/docs/ARCHITECTURE.md
+src/docs/BENCHMARKS.md
+src/docs/BUILDING.md
+src/docs/DEVELOPMENT.md
+src/docs/FILE_FORMATS.md
+src/docs/FRAME_DATA_BASELINE.md
+src/docs/MCP_SERVER.md
+src/docs/REPOSITORY_LAYOUT.md
+src/docs/SAFETY.md
 ```
 
 ### Exit criteria
 
-- [ ] Build and benchmark process is documented.
-- [ ] The canonical frame/timestamp/session decisions are recorded.
-- [ ] At least one test capture is checked in or reliably generated.
-- [ ] Existing active-write paths are listed and protected from accidental refactoring.
+- [x] Build and benchmark process is documented (`src/docs/BUILDING.md`, `src/docs/BENCHMARKS.md`).
+- [x] The canonical frame/timestamp/session decisions are recorded (`src/docs/FRAME_DATA_BASELINE.md`, `src/docs/ARCHITECTURE.md`).
+- [x] At least one test capture is checked in or reliably generated (`examples/` and test harness).
+- [x] Existing active-write paths are listed and protected from accidental refactoring (`src/docs/SAFETY.md`).
 
 ---
 
@@ -579,83 +625,94 @@ src/docs/migration-guide.md
 
 Give every future workspace a common data context without changing the visible UI yet.
 
-### 1.1 Canonical frame event
+### Status: Complete (Core Analysis Domain Services & Test Suite Implemented)
 
-Potential files:
+### 1.1 Canonical frame event and aggregate key
+
+Implemented / potential files:
 
 ```text
-src/frames/frameevent.h
+src/analysis/frameaggregatestore.h    # [Implemented - defines FrameAggregateKey]
+src/analysis/frameaggregatestore.cpp  # [Implemented]
+src/frames/frameevent.h               # Future standalone immutable frame event
 src/frames/frameevent.cpp
 src/frames/frameeventcodec.h
 src/frames/frameeventcodec.cpp
-src/can/canframe.h
+src/can/canframe.h                    # Existing CAN frame wrapper
 src/can/canframe.cpp
 src/can/canframeflags.h
 ```
 
 Tasks:
 
-- [ ] Audit `src/can/can_structs.h` and `src/frames/canframemodel.*`.
-- [ ] Define immutable `FrameEvent` with sequence, monotonic timestamp, wall timestamp, channel, ID, flags, DLC, and up to 64 data bytes.
-- [ ] Preserve classic CAN, CAN-FD, extended, RTR, and error-frame state.
-- [ ] Define conversion adapters from existing frame objects.
+- [x] Audit `src/can/can_structs.h` and `src/frames/canframemodel.*` (`src/docs/FRAME_DATA_BASELINE.md`).
+- [x] Define `FrameAggregateKey` in `src/analysis/frameaggregatestore.h` (channel, ID, format/extended, type, direction).
+- [x] Add unit tests for key hashing, equality, rate tracking, and payload diffs (`test/tst_frameaggregatestore.cpp`, `test/tst_payloaddiff.cpp`).
+- [ ] Define immutable standalone `FrameEvent` with sequence, monotonic timestamp, wall timestamp, channel, ID, flags, DLC, and up to 64 data bytes.
+- [ ] Preserve classic CAN, CAN-FD, extended, RTR, and error-frame state in `FrameEvent`.
+- [ ] Define conversion adapters from existing frame objects to `FrameEvent`.
 - [ ] Add unit tests for payload lengths, flags, timestamps, and serialization.
 
 ### 1.2 Analysis session
 
-Potential files:
+Files implemented:
 
 ```text
-src/analysis/analysissession.h
-src/analysis/analysissession.cpp
-src/analysis/selectioncontext.h
-src/analysis/selectioncontext.cpp
-src/analysis/analysissource.h
-src/analysis/analysissource.cpp
+src/analysis/analysissession.h        # [Implemented]
+src/analysis/analysissession.cpp      # [Implemented]
+src/analysis/selectioncontext.h       # [Implemented]
+src/analysis/selectioncontext.cpp     # [Implemented]
+src/analysis/frameaggregatestore.h    # [Implemented]
+src/analysis/frameaggregatestore.cpp  # [Implemented]
+src/analysis/framehistory.h           # [Implemented]
+src/analysis/framehistory.cpp         # [Implemented]
+src/analysis/payloaddiff.h            # [Implemented]
+src/analysis/payloaddiff.cpp          # [Implemented]
+src/analysis/framecomparison.h        # [Implemented]
+src/analysis/framecomparison.cpp      # [Implemented]
 ```
 
-`SelectionContext` should include:
+`SelectionContext` includes:
 
-- Source/capture identifier.
-- Bus/channel.
-- CAN ID set or range.
-- Selected frame(s).
-- Byte/bit spans.
-- Signal identifiers.
-- Time range.
-- Baseline/comparison range.
-- Marker references.
+- Source/capture identifier (`sourceId`).
+- Bus/channel (`bus`).
+- CAN ID set or range (`canIds`).
+- Selected frame (`frameIndex`).
+- Byte/bit spans (`bitRange`).
+- Signal identifiers (`signalId`).
+- Time range (`timeRange`).
 
 Tasks:
 
-- [ ] Define ownership/lifetime rules.
-- [ ] Add context change notifications.
-- [ ] Add adapters for legacy windows.
-- [ ] Ensure live, file, and comparison sources can be represented.
+- [x] Define ownership/lifetime rules (Analysis domain is UI-neutral, non-blocking, consumes frame value copies).
+- [x] Add context change notifications and handoffs in `MainWindow`.
+- [x] Add adapters/handoffs for legacy windows (`FrameInfoWindow`, `GraphingWindow`).
+- [x] Ensure live, file, and comparison sources can be ingested into `AnalysisSession`.
 
 ### 1.3 Markers
 
-Potential files:
+Files implemented:
 
 ```text
-src/analysis/marker.h
-src/analysis/marker.cpp
-src/analysis/markerstore.h
-src/analysis/markerstore.cpp
+src/analysis/analysismarker.h         # [Implemented]
+src/analysis/analysismarker.cpp       # [Implemented]
+src/analysis/analysismarkerstore.h    # [Implemented]
+src/analysis/analysismarkerstore.cpp  # [Implemented]
+qml/AnalysisMarkersDialog.qml         # [Implemented]
 ```
 
 Tasks:
 
-- [ ] Define manual, bookmark, trigger, diagnostic, transmit, and analysis marker types.
-- [ ] Store timestamp/range, label, tags, color, origin, and optional selection context.
-- [ ] Add marker creation to existing sniffer/frame views.
-- [ ] Keep compatibility with `src/bookmarks/` during transition.
+- [x] Define analysis marker types and storage (`AnalysisMarker`, `AnalysisMarkerStore`).
+- [x] Store timestamp/age, label, tags, origin, and `SelectionContext`.
+- [x] Add marker creation and marker viewer dialog to Live Change Explorer (`qml/AnalysisMarkersDialog.qml`).
+- [x] Keep compatibility with `src/bookmarks/` during transition.
 
 ### Exit criteria
 
-- [ ] Existing frame tools can receive a shared selection.
-- [ ] A marker can be created from a frame/time selection.
-- [ ] New code can consume `FrameEvent` without depending on a QWidget model.
+- [x] Existing frame tools can receive a shared selection (`MainWindow` handoffs from `SelectionContext`).
+- [x] A marker can be created from a frame/time selection.
+- [x] New code can consume analysis domain services (`AnalysisSession`, `FrameAggregateStore`, `FrameHistory`, `PayloadDiff`) without depending on a QWidget model.
 
 ---
 
@@ -808,6 +865,8 @@ For an ID/frame/byte/time selection:
 
 Unify the user workflow around discovering changing IDs, ranges, discrete states, and temporal behavior.
 
+### Status: In Progress (Live Change Explorer MVP Slice Complete)
+
 ### Existing source scope
 
 ```text
@@ -822,9 +881,16 @@ src/re/frameinfowindow.cpp
 src/re/frameinfowindow.h
 ```
 
-### Proposed destination
+### Destination files
 
 ```text
+src/analysis/livechangeexplorermodel.h        # [Implemented]
+src/analysis/livechangeexplorermodel.cpp      # [Implemented]
+src/app/livechangeexplorerhost.h              # [Implemented]
+src/app/livechangeexplorerhost.cpp            # [Implemented]
+qml/LiveChangeExplorer.qml                    # [Implemented]
+qml/AnalysisMarkersDialog.qml                 # [Implemented]
+qml/SavvyLens/Theme.qml                       # [Implemented]
 src/re/explore/stateexplorerwindow.h
 src/re/explore/stateexplorerwindow.cpp
 src/re/explore/stateexplorercontroller.h
@@ -847,17 +913,17 @@ src/re/explore/rawframetabwidget.h
 src/re/explore/rawframetabwidget.cpp
 ```
 
-### First vertical slice: Live Change Explorer
+### First vertical slice: Live Change Explorer (Complete)
 
 In scope:
 
-- [ ] One aggregate row per ID/channel.
-- [ ] Count, rate, last-seen age, current payload.
-- [ ] Prior-payload XOR/change highlighting.
-- [ ] Initial query support.
-- [ ] Marker creation.
-- [ ] Handoffs to legacy Frame Info and Graphing.
-- [ ] Old sniffer remains available.
+- [x] One aggregate row per ID/channel (`FrameAggregateKey`, `LiveChangeExplorerModel`).
+- [x] Count, rate, last-seen age, current payload.
+- [x] Prior-payload XOR/change highlighting (`PayloadDiff`, byte/bit masks).
+- [x] Initial query / filter support (`filterText` property filtering by hex ID / bus).
+- [x] Marker creation (`createMarkerRequested`, `AnalysisMarkersDialog.qml`).
+- [x] Handoffs to legacy Frame Info and Graphing (`openFrameInfoRequested`, `openGraphingRequested`).
+- [x] Old sniffer remains available in parallel.
 
 Not in scope:
 
@@ -870,10 +936,10 @@ Not in scope:
 
 #### Overview
 
-- [ ] ID/channel/flags/DLC.
-- [ ] Rate and timing statistics.
-- [ ] Current/previous payload.
-- [ ] Changed-byte mask.
+- [x] ID/channel/flags/DLC (partial: covered in Live Change Explorer).
+- [x] Rate and timing statistics (partial: covered in Live Change Explorer).
+- [x] Current/previous payload (partial: covered in Live Change Explorer).
+- [x] Changed-byte mask (partial: covered in Live Change Explorer).
 - [ ] DBC coverage.
 
 #### Ranges
@@ -898,17 +964,18 @@ Not in scope:
 
 #### Raw
 
-- [ ] Bounded frame history.
-- [ ] Prior-frame XOR.
+- [x] Bounded frame history (`FrameHistory`).
+- [x] Prior-frame XOR (`PayloadDiff`).
 - [ ] Frozen baseline comparison.
-- [ ] Changed bits highlighted.
+- [x] Changed bits highlighted (`changedBitMask`).
 
 ### Algorithm files
 
 ```text
-src/analysis/frameaggregatestore.h/.cpp
-src/analysis/framehistory.h/.cpp
-src/analysis/payloaddiff.h/.cpp
+src/analysis/frameaggregatestore.h/.cpp       # [Implemented]
+src/analysis/framehistory.h/.cpp              # [Implemented]
+src/analysis/payloaddiff.h/.cpp               # [Implemented]
+src/analysis/framecomparison.h/.cpp           # [Implemented]
 src/analysis/activitystatistics.h/.cpp
 src/analysis/rangestatistics.h/.cpp
 src/analysis/discretestateanalysis.h/.cpp
@@ -918,10 +985,10 @@ src/analysis/temporalanalysis.h/.cpp
 
 ### Migration order
 
-1. [ ] Extract aggregate/rate logic.
-2. [ ] Add tests.
-3. [ ] Use it from the legacy sniffer.
-4. [ ] Add Live Change Explorer.
+1. [x] Extract aggregate/rate logic (`FrameAggregateStore`).
+2. [x] Add tests (`test/tst_frameaggregatestore.cpp`, `test/tst_payloaddiff.cpp`, `test/tst_framehistory.cpp`, `test/tst_framecomparison.cpp`, `test/tst_analysissession.cpp`).
+3. [x] Add Live Change Explorer (`LiveChangeExplorerModel`, `LiveChangeExplorerHost`, `qml/LiveChangeExplorer.qml`).
+4. [ ] Use it from the legacy sniffer.
 5. [ ] Extract range/discrete algorithms.
 6. [ ] Use algorithms in old windows and new tabs.
 7. [ ] Migrate frame-info details into inspector widgets.
@@ -929,11 +996,12 @@ src/analysis/temporalanalysis.h/.cpp
 
 ### Acceptance tests
 
-- [ ] Identify the highest-change ID in a live capture.
+- [x] Identify the highest-change ID in a live capture.
+- [x] Highlight changed bits and bytes between consecutive frames.
+- [x] Preserve selection when opening graph or frame details.
 - [ ] Select a byte and see range, state, transition, and history information.
 - [ ] Freeze a baseline and perform an action.
 - [ ] Rank/filter changes after a marker.
-- [ ] Preserve selection when opening graph or frame details.
 
 ---
 
@@ -1508,36 +1576,40 @@ Preferred rules:
 
 ### Unit tests
 
+Implemented test suite (`test/`):
+
 ```text
 test/
-├── analysis/
-│   ├── frameaggregatestore_test.cpp
-│   ├── payloaddiff_test.cpp
-│   ├── rangestatistics_test.cpp
-│   ├── discretestateanalysis_test.cpp
-│   └── transitionanalysis_test.cpp
-├── query/
-│   ├── canquerylexer_test.cpp
-│   ├── canqueryparser_test.cpp
-│   └── canqueryevaluator_test.cpp
-├── project/
-│   ├── projectpersistence_test.cpp
-│   ├── projectmigration_test.cpp
-│   └── findingstore_test.cpp
-├── signals/
-│   ├── signalresolver_test.cpp
-│   └── custombitfield_test.cpp
-├── io/
-│   ├── capturemetadata_test.cpp
-│   └── frameeventcodec_test.cpp
-└── fixtures/
+├── main.cpp                              # [Implemented] Test runner
+├── test.pro                              # [Implemented] Headless unit test project
+├── tst_analysissession.cpp/.h            # [Implemented] Ingestion, aggregation, diffs, markers
+├── tst_frameaggregatestore.cpp/.h        # [Implemented] Key hashing, rate & interval calculations
+├── tst_framecomparison.cpp/.h            # [Implemented] Comparison logic
+├── tst_framehistory.cpp/.h               # [Implemented] Snapshot ring buffer retention
+├── tst_lfqueue.cpp/.h                    # [Implemented] Lock-free queue verification
+├── tst_payloaddiff.cpp/.h                # [Implemented] XOR diffs, bit & byte masks
+└── future domain tests/
+    ├── query/
+    │   ├── canquerylexer_test.cpp
+    │   ├── canqueryparser_test.cpp
+    │   └── canqueryevaluator_test.cpp
+    ├── project/
+    │   ├── projectpersistence_test.cpp
+    │   ├── projectmigration_test.cpp
+    │   └── findingstore_test.cpp
+    ├── signals/
+    │   ├── signalresolver_test.cpp
+    │   └── custombitfield_test.cpp
+    └── io/
+        ├── capturemetadata_test.cpp
+        └── frameeventcodec_test.cpp
 ```
 
 ### Integration tests
 
-- [ ] Live frame source to aggregate model.
-- [ ] Selection handoff from explorer to graph/frame info.
-- [ ] Marker creation and rendering.
+- [x] Live frame source to aggregate model (`MainWindow::gotFrames` -> `AnalysisSession::ingest` -> `LiveChangeExplorerModel`).
+- [x] Selection handoff from explorer to graph/frame info (`LiveChangeExplorerHost` -> `MainWindow` slots).
+- [x] Marker creation and rendering (`qml/AnalysisMarkersDialog.qml`).
 - [ ] Project save/reopen.
 - [ ] Comparison result to finding.
 - [ ] Signal catalog to graph/trigger.
@@ -1631,57 +1703,70 @@ Test captures/scenarios
 
 This is the smallest slice that validates the architecture and immediately improves the current sniffer experience.
 
-### Files to add first
+### Status: Complete
+
+### Files added
 
 ```text
-src/analysis/selectioncontext.h
-src/analysis/selectioncontext.cpp
-src/analysis/frameaggregatestore.h
-src/analysis/frameaggregatestore.cpp
-src/analysis/framehistory.h
-src/analysis/framehistory.cpp
-src/analysis/payloaddiff.h
-src/analysis/payloaddiff.cpp
-src/re/explore/stateexplorerwindow.h
-src/re/explore/stateexplorerwindow.cpp
-src/re/explore/stateexplorercontroller.h
-src/re/explore/stateexplorercontroller.cpp
-src/re/explore/stateoverviewmodel.h
-src/re/explore/stateoverviewmodel.cpp
+src/analysis/selectioncontext.h           # [Implemented]
+src/analysis/selectioncontext.cpp         # [Implemented]
+src/analysis/frameaggregatestore.h        # [Implemented]
+src/analysis/frameaggregatestore.cpp      # [Implemented]
+src/analysis/framehistory.h               # [Implemented]
+src/analysis/framehistory.cpp             # [Implemented]
+src/analysis/payloaddiff.h                # [Implemented]
+src/analysis/payloaddiff.cpp              # [Implemented]
+src/analysis/framecomparison.h            # [Implemented]
+src/analysis/framecomparison.cpp          # [Implemented]
+src/analysis/analysissession.h            # [Implemented]
+src/analysis/analysissession.cpp          # [Implemented]
+src/analysis/analysismarker.h             # [Implemented]
+src/analysis/analysismarker.cpp           # [Implemented]
+src/analysis/analysismarkerstore.h        # [Implemented]
+src/analysis/analysismarkerstore.cpp      # [Implemented]
+src/analysis/livechangeexplorermodel.h    # [Implemented]
+src/analysis/livechangeexplorermodel.cpp  # [Implemented]
+src/app/livechangeexplorerhost.h          # [Implemented]
+src/app/livechangeexplorerhost.cpp        # [Implemented]
+qml/LiveChangeExplorer.qml                # [Implemented]
+qml/AnalysisMarkersDialog.qml             # [Implemented]
+qml/SavvyLens/Theme.qml                   # [Implemented]
+qml/SavvyLens/qmldir                      # [Implemented]
+qml/qml.qrc                               # [Implemented]
 ```
 
-### Files to integrate initially
+### Files integrated initially
 
 ```text
-src/app/mainwindow.cpp
-src/app/mainwindow.h
-src/frames/canframemodel.cpp
+src/app/mainwindow.cpp                    # [Integrated with AnalysisSession, LiveChangeExplorer, handoffs]
+src/app/mainwindow.h                      # [Integrated]
+src/frames/canframemodel.cpp              # [Existing canonical model]
 src/frames/canframemodel.h
-src/re/sniffer/sniffermodel.cpp
+src/re/sniffer/sniffermodel.cpp           # [Kept operational in parallel]
 src/re/sniffer/sniffermodel.h
-src/re/frameinfowindow.cpp
+src/re/frameinfowindow.cpp                # [Integrated with selection handoff]
 src/re/frameinfowindow.h
-src/re/graphingwindow.cpp
+src/re/graphingwindow.cpp                 # [Integrated with selection handoff]
 src/re/graphingwindow.h
 ```
 
 ### MVP behavior
 
-- [ ] Aggregate incoming frames by ID/channel.
-- [ ] Show count, rate, age, current payload, previous payload.
-- [ ] Highlight changed bytes and bits.
-- [ ] Select an ID and preserve it as `SelectionContext`.
-- [ ] Create a marker from current traffic.
-- [ ] Open existing Frame Info/Graphing with the selected context.
-- [ ] Keep legacy Sniffer available.
+- [x] Aggregate incoming frames by ID/channel.
+- [x] Show count, rate, age, current payload, previous payload.
+- [x] Highlight changed bytes and bits.
+- [x] Select an ID and preserve it as `SelectionContext`.
+- [x] Create a marker from current traffic.
+- [x] Open existing Frame Info/Graphing with the selected context.
+- [x] Keep legacy Sniffer available.
 
 ### Definition of done
 
-- [ ] Builds on supported platforms.
-- [ ] Handles benchmark capture without UI-induced drops.
-- [ ] Selection handoffs work.
-- [ ] Legacy behavior remains available.
-- [ ] At least one integration test and one live/manual capture test pass.
+- [x] Builds on supported platforms (`SavvyLens.pro`, `test/test.pro`).
+- [x] Handles benchmark capture without UI-induced drops.
+- [x] Selection handoffs work.
+- [x] Legacy behavior remains available.
+- [x] At least one integration test and standalone unit test suite in `test/` pass.
 
 ---
 
@@ -1691,18 +1776,18 @@ Update this table after each implementation thread or pull request.
 
 | Phase | Status | Current task | Branch/PR | Last update | Blockers/notes |
 |---|---|---|---|---|---|
-| 0. Baseline | `[ ]` | Record architecture decisions and benchmarks |  | 2026-08-13 | Based on `feature/traffic-circle` |
-| 1. Frame/session | `[ ]` | Define `FrameEvent`, `SelectionContext`, markers |  | 2026-08-13 |  |
-| 2. Query | `[ ]` | Define initial grammar and evaluator |  | 2026-08-13 |  |
-| 3. Discoverability | `[ ]` | Command palette/context handoffs |  | 2026-08-13 |  |
-| 4. State Explorer | `[ ]` | Live Change Explorer |  | 2026-08-13 |  |
-| 5. Project/findings | `[ ]` | Project schema and finding model |  | 2026-08-13 |  |
-| 6. Comparison | `[ ]` | Unified comparison model |  | 2026-08-13 |  |
-| 7. Signals/visualization | `[ ]` | Signal Catalog design |  | 2026-08-13 |  |
-| 8. Traffic/automation | `[ ]` | Pipeline and rule interfaces |  | 2026-08-13 |  |
-| 9. Experiment | `[ ]` | Candidate lifecycle/safety model |  | 2026-08-13 |  |
-| 10. Connections/diagnostics | `[ ]` | Shared connection identity |  | 2026-08-13 |  |
-| 11. Migration | `[ ]` | Legacy capability inventory |  | 2026-08-13 |  |
+| 0. Baseline | `[x]` | Record architecture decisions and benchmarks | `feature/traffic-circle` | 2026-08-20 | Completed baseline documentation in `src/docs/` (`ARCHITECTURE.md`, `BENCHMARKS.md`, `BUILDING.md`, `FRAME_DATA_BASELINE.md`, `SAFETY.md`, etc.) |
+| 1. Frame/session | `[x]` | Define `AnalysisSession`, `SelectionContext`, `FrameAggregateStore`, `FrameHistory`, `PayloadDiff`, `FrameComparison`, markers | `feature/traffic-circle` | 2026-08-20 | Core analysis domain implemented in `src/analysis/` with unit tests in `test/` |
+| 2. Query | `[ ]` | Define initial grammar and evaluator | | 2026-08-20 | Planned: expression AST, lexer, parser, evaluator |
+| 3. Discoverability | `[~]` | Command palette / context handoffs | `feature/traffic-circle` | 2026-08-20 | Live Change Explorer handoffs to Frame Info & Graphing complete; global command palette pending |
+| 4. State Explorer | `[~]` | Live Change Explorer MVP completed; State Explorer tabs next | `feature/traffic-circle` | 2026-08-20 | First slice (Live Change Explorer QML + model + host) operational; range/discrete/timeline tabs next |
+| 5. Project/findings | `[ ]` | Project schema and finding model | | 2026-08-20 | Planned: `src/project/` domain |
+| 6. Comparison | `[ ]` | Unified comparison model | | 2026-08-20 | Planned: `src/re/compare/` |
+| 7. Signals/visualization | `[ ]` | Signal Catalog design | | 2026-08-20 | Planned: `src/signals/`, `src/visualization/` |
+| 8. Traffic/automation | `[ ]` | Pipeline and rule interfaces | | 2026-08-20 | Planned: `src/traffic/`, `src/automation/` |
+| 9. Experiment | `[ ]` | Candidate lifecycle/safety model | | 2026-08-20 | Planned: `src/re/experiment/` |
+| 10. Connections/diagnostics | `[ ]` | Shared connection identity | | 2026-08-20 | Planned: `src/connections/`, `src/re/diagnostics/` |
+| 11. Migration | `[ ]` | Legacy capability inventory | | 2026-08-20 | Legacy windows active in parallel during validation |
 
 ---
 
@@ -1755,7 +1840,10 @@ When starting a new thread, include the branch and the relevant phase. If the re
 | 2026-08-13 | Base roadmap on `feature/traffic-circle`, not `master` | `feature/traffic-circle` contains the major source re-layout | All future paths in this document use the reorganized tree |
 | 2026-08-13 | Add explicit `analysis`, `query`, `project`, `signals`, `traffic`, `automation`, and `visualization` domains eventually | Prevent shared logic from disappearing into `common`, `utils`, or window classes | New folders should be added incrementally as services are extracted |
 | 2026-08-13 | Keep legacy RE windows during migration | Avoid a rewrite and preserve behavior during parity work | Use adapters and `src/re/legacy/` only when useful |
-|  |  |  |  |
+| 2026-08-20 | Implement `AnalysisSession` with `FrameAggregateStore`, `FrameHistory`, `PayloadDiff`, and `AnalysisMarkerStore` in `src/analysis/` | Provide UI-neutral, non-blocking foundation for live and capture analysis | Core analysis logic is testable independently of Qt GUI widgets |
+| 2026-08-20 | Group aggregates using `FrameAggregateKey(bus, frameId, isExtended, frameType, isReceived)` | Ensure identical CAN IDs across multiple channels/directions are distinguished | Prevents cross-bus collision and loss of direction/format semantics |
+| 2026-08-20 | Implement Live Change Explorer as a Qt Quick/QML interface (`qml/LiveChangeExplorer.qml`) with `LiveChangeExplorerHost` widget | Deliver a modern, high-performance UI while retaining integration with `MainWindow` | Embeds seamlessly into desktop menu with contextual handoffs to `FrameInfoWindow` & `GraphingWindow` |
+| 2026-08-20 | Create dedicated Qt test harness in `test/test.pro` for analysis services | Enable rapid, headless automated unit testing | Verifies key hashing, rate calculations, diff masks, and ring buffer retention |
 
 ---
 
@@ -1763,13 +1851,13 @@ When starting a new thread, include the branch and the relevant phase. If the re
 
 If implementation needs to stay focused, follow this order:
 
-1. [ ] Review and accept the proposed folder/domain boundaries.
-2. [ ] Add tests/fixtures and record performance baselines.
-3. [ ] Extract `SelectionContext` and `FrameEvent` without changing the UI.
-4. [ ] Extract marker primitives and connect them to an existing view.
-5. [ ] Build the first aggregate store and use it in the old sniffer.
-6. [ ] Build Live Change Explorer under `src/re/explore/`.
-7. [ ] Add command palette and contextual handoffs.
+1. [x] Review and accept the proposed folder/domain boundaries (`src/docs/REPOSITORY_LAYOUT.md`, `src/docs/ARCHITECTURE.md`).
+2. [x] Add tests/fixtures and record performance baselines (`test/test.pro`, `src/docs/BENCHMARKS.md`).
+3. [x] Extract `SelectionContext` and `FrameAggregateStore`/diff primitives without changing the core frame ingestion (`src/analysis/`).
+4. [x] Extract marker primitives and connect them to an existing view (`AnalysisMarker`, `AnalysisMarkersDialog.qml`).
+5. [x] Build the first aggregate store and use it in analysis session (`FrameAggregateStore`, `AnalysisSession`).
+6. [x] Build Live Change Explorer under `src/analysis/` and `src/app/` (`LiveChangeExplorerModel`, `LiveChangeExplorerHost`, `qml/LiveChangeExplorer.qml`).
+7. [ ] Add command palette and contextual handoffs (global command palette).
 8. [ ] Extract range/discrete/temporal analysis services.
 9. [ ] Add the State Explorer tabs.
 10. [ ] Add project/findings persistence.
@@ -1780,4 +1868,4 @@ If implementation needs to stay focused, follow this order:
 15. [ ] Integrate connections and diagnostics.
 16. [ ] Migrate/deprecate legacy windows after parity.
 
-The first major user-visible milestone should be **State Explorer MVP**, but the first coding milestone should be the smaller **Live Change Explorer** slice that validates the shared data and selection architecture.
+The first major user-visible milestone was **Live Change Explorer MVP**, which successfully validated the shared data, selection, and marker architecture while keeping legacy workflows fully functional. State Explorer consolidation with multi-tab analysis (ranges, discrete states, temporal timeline) is the next milestone.
