@@ -19,6 +19,8 @@ Rectangle {
         "Format",
         "Type",
         "Count",
+        "Rate",
+        "Last Seen",
         "Latest Payload",
         "Changed Bytes"
     ]
@@ -30,6 +32,8 @@ Rectangle {
         76,
         88,
         110,
+        88,
+        98,
         320,
         230
     ]
@@ -41,6 +45,8 @@ Rectangle {
                       formatText,
                       frameTypeText,
                       occurrenceCount,
+                      rateText,
+                      lastSeenAgeText,
                       latestPayloadText,
                       changedBytesText) {
         switch (column) {
@@ -57,8 +63,12 @@ Rectangle {
         case 5:
             return occurrenceCount
         case 6:
-            return latestPayloadText
+            return rateText
         case 7:
+            return lastSeenAgeText
+        case 8:
+            return latestPayloadText
+        case 9:
             return changedBytesText
         default:
             return ""
@@ -70,6 +80,14 @@ Rectangle {
 
         parent: root
         markersModel: []
+    }
+
+    Timer {
+        interval: 1000
+        repeat: true
+        running: true
+
+        onTriggered: liveChangeExplorerModel.refreshActivityAges()
     }
 
     Popup {
@@ -415,13 +433,19 @@ Rectangle {
                 implicitHeight: 32
 
                 property bool isSelected: row === root.selectedRow
-                property bool isChangeColumn: column === 7
-                property bool comparisonAvailable: hasPrevious
-                property bool lengthChanged: hasPrevious && payloadLengthChanged
+                property bool isChangeColumn: column === 9
+                property bool comparisonAvailable:
+                    typeof hasPrevious !== "undefined"
+                    && hasPrevious === true
+                property bool lengthChanged:
+                    comparisonAvailable
+                    && typeof payloadLengthChanged !== "undefined"
+                    && payloadLengthChanged === true
                 property bool payloadChanged:
-                    hasPrevious
+                    comparisonAvailable
+                    && typeof changedBytesText !== "undefined"
                     && changedBytesText !== "None"
-                    && !payloadLengthChanged
+                    && !lengthChanged
 
                 color: {
                     if (isSelected)
@@ -538,14 +562,16 @@ Rectangle {
                     Item {
                         id: payloadCell
 
-                        width: column === 6 ? parent.width : 0
+                        width: column === 8 ? parent.width : 0
                         height: parent.height
 
-                        visible: column === 6
+                        visible: column === 8
 
                         readonly property bool payloadHasChanges:
-                            hasPrevious
-                            && changedByteIndexes
+                            typeof hasPrevious !== "undefined"
+                            && hasPrevious === true
+                            && typeof changedByteIndexes !== "undefined"
+                            && changedByteIndexes !== null
                             && changedByteIndexes.length > 0
 
                         // Always-present fallback payload text.
@@ -635,21 +661,32 @@ Rectangle {
                         width: parent.width - changeIndicatorSlot.width
                         height: parent.height
 
-                        visible: column !== 6
+                        visible: column !== 8
 
                         elide: Text.ElideRight
                         verticalAlignment: Text.AlignVCenter
 
                         text: root.cellText(
                                   column,
-                                  bus,
-                                  canIdText,
-                                  directionText,
-                                  formatText,
-                                  frameTypeText,
-                                  occurrenceCount,
-                                  latestPayloadText,
-                                  changedBytesText)
+                                  typeof bus !== "undefined" ? bus : "",
+                                  typeof canIdText !== "undefined"
+                                      ? canIdText : "",
+                                  typeof directionText !== "undefined"
+                                      ? directionText : "",
+                                  typeof formatText !== "undefined"
+                                      ? formatText : "",
+                                  typeof frameTypeText !== "undefined"
+                                      ? frameTypeText : "",
+                                  typeof occurrenceCount !== "undefined"
+                                      ? occurrenceCount : "",
+                                  typeof rateText !== "undefined"
+                                      ? rateText : "—",
+                                  typeof lastSeenAgeText !== "undefined"
+                                      ? lastSeenAgeText : "—",
+                                  typeof latestPayloadText !== "undefined"
+                                      ? latestPayloadText : "—",
+                                  typeof changedBytesText !== "undefined"
+                                      ? changedBytesText : "—")
 
                         color: {
                             if (column === 0)
@@ -663,13 +700,17 @@ Rectangle {
                                         ? Theme.success
                                         : Theme.warning
 
-                            if (column === 7 && !comparisonAvailable)
+                            if ((column === 6 && rateText === "—")
+                                    || (column === 7
+                                        && lastSeenAgeText === "—")
+                                    || (column === 9
+                                        && !comparisonAvailable))
                                 return Theme.textFaint
 
-                            if (column === 7 && lengthChanged)
+                            if (column === 9 && lengthChanged)
                                 return Theme.warning
 
-                            if (column === 7 && payloadChanged)
+                            if (column === 9 && payloadChanged)
                                 return Theme.success
 
                             return Theme.textPrimary
@@ -919,7 +960,9 @@ Rectangle {
             anchors.centerIn: tableView
             visible: tableView.rows === 0
 
-            text: "Waiting for live CAN traffic"
+            text: filterIdsField.text.trim().length > 0
+                  ? "No CAN IDs match this search"
+                  : "Waiting for live CAN traffic"
             color: Theme.textMuted
             font.pixelSize: 16
         }

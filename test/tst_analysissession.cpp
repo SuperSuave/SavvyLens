@@ -207,6 +207,57 @@ void TestAnalysisSession::clearRemovesAggregateAndHistoryState()
     QVERIFY(session.previousSnapshot(key) == nullptr);
 }
 
+void TestAnalysisSession::activityAgeIsAvailableAfterIngest()
+{
+    AnalysisSession session;
+
+    const CANFrame frame = makeFrame(
+        0x123,
+        1,
+        true,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("01"));
+
+    const FrameAggregateKey key = AnalysisSession::makeKey(frame);
+
+    QVERIFY(!session.hasActivityTimestamp(key));
+    QCOMPARE(session.activityAgeMilliseconds(key), static_cast<qint64>(-1));
+
+    session.ingest(frame);
+
+    QVERIFY(session.hasActivityTimestamp(key));
+
+    const qint64 activityAgeMilliseconds =
+        session.activityAgeMilliseconds(key);
+
+    QVERIFY(activityAgeMilliseconds >= 0);
+}
+
+void TestAnalysisSession::clearRemovesActivityAgeState()
+{
+    AnalysisSession session;
+
+    const CANFrame frame = makeFrame(
+        0x123,
+        1,
+        true,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("01"));
+
+    const FrameAggregateKey key = AnalysisSession::makeKey(frame);
+
+    session.ingest(frame);
+
+    QVERIFY(session.hasActivityTimestamp(key));
+
+    session.clear();
+
+    QVERIFY(!session.hasActivityTimestamp(key));
+    QCOMPARE(session.activityAgeMilliseconds(key), static_cast<qint64>(-1));
+}
+
 void TestAnalysisSession::comparisonOwnsDataAfterLaterIngest()
 {
     AnalysisSession session;

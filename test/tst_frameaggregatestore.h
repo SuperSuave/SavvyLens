@@ -15,6 +15,7 @@ private slots:
     void standardAndExtendedCreateSeparateAggregates();
     void differentFrameTypesCreateSeparateAggregates();
     void lastIngestedCopiesPayloadAndMetadata();
+    void aggregateRetainsFirstAndLastObservedActivityMilliseconds();
     void clearRemovesAllAggregates();
 };
 

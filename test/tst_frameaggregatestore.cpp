@@ -1,5 +1,6 @@
-// SavvyLens headers
 #include "analysis/frameaggregatestore.h"
+
+// SavvyLens headers
 #include "can/can_structs.h"
 #include "tst_frameaggregatestore.h"
 
@@ -43,8 +44,8 @@ void TestFrameAggregateStore::sameKeyIncrementsOccurrenceCount()
     const CANFrame second = makeFrame(
         0x123, 1, true, false, QCanBusFrame::DataFrame, QByteArray::fromHex("02"));
 
-    store.ingest(first);
-    store.ingest(second);
+    store.ingest(first, 100);
+    store.ingest(second, 600);
 
     const FrameAggregateKey key = FrameAggregateStore::makeKey(first);
     const FrameAggregate *aggregate = store.find(key);
@@ -63,8 +64,8 @@ void TestFrameAggregateStore::sameIdOnDifferentBusesCreatesSeparateAggregates()
     const CANFrame busTwo = makeFrame(
         0x123, 2, true, false, QCanBusFrame::DataFrame, QByteArray::fromHex("01"));
 
-    store.ingest(busOne);
-    store.ingest(busTwo);
+    store.ingest(busOne, 0);
+    store.ingest(busTwo, 0);
 
     QVERIFY(store.find(FrameAggregateStore::makeKey(busOne)) != nullptr);
     QVERIFY(store.find(FrameAggregateStore::makeKey(busTwo)) != nullptr);
@@ -80,8 +81,8 @@ void TestFrameAggregateStore::receiveAndTransmitCreateSeparateAggregates()
     const CANFrame transmitted = makeFrame(
         0x123, 1, false, false, QCanBusFrame::DataFrame, QByteArray::fromHex("01"));
 
-    store.ingest(received);
-    store.ingest(transmitted);
+    store.ingest(received, 0);
+    store.ingest(transmitted, 0);
 
     QVERIFY(store.find(FrameAggregateStore::makeKey(received)) != nullptr);
     QVERIFY(store.find(FrameAggregateStore::makeKey(transmitted)) != nullptr);
@@ -97,8 +98,8 @@ void TestFrameAggregateStore::standardAndExtendedCreateSeparateAggregates()
     const CANFrame extended = makeFrame(
         0x123, 1, true, true, QCanBusFrame::DataFrame, QByteArray::fromHex("01"));
 
-    store.ingest(standard);
-    store.ingest(extended);
+    store.ingest(standard, 0);
+    store.ingest(extended, 0);
 
     QVERIFY(store.find(FrameAggregateStore::makeKey(standard)) != nullptr);
     QVERIFY(store.find(FrameAggregateStore::makeKey(extended)) != nullptr);
@@ -114,8 +115,8 @@ void TestFrameAggregateStore::differentFrameTypesCreateSeparateAggregates()
     const CANFrame remote = makeFrame(
         0x123, 1, true, false, QCanBusFrame::RemoteRequestFrame, QByteArray());
 
-    store.ingest(data);
-    store.ingest(remote);
+    store.ingest(data, 0);
+    store.ingest(remote, 0);
 
     QVERIFY(store.find(FrameAggregateStore::makeKey(data)) != nullptr);
     QVERIFY(store.find(FrameAggregateStore::makeKey(remote)) != nullptr);
@@ -146,8 +147,8 @@ void TestFrameAggregateStore::lastIngestedCopiesPayloadAndMetadata()
         50,
         7);
 
-    store.ingest(first);
-    store.ingest(second);
+    store.ingest(first, 100);
+    store.ingest(second, 600);
 
     second.setPayload(QByteArray::fromHex("FF"));
     second.timedelta = 100;
@@ -163,6 +164,50 @@ void TestFrameAggregateStore::lastIngestedCopiesPayloadAndMetadata()
     QCOMPARE(aggregate->lastIngested.sourceFrameCount, static_cast<std::uint32_t>(7));
 }
 
+void TestFrameAggregateStore::aggregateRetainsFirstAndLastObservedActivityMilliseconds()
+{
+    FrameAggregateStore store;
+
+    const CANFrame first = makeFrame(
+        0x123,
+        1,
+        true,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("01"),
+        125,
+        1);
+
+    const CANFrame second = makeFrame(
+        0x123,
+        1,
+        true,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("02"),
+        750,
+        2);
+
+    store.ingest(first, 100);
+    store.ingest(second, 600);
+
+    const FrameAggregate *aggregate =
+        store.find(FrameAggregateStore::makeKey(first));
+
+    QVERIFY(aggregate != nullptr);
+    QCOMPARE(aggregate->occurrenceCount, static_cast<std::uint64_t>(2));
+    QCOMPARE(
+        aggregate->firstObservedActivityMilliseconds,
+        static_cast<qint64>(100));
+
+    QCOMPARE(
+        aggregate->lastObservedActivityMilliseconds,
+        static_cast<qint64>(600));
+    QCOMPARE(
+        aggregate->lastIngested.sourceTimedelta,
+        static_cast<std::uint64_t>(750));
+}
+
 void TestFrameAggregateStore::clearRemovesAllAggregates()
 {
     FrameAggregateStore store;
@@ -170,7 +215,7 @@ void TestFrameAggregateStore::clearRemovesAllAggregates()
     const CANFrame frame = makeFrame(
         0x123, 1, true, false, QCanBusFrame::DataFrame, QByteArray::fromHex("01"));
 
-    store.ingest(frame);
+    store.ingest(frame, 0);
 
     QVERIFY(!store.empty());
     QCOMPARE(store.size(), static_cast<std::size_t>(1));

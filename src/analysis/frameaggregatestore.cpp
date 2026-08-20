@@ -8,7 +8,11 @@
 
 bool FrameAggregateKey::operator==(const FrameAggregateKey &other) const noexcept
 {
-    return bus == other.bus && frameId == other.frameId && frameType == other.frameType && hasExtendedFrameFormat == other.hasExtendedFrameFormat && isReceived == other.isReceived;
+    return bus == other.bus &&
+           frameId == other.frameId &&
+           frameType == other.frameType &&
+           hasExtendedFrameFormat == other.hasExtendedFrameFormat &&
+           isReceived == other.isReceived;
 }
 
 std::size_t FrameAggregateStore::KeyHash::operator()(
@@ -30,7 +34,7 @@ std::size_t FrameAggregateStore::KeyHash::operator()(
     return seed;
 }
 
-void FrameAggregateStore::ingest(const CANFrame &frame)
+void FrameAggregateStore::ingest(const CANFrame &frame, qint64 observedActivityMilliseconds)
 {
     const FrameAggregateKey key = makeKey(frame);
 
@@ -39,14 +43,15 @@ void FrameAggregateStore::ingest(const CANFrame &frame)
         FrameAggregate{
             key,
             0,
-            FrameAggregateLastFrame{
-                QByteArray(),
-                0,
-                0}});
+            observedActivityMilliseconds,
+            observedActivityMilliseconds,
+            FrameAggregateLastFrame{QByteArray(), 0, 0}});
 
     FrameAggregate &aggregate = result.first->second;
 
     ++aggregate.occurrenceCount;
+    aggregate.lastObservedActivityMilliseconds =
+        observedActivityMilliseconds;
     aggregate.lastIngested.payload = frame.payload();
     aggregate.lastIngested.sourceTimedelta = frame.timedelta;
     aggregate.lastIngested.sourceFrameCount = frame.frameCount;

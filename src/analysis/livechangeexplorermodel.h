@@ -11,7 +11,7 @@
 #include <QString>
 #include <QVector>
 
-// C++ standard headers
+// C++ standard-library headers
 #include <cstdint>
 
 class AnalysisSession;
@@ -35,6 +35,8 @@ public:
         FormatColumn,
         FrameTypeColumn,
         CountColumn,
+        RateColumn,
+        LastSeenColumn,
         LatestPayloadColumn,
         ChangedBytesColumn,
         ColumnCount
@@ -53,6 +55,10 @@ public:
         FrameTypeRole,
         FrameTypeTextRole,
         OccurrenceCountRole,
+        RateHzRole,
+        RateTextRole,
+        LastSeenAgeMillisecondsRole,
+        LastSeenAgeTextRole,
         LatestPayloadRole,
         LatestPayloadTextRole,
         ChangedByteMaskRole,
@@ -70,6 +76,11 @@ public:
     {
         FrameAggregateKey key;
         quint64 occurrenceCount = 0;
+
+        double rateHz = 0.0;
+        bool hasRate = false;
+
+        qint64 lastSeenAgeMilliseconds = -1;
 
         QByteArray latestPayload;
 
@@ -113,6 +124,7 @@ signals:
 
 public slots:
     void refresh();
+    void refreshActivityAges();
     void clear();
 
 private:

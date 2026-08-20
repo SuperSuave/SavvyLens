@@ -9,6 +9,8 @@
 #include "analysis/selectioncontext.h"
 
 // Qt headers
+#include <QElapsedTimer>
+#include <QHash>
 #include <QVector>
 
 // C++ standard-library headers
@@ -29,7 +31,7 @@ public:
     bool empty() const noexcept;
 
     QVector<FrameAggregateKey> aggregateKeys() const;
-    
+
     const FrameAggregate *findAggregate(
         const FrameAggregateKey &key) const noexcept;
 
@@ -45,6 +47,12 @@ public:
 
     static FrameAggregateKey makeKey(const CANFrame &frame);
 
+    bool hasActivityTimestamp(
+        const FrameAggregateKey &key) const noexcept;
+
+    qint64 activityAgeMilliseconds(
+        const FrameAggregateKey &key) const noexcept;
+
     bool addMarker(
         const SelectionContext &context,
         const QString &label = QString());
@@ -55,6 +63,9 @@ private:
     FrameAggregateStore aggregateStore;
     FrameHistory frameHistory;
     AnalysisMarkerStore markerStore;
+
+    QElapsedTimer activityClock;
+    QHash<FrameAggregateKey, qint64> lastActivityMilliseconds;
 };
 
 #endif // ANALYSISSESSION_H

@@ -16,7 +16,10 @@ private slots:
     void comparisonRejectsNullOutputPointer();
     void depthOneNeverCreatesComparison();
     void clearRemovesAggregateAndHistoryState();
+    void activityAgeIsAvailableAfterIngest();
+    void clearRemovesActivityAgeState();
     void comparisonOwnsDataAfterLaterIngest();
+
 };
 
 #endif // TST_ANALYSISSESSION_H

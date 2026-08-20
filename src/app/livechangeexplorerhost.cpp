@@ -21,7 +21,8 @@ LiveChangeExplorerHost::LiveChangeExplorerHost(
     layout->setContentsMargins(0, 0, 0, 0);
 
     quickWidget_ = new QQuickWidget(this);
-    quickWidget_->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    quickWidget_->setResizeMode(
+        QQuickWidget::SizeRootObjectToView);
 
     quickWidget_->engine()->addImportPath(
         QStringLiteral("qrc:/qml"));
@@ -60,7 +61,9 @@ void LiveChangeExplorerHost::openGraphingForRow(int row)
     emit openGraphingRequested(row);
 }
 
-void LiveChangeExplorerHost::createMarkerForRow(int row, const QString &label)
+void LiveChangeExplorerHost::createMarkerForRow(
+    int row,
+    const QString &label)
 {
     if (row < 0)
     {
@@ -78,7 +81,8 @@ void LiveChangeExplorerHost::openAnalysisMarkers()
 void LiveChangeExplorerHost::showAnalysisMarkers(
     const QVariantList &markers)
 {
-    if (quickWidget_ == nullptr || quickWidget_->rootObject() == nullptr)
+    if (quickWidget_ == nullptr ||
+        quickWidget_->rootObject() == nullptr)
     {
         return;
     }

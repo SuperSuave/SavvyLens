@@ -6,12 +6,26 @@ AnalysisSession::AnalysisSession(
     std::size_t maximumSnapshotsPerKey)
     : frameHistory(maximumSnapshotsPerKey)
 {
+    activityClock.start();
 }
 
 void AnalysisSession::ingest(const CANFrame &frame)
 {
-    aggregateStore.ingest(frame);
+    if (!activityClock.isValid())
+    {
+        activityClock.start();
+    }
+
+    const FrameAggregateKey key = makeKey(frame);
+
+    const qint64 observedActivityMilliseconds =
+        activityClock.elapsed();
+
+    aggregateStore.ingest(frame, observedActivityMilliseconds);
+
     frameHistory.ingest(frame);
+
+    lastActivityMilliseconds.insert(key, observedActivityMilliseconds);
 }
 
 void AnalysisSession::clear() noexcept
@@ -19,6 +33,9 @@ void AnalysisSession::clear() noexcept
     aggregateStore.clear();
     frameHistory.clear();
     markerStore.clear();
+    lastActivityMilliseconds.clear();
+
+    activityClock.restart();
 }
 
 std::size_t AnalysisSession::aggregateCount() const noexcept
@@ -71,7 +88,9 @@ bool AnalysisSession::compareLatest(
         return false;
     }
 
-    *comparison = FrameComparisonCalculator::compare(*previous, *current);
+    *comparison = FrameComparisonCalculator::compare(
+        *previous,
+        *current);
 
     return true;
 }
@@ -84,6 +103,30 @@ FrameAggregateKey AnalysisSession::makeKey(const CANFrame &frame)
         frame.frameType(),
         frame.hasExtendedFrameFormat(),
         frame.isReceived};
+}
+
+bool AnalysisSession::hasActivityTimestamp(
+    const FrameAggregateKey &key) const noexcept
+{
+    return lastActivityMilliseconds.contains(key);
+}
+
+qint64 AnalysisSession::activityAgeMilliseconds(
+    const FrameAggregateKey &key) const noexcept
+{
+    if (!activityClock.isValid())
+    {
+        return -1;
+    }
+
+    const auto iterator = lastActivityMilliseconds.constFind(key);
+
+    if (iterator == lastActivityMilliseconds.constEnd())
+    {
+        return -1;
+    }
+
+    return activityClock.elapsed() - iterator.value();
 }
 
 bool AnalysisSession::addMarker(

@@ -4,6 +4,7 @@
 // Qt headers
 #include <QByteArray>
 #include <QCanBusFrame>
+#include <QtGlobal>
 #include <QVector>
 
 // C++ standard-library headers
@@ -24,6 +25,19 @@ struct FrameAggregateKey
     bool operator==(const FrameAggregateKey &other) const noexcept;
 };
 
+inline uint qHash(
+    const FrameAggregateKey &key,
+    uint seed = 0) noexcept
+{
+    seed = ::qHash(key.bus, seed);
+    seed = ::qHash(key.frameId, seed);
+    seed = ::qHash(static_cast<int>(key.frameType), seed);
+    seed = ::qHash(key.hasExtendedFrameFormat, seed);
+    seed = ::qHash(key.isReceived, seed);
+
+    return seed;
+}
+
 struct FrameAggregateLastFrame
 {
     QByteArray payload;
@@ -35,6 +49,8 @@ struct FrameAggregate
 {
     FrameAggregateKey key;
     std::uint64_t occurrenceCount;
+    qint64 firstObservedActivityMilliseconds;
+    qint64 lastObservedActivityMilliseconds;
     FrameAggregateLastFrame lastIngested;
 };
 
@@ -49,7 +65,7 @@ public:
     FrameAggregateStore(FrameAggregateStore &&) noexcept = default;
     FrameAggregateStore &operator=(FrameAggregateStore &&) noexcept = default;
 
-    void ingest(const CANFrame &frame);
+    void ingest(const CANFrame &frame, qint64 observedActivityMilliseconds);
     void clear() noexcept;
 
     std::size_t size() const noexcept;

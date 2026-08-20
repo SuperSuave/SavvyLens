@@ -70,6 +70,58 @@ namespace
         }
     }
 
+    QString rateText(const LiveChangeExplorerModel::Row &row)
+    {
+        if (!row.hasRate)
+        {
+            return QStringLiteral("—");
+        }
+
+        if (row.rateHz >= 1000.0)
+        {
+            return QStringLiteral("%1 kHz")
+                .arg(row.rateHz / 1000.0, 0, 'f', 1);
+        }
+
+        if (row.rateHz >= 100.0)
+        {
+            return QStringLiteral("%1 Hz")
+                .arg(row.rateHz, 0, 'f', 0);
+        }
+
+        return QStringLiteral("%1 Hz")
+            .arg(row.rateHz, 0, 'f', 1);
+    }
+
+    QString lastSeenAgeText(const LiveChangeExplorerModel::Row &row)
+    {
+        if (row.lastSeenAgeMilliseconds < 0)
+        {
+            return QStringLiteral("—");
+        }
+
+        if (row.lastSeenAgeMilliseconds < 1000)
+        {
+            return QStringLiteral("<1s");
+        }
+
+        const qint64 totalSeconds =
+            row.lastSeenAgeMilliseconds / 1000;
+
+        const qint64 minutes = totalSeconds / 60;
+        const qint64 seconds = totalSeconds % 60;
+
+        if (minutes > 0)
+        {
+            return QStringLiteral("%1m %2s")
+                .arg(minutes)
+                .arg(seconds);
+        }
+
+        return QStringLiteral("%1s")
+            .arg(seconds);
+    }
+
     QString changedBytesText(const LiveChangeExplorerModel::Row &row)
     {
         if (!row.hasPrevious)
@@ -108,7 +160,8 @@ namespace
                 result += QStringLiteral(" · ");
             }
 
-            result += changedByteIndexes.join(QLatin1Char(' '));
+            result += changedByteIndexes.join(
+                QLatin1Char(' '));
         }
 
         if (result.isEmpty())
@@ -147,6 +200,37 @@ namespace
         }
 
         return left.key.isReceived < right.key.isReceived;
+    }
+
+    void populateActivity(
+        LiveChangeExplorerModel::Row *row,
+        const FrameAggregate &aggregate,
+        const AnalysisSession &session)
+    {
+        if (row == nullptr)
+        {
+            return;
+        }
+
+        if (aggregate.occurrenceCount >= 2 &&
+            aggregate.lastObservedActivityMilliseconds >
+                aggregate.firstObservedActivityMilliseconds)
+        {
+            const qint64 elapsedMilliseconds =
+                aggregate.lastObservedActivityMilliseconds -
+                aggregate.firstObservedActivityMilliseconds;
+
+            row->rateHz =
+                (static_cast<double>(
+                     aggregate.occurrenceCount - 1) *
+                 1000.0) /
+                static_cast<double>(elapsedMilliseconds);
+
+            row->hasRate = row->rateHz > 0.0;
+        }
+
+        row->lastSeenAgeMilliseconds =
+            session.activityAgeMilliseconds(aggregate.key);
     }
 
 } // namespace
@@ -254,6 +338,12 @@ QVariant LiveChangeExplorerModel::data(
         case CountColumn:
             return QVariant::fromValue(row.occurrenceCount);
 
+        case RateColumn:
+            return rateText(row);
+
+        case LastSeenColumn:
+            return lastSeenAgeText(row);
+
         case LatestPayloadColumn:
             return payloadText(row.latestPayload);
 
@@ -293,6 +383,20 @@ QVariant LiveChangeExplorerModel::data(
 
     case OccurrenceCountRole:
         return QVariant::fromValue(row.occurrenceCount);
+
+    case RateHzRole:
+        return row.hasRate
+                   ? QVariant::fromValue(row.rateHz)
+                   : QVariant();
+
+    case RateTextRole:
+        return rateText(row);
+
+    case LastSeenAgeMillisecondsRole:
+        return row.lastSeenAgeMilliseconds;
+
+    case LastSeenAgeTextRole:
+        return lastSeenAgeText(row);
 
     case LatestPayloadRole:
         return row.latestPayload;
@@ -374,6 +478,12 @@ QVariant LiveChangeExplorerModel::headerData(
     case CountColumn:
         return QStringLiteral("Count");
 
+    case RateColumn:
+        return QStringLiteral("Rate");
+
+    case LastSeenColumn:
+        return QStringLiteral("Last Seen");
+
     case LatestPayloadColumn:
         return QStringLiteral("Latest Payload");
 
@@ -399,6 +509,12 @@ QHash<int, QByteArray> LiveChangeExplorerModel::roleNames() const
     roles.insert(FrameTypeRole, "frameType");
     roles.insert(FrameTypeTextRole, "frameTypeText");
     roles.insert(OccurrenceCountRole, "occurrenceCount");
+    roles.insert(RateHzRole, "rateHz");
+    roles.insert(RateTextRole, "rateText");
+    roles.insert(
+        LastSeenAgeMillisecondsRole,
+        "lastSeenAgeMilliseconds");
+    roles.insert(LastSeenAgeTextRole, "lastSeenAgeText");
     roles.insert(LatestPayloadRole, "latestPayload");
     roles.insert(LatestPayloadTextRole, "latestPayloadText");
     roles.insert(ChangedByteMaskRole, "changedByteMask");
@@ -417,7 +533,9 @@ void LiveChangeExplorerModel::refresh()
 {
     QVector<Row> refreshedRows;
 
-    const QVector<FrameAggregateKey> keys = session_.aggregateKeys();
+    const QVector<FrameAggregateKey> keys =
+        session_.aggregateKeys();
+
     refreshedRows.reserve(keys.size());
 
     const QStringList filterTerms = filterText_.split(
@@ -446,9 +564,10 @@ void LiveChangeExplorerModel::refresh()
             continue;
         }
 
-        const FrameAggregate *aggregate = session_.findAggregate(key);
+        const FrameAggregate *aggregate =
+            session_.findAggregate(key);
 
-        if (!aggregate)
+        if (aggregate == nullptr)
         {
             continue;
         }
@@ -458,6 +577,8 @@ void LiveChangeExplorerModel::refresh()
         row.occurrenceCount = aggregate->occurrenceCount;
         row.latestPayload = aggregate->lastIngested.payload;
         row.latestPayloadLength = row.latestPayload.size();
+
+        populateActivity(&row, *aggregate, session_);
 
         FrameComparison comparison;
 
@@ -517,10 +638,17 @@ void LiveChangeExplorerModel::refresh()
         Row &currentRow = rows_[rowIndex];
 
         const bool rowChanged =
-            currentRow.occurrenceCount != refreshedRow.occurrenceCount ||
+            currentRow.occurrenceCount !=
+                refreshedRow.occurrenceCount ||
+            currentRow.hasRate != refreshedRow.hasRate ||
+            currentRow.rateHz != refreshedRow.rateHz ||
+            currentRow.lastSeenAgeMilliseconds !=
+                refreshedRow.lastSeenAgeMilliseconds ||
             currentRow.latestPayload != refreshedRow.latestPayload ||
-            currentRow.changedByteMask != refreshedRow.changedByteMask ||
-            currentRow.changedBitMask != refreshedRow.changedBitMask ||
+            currentRow.changedByteMask !=
+                refreshedRow.changedByteMask ||
+            currentRow.changedBitMask !=
+                refreshedRow.changedBitMask ||
             currentRow.hasPrevious != refreshedRow.hasPrevious ||
             currentRow.payloadLengthChanged !=
                 refreshedRow.payloadLengthChanged ||
@@ -542,6 +670,42 @@ void LiveChangeExplorerModel::refresh()
             ColumnCount - 1);
 
         emit dataChanged(first, last);
+    }
+}
+
+void LiveChangeExplorerModel::refreshActivityAges()
+{
+    for (int rowIndex = 0; rowIndex < rows_.size(); ++rowIndex)
+    {
+        Row &row = rows_[rowIndex];
+
+        const qint64 refreshedAgeMilliseconds =
+            session_.activityAgeMilliseconds(row.key);
+
+        if (row.lastSeenAgeMilliseconds ==
+            refreshedAgeMilliseconds)
+        {
+            continue;
+        }
+
+        row.lastSeenAgeMilliseconds =
+            refreshedAgeMilliseconds;
+
+        const QModelIndex first = index(
+            rowIndex,
+            LastSeenColumn);
+
+        const QModelIndex last = index(
+            rowIndex,
+            LastSeenColumn);
+
+        emit dataChanged(
+            first,
+            last,
+            {
+                LastSeenAgeMillisecondsRole,
+                LastSeenAgeTextRole
+            });
     }
 }
 
