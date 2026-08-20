@@ -538,23 +538,43 @@ void FramePlaybackWindow::useOrigTimingClicked()
 
 void FramePlaybackWindow::btnDeleteCurrSeq()
 {
-    if (currentSeqNum == -1) return;
+    if (currentSeqNum == -1)
+    {
+        return;
+    }
+
+    isPlaying = false;
+    wantPlaying = false;
+    haveIncomingTraffic = false;
 
     playbackObject.stopPlayback();
 
+    // The worker stores a raw pointer into seqItems. Clear that pointer
+    // synchronously before removing or relocating list storage.
+    playbackObject.setSequenceObject(nullptr);
+
     seqItems.removeAt(currentSeqNum);
     ui->tblSequence->removeRow(currentSeqNum);
-    if (seqItems.count() > 0)
+
+    if (!seqItems.isEmpty())
     {
         currentSeqNum = 0;
         currentSeqItem = &seqItems[currentSeqNum];
+
+        playbackObject.setSequenceObject(currentSeqItem);
+
+        ui->tblSequence->setCurrentCell(currentSeqNum, 0);
+        refreshIDList();
     }
     else
     {
         currentSeqNum = -1;
         currentSeqItem = nullptr;
+
+        ui->listID->clear();
     }
-    refreshIDList();
+
+    currentPosition = 0;
     updateFrameLabel();
 }
 
