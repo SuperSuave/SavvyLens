@@ -152,8 +152,8 @@ src/
 │   ├── livechangeexplorermodel.h             # [Implemented]
 │   ├── activitystatistics.cpp
 │   ├── activitystatistics.h
-│   ├── rangestatistics.cpp
-│   ├── rangestatistics.h
+│   ├── rangestatistics.cpp                   # [Implemented] CAN signal range analysis and candidate discovery
+│   ├── rangestatistics.h                     # [Implemented]
 │   ├── discretestateanalysis.cpp
 │   ├── discretestateanalysis.h
 │   ├── transitionanalysis.cpp
@@ -976,8 +976,8 @@ src/analysis/frameaggregatestore.h/.cpp       # [Implemented]
 src/analysis/framehistory.h/.cpp              # [Implemented]
 src/analysis/payloaddiff.h/.cpp               # [Implemented]
 src/analysis/framecomparison.h/.cpp           # [Implemented]
+src/analysis/rangestatistics.h/.cpp           # [Implemented]
 src/analysis/activitystatistics.h/.cpp
-src/analysis/rangestatistics.h/.cpp
 src/analysis/discretestateanalysis.h/.cpp
 src/analysis/transitionanalysis.h/.cpp
 src/analysis/temporalanalysis.h/.cpp
@@ -986,10 +986,10 @@ src/analysis/temporalanalysis.h/.cpp
 ### Migration order
 
 1. [x] Extract aggregate/rate logic (`FrameAggregateStore`).
-2. [x] Add tests (`test/tst_frameaggregatestore.cpp`, `test/tst_payloaddiff.cpp`, `test/tst_framehistory.cpp`, `test/tst_framecomparison.cpp`, `test/tst_analysissession.cpp`).
+2. [x] Add tests (`test/tst_frameaggregatestore.cpp`, `test/tst_payloaddiff.cpp`, `test/tst_framehistory.cpp`, `test/tst_framecomparison.cpp`, `test/tst_analysissession.cpp`, `test/tst_rangestatistics.cpp`).
 3. [x] Add Live Change Explorer (`LiveChangeExplorerModel`, `LiveChangeExplorerHost`, `qml/LiveChangeExplorer.qml`).
 4. [ ] Use it from the legacy sniffer.
-5. [ ] Extract range/discrete algorithms.
+5. [x] Extract range algorithms (`RangeStatistics`).
 6. [ ] Use algorithms in old windows and new tabs.
 7. [ ] Migrate frame-info details into inspector widgets.
 8. [ ] Retire old windows only after parity.
@@ -1844,6 +1844,7 @@ When starting a new thread, include the branch and the relevant phase. If the re
 | 2026-08-20 | Group aggregates using `FrameAggregateKey(bus, frameId, isExtended, frameType, isReceived)` | Ensure identical CAN IDs across multiple channels/directions are distinguished | Prevents cross-bus collision and loss of direction/format semantics |
 | 2026-08-20 | Implement Live Change Explorer as a Qt Quick/QML interface (`qml/LiveChangeExplorer.qml`) with `LiveChangeExplorerHost` widget | Deliver a modern, high-performance UI while retaining integration with `MainWindow` | Embeds seamlessly into desktop menu with contextual handoffs to `FrameInfoWindow` & `GraphingWindow` |
 | 2026-08-20 | Create dedicated Qt test harness in `test/test.pro` for analysis services | Enable rapid, headless automated unit testing | Verifies key hashing, rate calculations, diff masks, and ring buffer retention |
+| 2026-08-20 | Extract `RangeStatistics` domain service in `src/analysis/` with unit tests | Decouple continuous/analog signal detection from UI dialogs | Supports arbitrary bit lengths (1-64), Intel/Motorola endianness, signed/unsigned values, and non-blocking candidate scanning |
 
 ---
 
@@ -1858,8 +1859,8 @@ If implementation needs to stay focused, follow this order:
 5. [x] Build the first aggregate store and use it in analysis session (`FrameAggregateStore`, `AnalysisSession`).
 6. [x] Build Live Change Explorer under `src/analysis/` and `src/app/` (`LiveChangeExplorerModel`, `LiveChangeExplorerHost`, `qml/LiveChangeExplorer.qml`).
 7. [ ] Add command palette and contextual handoffs (global command palette).
-8. [ ] Extract range/discrete/temporal analysis services.
-9. [ ] Add the State Explorer tabs.
+8. [~] Extract range/discrete/temporal analysis services (`RangeStatistics` domain service implemented & tested; discrete/temporal next).
+9. [ ] Add the State Explorer tabs (Ranges tab, States tab, Timeline tab).
 10. [ ] Add project/findings persistence.
 11. [ ] Add comparison/investigation workflow.
 12. [ ] Add Signal Catalog and shared visualization context.

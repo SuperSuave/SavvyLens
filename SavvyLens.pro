@@ -127,6 +127,7 @@ SOURCES += \
     src/analysis/framehistory.cpp \
     src/analysis/livechangeexplorermodel.cpp \
     src/analysis/payloaddiff.cpp \
+    src/analysis/rangestatistics.cpp \
     src/analysis/selectioncontext.cpp \
     src/app/helpwindow.cpp \
     src/app/livechangeexplorerhost.cpp \
@@ -239,6 +240,7 @@ HEADERS += \
     src/analysis/framehistory.h \
     src/analysis/livechangeexplorermodel.h \
     src/analysis/payloaddiff.h \
+    src/analysis/rangestatistics.h \
     src/analysis/selectioncontext.h \
     src/app/helpwindow.h \
     src/app/livechangeexplorerhost.h \

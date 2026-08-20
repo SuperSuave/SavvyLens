@@ -17,6 +17,7 @@ SOURCES += \
     tst_framehistory.cpp \
     tst_lfqueue.cpp \
     tst_payloaddiff.cpp \
+    tst_rangestatistics.cpp \
     main.cpp \
     $$PROJECT_ROOT/src/analysis/analysismarker.cpp \
     $$PROJECT_ROOT/src/analysis/analysismarkerstore.cpp \
@@ -25,6 +26,7 @@ SOURCES += \
     $$PROJECT_ROOT/src/analysis/framecomparison.cpp \
     $$PROJECT_ROOT/src/analysis/framehistory.cpp \
     $$PROJECT_ROOT/src/analysis/payloaddiff.cpp \
+    $$PROJECT_ROOT/src/analysis/rangestatistics.cpp \
     $$PROJECT_ROOT/src/analysis/selectioncontext.cpp
 
 HEADERS += \
@@ -34,6 +36,7 @@ HEADERS += \
     tst_framehistory.h \
     tst_lfqueue.h \
     tst_payloaddiff.h \
+    tst_rangestatistics.h \
     $$PROJECT_ROOT/src/analysis/analysismarker.h \
     $$PROJECT_ROOT/src/analysis/analysismarkerstore.h \
     $$PROJECT_ROOT/src/analysis/analysissession.h \
@@ -41,6 +44,7 @@ HEADERS += \
     $$PROJECT_ROOT/src/analysis/framecomparison.h \
     $$PROJECT_ROOT/src/analysis/framehistory.h \
     $$PROJECT_ROOT/src/analysis/payloaddiff.h \
+    $$PROJECT_ROOT/src/analysis/rangestatistics.h \
     $$PROJECT_ROOT/src/analysis/selectioncontext.h \
     $$PROJECT_ROOT/src/can/can_structs.h
 

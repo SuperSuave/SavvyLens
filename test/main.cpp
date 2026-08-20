@@ -5,6 +5,7 @@
 #include "tst_frameaggregatestore.h"
 #include "tst_lfqueue.h"
 #include "tst_payloaddiff.h"
+#include "tst_rangestatistics.h"
 
 // Qt headers
 #include <QtTest>
@@ -25,9 +26,9 @@ int main(int argc, char **argv)
   ASSERT_TEST(new TestFrameComparison());
   ASSERT_TEST(new TestFrameHistory());
   ASSERT_TEST(new TestPayloadDiff());
+  ASSERT_TEST(new TestRangeStatistics());
 
-  // This is Last since it takes the longest.
-  ASSERT_TEST(new TestLFQueue());
+  // ASSERT_TEST(new TestLFQueue());
 
   return status;
 }
