@@ -1,5 +1,7 @@
-#Build directory
+#Build directories
 build/
+.qtcreator
+test/.qtcreator
 
 # Compiled Object files
 *.slo
