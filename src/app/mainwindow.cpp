@@ -1256,7 +1256,6 @@ void MainWindow::presistentFiltersToggled(bool state)
 
 void MainWindow::updateFilterList()
 {
-    qDebug() << "updateFilterList called on MainWindow";
     if (model == nullptr)
         return;
 
@@ -1269,9 +1268,14 @@ void MainWindow::updateFilterList()
     if (filters == nullptr || busFilters == nullptr)
         return;
 
-    qDebug() << "updateFilterList called on MainWindow"
-             << "CAN filters:" << filters->count()
-             << "bus filters:" << busFilters->count();
+    if (displayedCanFilters == *filters &&
+        displayedBusFilters == *busFilters)
+    {
+        return;
+    }
+
+    displayedCanFilters = *filters;
+    displayedBusFilters = *busFilters;
 
     inhibitFilterUpdate = true;
 

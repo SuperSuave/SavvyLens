@@ -44,6 +44,7 @@
 #include <QDialogButtonBox>
 #include <QHeaderView>
 #include <QMainWindow>
+#include <QMap>
 #include <QPushButton>
 #include <QSerialPort>
 #include <QSerialPortInfo>
@@ -221,6 +222,9 @@ private:
     //canbus related data
     CANFrameModel *model;
     DBCHandler *dbcHandler;
+
+    QMap<int, bool> displayedCanFilters;
+    QMap<int, bool> displayedBusFilters;
 
     void filterToFrameIds(const QSet<uint32_t> &ids);
     void removeFrameIdsFromFilterList(const QSet<uint32_t> &ids);

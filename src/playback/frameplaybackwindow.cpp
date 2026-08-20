@@ -360,56 +360,98 @@ void FramePlaybackWindow::calculateWhichBus()
 
 void FramePlaybackWindow::EndOfFrameCache()
 {
+    if (seqItems.isEmpty())
+    {
+        isPlaying = false;
+        wantPlaying = false;
+        haveIncomingTraffic = false;
+        currentSeqNum = -1;
+        currentSeqItem = nullptr;
+        currentPosition = 0;
+
+        playbackObject.setSequenceObject(nullptr);
+        updateFrameLabel();
+
+        return;
+    }
+
     if (forward)
     {
-        currentSeqNum++; //go forward in the sequence
-        if (currentSeqNum == seqItems.count()) //are we at the end of the sequence?
-        {
-            //reset the loop figures for each sequence entry
-            for (int i = 0; i < seqItems.count(); i++) seqItems[i].currentLoopCount = 0;
-            currentSeqNum = 0;
-            if (ui->cbLoop->isChecked()) //go back to beginning if we're looping the sequence
-            {
+        ++currentSeqNum;
 
+        if (currentSeqNum >= seqItems.count())
+        {
+            for (SequenceItem &item : seqItems)
+            {
+                item.currentLoopCount = 0;
             }
-            else //not looping so stop playback entirely
+
+            if (!ui->cbLoop->isChecked())
             {
                 isPlaying = false;
                 wantPlaying = false;
                 haveIncomingTraffic = false;
-                playbackObject.stopPlayback();
+                currentSeqNum = 0;
+                currentSeqItem = &seqItems[currentSeqNum];
+                currentPosition = 0;
+
+                playbackObject.setSequenceObject(currentSeqItem);
+                ui->tblSequence->setCurrentCell(currentSeqNum, 0);
+                updateFrameLabel();
+
+                return;
             }
+
+            currentSeqNum = 0;
         }
-        currentSeqItem = &seqItems[currentSeqNum];
-        playbackObject.setSequenceObject(currentSeqItem);
-        if (isPlaying) playbackObject.startPlaybackForward();
-        ui->tblSequence->setCurrentCell(currentSeqNum, 0);
     }
     else
     {
-        currentSeqNum--; //go backward in the sequence
-        if (currentSeqNum == -1) //are we trying to go past the beginning?
-        {
-            //reset the loop figures for each sequence entry
-            for (int i = 0; i < seqItems.count(); i++) seqItems[i].currentLoopCount = 0;
-            currentSeqNum = seqItems.count() - 1;
-            if (ui->cbLoop->isChecked()) //go back to the last sequence entry if we're looping
-            {
+        --currentSeqNum;
 
+        if (currentSeqNum < 0)
+        {
+            for (SequenceItem &item : seqItems)
+            {
+                item.currentLoopCount = 0;
             }
-            else //not looping so stop playback entirely
+
+            if (!ui->cbLoop->isChecked())
             {
                 isPlaying = false;
                 wantPlaying = false;
                 haveIncomingTraffic = false;
-                playbackObject.stopPlayback();
+                currentSeqNum = seqItems.count() - 1;
+                currentSeqItem = &seqItems[currentSeqNum];
+                currentPosition = 0;
+
+                playbackObject.setSequenceObject(currentSeqItem);
+                ui->tblSequence->setCurrentCell(currentSeqNum, 0);
+                updateFrameLabel();
+
+                return;
             }
+
+            currentSeqNum = seqItems.count() - 1;
         }
-        currentSeqItem = &seqItems[currentSeqNum];
-        playbackObject.setSequenceObject(currentSeqItem);
-        if (isPlaying) playbackObject.startPlaybackBackward();
-        ui->tblSequence->setCurrentCell(currentSeqNum, 0);
     }
+
+    currentSeqItem = &seqItems[currentSeqNum];
+    currentPosition = 0;
+
+    playbackObject.setSequenceObject(currentSeqItem);
+
+    if (forward)
+    {
+        playbackObject.startPlaybackForward();
+    }
+    else
+    {
+        playbackObject.startPlaybackBackward();
+    }
+
+    ui->tblSequence->setCurrentCell(currentSeqNum, 0);
+    updateFrameLabel();
 }
 
 void FramePlaybackWindow::getStatusUpdate(int frameNum)
