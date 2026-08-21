@@ -21,6 +21,10 @@ private slots:
     void rejectRandomNoiseSignal();
     void candidateScannerFindsRamp();
     void candidateScannerCancellation();
+    void canIdZeroIsAnExactFilter();
+    void shortPayloadsAreSkipped();
+    void candidateScannerUsesMinimumPayloadLength();
+    void payloadSupportRejectsInvalidMotorolaLayout();
 };
 
 #endif // TST_RANGESTATISTICS_H

@@ -292,3 +292,107 @@ void TestRangeStatistics::candidateScannerCancellation()
     QVector<RangeSignalCandidate> candidates = RangeStatistics::scanCandidates(frames, 0x700, config, cancelEarly);
     QCOMPARE(stepsRecorded, 5);
 }
+void TestRangeStatistics::canIdZeroIsAnExactFilter()
+{
+    QVector<CANFrame> frames;
+
+    frames.append(makeFrame(0x000, QByteArray::fromHex("01")));
+    frames.append(makeFrame(0x000, QByteArray::fromHex("02")));
+    frames.append(makeFrame(0x123, QByteArray::fromHex("AA")));
+    frames.append(makeFrame(0x123, QByteArray::fromHex("BB")));
+
+    RangeSignalSpec spec;
+    spec.canId = 0x000;
+    spec.startBit = 0;
+    spec.bitLength = 8;
+    spec.isLittleEndian = true;
+    spec.isSigned = false;
+
+    const QVector<qint64> values =
+        RangeStatistics::extractSignalValues(frames, spec);
+
+    QCOMPARE(values.size(), 2);
+    QCOMPARE(values.at(0), static_cast<qint64>(0x01));
+    QCOMPARE(values.at(1), static_cast<qint64>(0x02));
+
+    const ByteRangeStats stats =
+        RangeStatistics::computeByteStats(frames, 0, 0x000);
+
+    QCOMPARE(stats.sampleCount, 2);
+    QCOMPARE(stats.minUnsigned, static_cast<quint8>(0x01));
+    QCOMPARE(stats.maxUnsigned, static_cast<quint8>(0x02));
+}
+
+void TestRangeStatistics::shortPayloadsAreSkipped()
+{
+    QVector<CANFrame> frames;
+
+    frames.append(makeFrame(0x321, QByteArray::fromHex("3412")));
+    frames.append(makeFrame(0x321, QByteArray::fromHex("7856")));
+    frames.append(makeFrame(0x321, QByteArray::fromHex("9A")));
+
+    RangeSignalSpec spec;
+    spec.canId = 0x321;
+    spec.startBit = 0;
+    spec.bitLength = 16;
+    spec.isLittleEndian = true;
+    spec.isSigned = false;
+
+    const QVector<qint64> values =
+        RangeStatistics::extractSignalValues(frames, spec);
+
+    QCOMPARE(values.size(), 2);
+    QCOMPARE(values.at(0), static_cast<qint64>(0x1234));
+    QCOMPARE(values.at(1), static_cast<qint64>(0x5678));
+
+    const RangeSignalCandidate candidate =
+        RangeStatistics::evaluateSignal(frames, spec);
+
+    QCOMPARE(candidate.sampleCount, 2);
+    QCOMPARE(candidate.minValue, static_cast<qint64>(0x1234));
+    QCOMPARE(candidate.maxValue, static_cast<qint64>(0x5678));
+}
+
+void TestRangeStatistics::candidateScannerUsesMinimumPayloadLength()
+{
+    QVector<CANFrame> frames;
+
+    for (int i = 0; i < 20; ++i)
+    {
+        QByteArray longPayload(8, 0);
+        longPayload[0] = static_cast<char>(i * 10);
+        longPayload[1] = static_cast<char>(i * 10);
+
+        frames.append(makeFrame(0x322, longPayload));
+        frames.append(makeFrame(
+            0x322,
+            QByteArray(1, static_cast<char>(i * 10))));
+    }
+
+    RangeScanConfig config;
+    config.minBitLength = 16;
+    config.maxBitLength = 16;
+    config.bitGranularity = 8;
+    config.endianMode = RangeScanConfig::LittleEndianOnly;
+    config.signedMode = RangeScanConfig::UnsignedOnly;
+
+    const QVector<RangeSignalCandidate> candidates =
+        RangeStatistics::scanCandidates(frames, 0x322, config);
+
+    QCOMPARE(candidates.size(), 0);
+}
+
+void TestRangeStatistics::payloadSupportRejectsInvalidMotorolaLayout()
+{
+    RangeSignalSpec spec;
+    spec.canId = 0x323;
+    spec.startBit = 0;
+    spec.bitLength = 16;
+    spec.isLittleEndian = false;
+    spec.isSigned = false;
+
+    const RangeSignalPayloadSupport support =
+        RangeStatistics::payloadSupport(1, spec);
+
+    QVERIFY(!support.isSupported);
+}

@@ -101,8 +101,9 @@ class RangeStatistics
 {
 public:
     // Value extraction primitives
-    static RangeSignalPayloadSupport payloadSupport(int payloadLengthBytes,
-                                                    const RangeSignalSpec &spec);
+    static RangeSignalPayloadSupport payloadSupport(
+                            int payloadLengthBytes,
+                            const RangeSignalSpec &spec);
                                                     
     static qint64 extractValue(const QByteArray &payload,
                                int startBit,

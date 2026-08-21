@@ -263,26 +263,12 @@ void RangeStateWindow::recalcButton()
                 canId,
                 scanConfig);
 
-        qDebug() << "ID"
-                 << QString::number(canId, 16).toUpper()
-                 << "produced"
-                 << candidates.count()
-                 << "range candidates.";
-
         for (const RangeSignalCandidate &candidate : candidates)
         {
             foundCandidates.append(candidate);
 
             ui->listCandidates->addItem(
                 candidate.summaryText());
-        }
-
-        if (candidates.size() >= scanConfig.maxCandidates)
-        {
-            ui->listCandidates->addItem(
-                tr("Candidate result limit reached (%1) for ID %2.")
-                    .arg(scanConfig.maxCandidates)
-                    .arg(QString::number(canId, 16).toUpper()));
         }
 
         qApp->processEvents();

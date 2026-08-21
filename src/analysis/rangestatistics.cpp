@@ -367,8 +367,8 @@ bool RangeStatistics::isSmoothRange(const QVector<qint64> &values,
 
     double reqPercent = linearInterpolate(minPercent, maxPercent, lerpPoint);
     qint64 requiredRange = static_cast<qint64>(maxRange * reqPercent);
-    if (requiredRange < 2) {
-        requiredRange = 2;
+    if (requiredRange < 1) {
+        requiredRange = 1;
     }
     if (bitLength >= 24) {
         requiredRange = qMin(requiredRange, static_cast<qint64>(linearInterpolate(20.0, 500.0, lerpPoint)));
@@ -577,9 +577,13 @@ QVector<RangeSignalCandidate> RangeStatistics::scanCandidates(
                         spec,
                         config.sensitivity,
                         config.populateSamples);
-                    if (candidate.isRanging) {
+
+                    if (candidate.isRanging)
+                    {
                         candidates.append(candidate);
-                        if (candidates.size() >= config.maxCandidates) {
+
+                        if (candidates.size() >= config.maxCandidates)
+                        {
                             return candidates;
                         }
                     }
