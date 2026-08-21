@@ -37,7 +37,7 @@ private:
     void closeEvent(QCloseEvent *event);
     void readSettings();
     void writeSettings();
-    void createGraph(QVector<int> values);
+    void createGraph(const QVector<qint64> &values);
     bool eventFilter(QObject *obj, QEvent *event);
 };
 

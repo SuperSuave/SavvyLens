@@ -122,6 +122,8 @@ SOURCES += \
     src/analysis/analysismarker.cpp \
     src/analysis/analysismarkerstore.cpp \
     src/analysis/analysissession.cpp \
+    src/analysis/candidateanalysis.cpp \
+    src/analysis/discretestateanalysis.cpp \
     src/analysis/frameaggregatestore.cpp \
     src/analysis/framecomparison.cpp \
     src/analysis/framehistory.cpp \
@@ -129,6 +131,7 @@ SOURCES += \
     src/analysis/payloaddiff.cpp \
     src/analysis/rangestatistics.cpp \
     src/analysis/selectioncontext.cpp \
+    src/analysis/temporalanalysis.cpp \
     src/analysis/transitionanalysis.cpp \
     src/app/helpwindow.cpp \
     src/app/livechangeexplorerhost.cpp \
@@ -236,6 +239,8 @@ HEADERS += \
     src/analysis/analysismarker.h \
     src/analysis/analysismarkerstore.h \
     src/analysis/analysissession.h \
+    src/analysis/candidateanalysis.h \
+    src/analysis/discretestateanalysis.h \
     src/analysis/frameaggregatestore.h \
     src/analysis/framecomparison.h \
     src/analysis/framehistory.h \
@@ -243,6 +248,7 @@ HEADERS += \
     src/analysis/payloaddiff.h \
     src/analysis/rangestatistics.h \
     src/analysis/selectioncontext.h \
+    src/analysis/temporalanalysis.h \
     src/analysis/transitionanalysis.h \
     src/app/helpwindow.h \
     src/app/livechangeexplorerhost.h \
