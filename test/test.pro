@@ -12,6 +12,7 @@ DEPENDPATH += $$PROJECT_ROOT/src
 
 SOURCES += \
     tst_analysissession.cpp \
+    tst_discretestateanalysis.cpp \
     tst_frameaggregatestore.cpp \
     tst_framecomparison.cpp \
     tst_framehistory.cpp \
@@ -22,6 +23,7 @@ SOURCES += \
     $$PROJECT_ROOT/src/analysis/analysismarker.cpp \
     $$PROJECT_ROOT/src/analysis/analysismarkerstore.cpp \
     $$PROJECT_ROOT/src/analysis/analysissession.cpp \
+    $$PROJECT_ROOT/src/analysis/discretestateanalysis.cpp \
     $$PROJECT_ROOT/src/analysis/frameaggregatestore.cpp \
     $$PROJECT_ROOT/src/analysis/framecomparison.cpp \
     $$PROJECT_ROOT/src/analysis/framehistory.cpp \
@@ -31,6 +33,7 @@ SOURCES += \
 
 HEADERS += \
     tst_analysissession.h \
+    tst_discretestateanalysis.h \
     tst_frameaggregatestore.h \
     tst_framecomparison.h \
     tst_framehistory.h \
@@ -40,6 +43,7 @@ HEADERS += \
     $$PROJECT_ROOT/src/analysis/analysismarker.h \
     $$PROJECT_ROOT/src/analysis/analysismarkerstore.h \
     $$PROJECT_ROOT/src/analysis/analysissession.h \
+    $$PROJECT_ROOT/src/analysis/discretestateanalysis.h \
     $$PROJECT_ROOT/src/analysis/frameaggregatestore.h \
     $$PROJECT_ROOT/src/analysis/framecomparison.h \
     $$PROJECT_ROOT/src/analysis/framehistory.h \

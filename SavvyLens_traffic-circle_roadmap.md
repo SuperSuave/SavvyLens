@@ -978,7 +978,7 @@ src/analysis/payloaddiff.h/.cpp               # [Implemented]
 src/analysis/framecomparison.h/.cpp           # [Implemented]
 src/analysis/rangestatistics.h/.cpp           # [Implemented]
 src/analysis/activitystatistics.h/.cpp
-src/analysis/discretestateanalysis.h/.cpp
+src/analysis/discretestateanalysis.h/.cpp     # [Implemented] Bounded UI-neutral observed-state analysis
 src/analysis/transitionanalysis.h/.cpp
 src/analysis/temporalanalysis.h/.cpp
 ```
@@ -986,13 +986,15 @@ src/analysis/temporalanalysis.h/.cpp
 ### Migration order
 
 1. [x] Extract aggregate/rate logic (`FrameAggregateStore`).
-2. [x] Add tests (`test/tst_frameaggregatestore.cpp`, `test/tst_payloaddiff.cpp`, `test/tst_framehistory.cpp`, `test/tst_framecomparison.cpp`, `test/tst_analysissession.cpp`, `test/tst_rangestatistics.cpp`).
+2. [x] Add tests (`test/tst_frameaggregatestore.cpp`, `test/tst_payloaddiff.cpp`, `test/tst_framehistory.cpp`, `test/tst_framecomparison.cpp`, `test/tst_analysissession.cpp`, `test/tst_rangestatistics.cpp`, `test/tst_discretestateanalysis.cpp`).
 3. [x] Add Live Change Explorer (`LiveChangeExplorerModel`, `LiveChangeExplorerHost`, `qml/LiveChangeExplorer.qml`).
 4. [ ] Use it from the legacy sniffer.
 5. [x] Extract range algorithms (`RangeStatistics`).
-6. [ ] Use algorithms in old windows and new tabs.
-7. [ ] Migrate frame-info details into inspector widgets.
-8. [ ] Retire old windows only after parity.
+6. [x] Extract bounded discrete-state observation analysis (`DiscreteStateAnalysis`) with QtTest coverage; reuse `RangeStatistics::extractSignalValues()` for CAN-ID filtering, endian handling, signedness, and mixed-DLC short-frame skipping.
+7. [x] Add bounded transition analysis (`TransitionAnalysis`) using discrete-state evidence without UI integration.
+8. [ ] Use algorithms in old windows and new tabs.
+9. [ ] Migrate frame-info details into inspector widgets.
+10. [ ] Retire old windows only after parity.
 
 ### Acceptance tests
 
