@@ -62,14 +62,14 @@ SavvyLens/
 The existing structure already gives the modernization effort good boundaries:
 
 - `src/app/` is the application shell, settings, and navigation integration point (hosts `LiveChangeExplorerHost`).
-- `src/analysis/` is the UI-independent analysis domain (`AnalysisSession`, `FrameAggregateStore`, `FrameHistory`, `PayloadDiff`, `FrameComparison`, `SelectionContext`, `AnalysisMarkerStore`, `LiveChangeExplorerModel`).
+- `src/analysis/` is the UI-independent analysis domain (`AnalysisSession`, `FrameAggregateStore`, `FrameHistory`, `PayloadDiff`, `FrameComparison`, `SelectionContext`, `AnalysisMarkerStore`, `LiveChangeExplorerModel`, `RangeStatistics`, `DiscreteStateAnalysis`, `TransitionAnalysis`).
 - `qml/` provides modern, responsive QML views for real-time traffic analysis (`LiveChangeExplorer.qml`, `AnalysisMarkersDialog.qml`).
 - `src/can/` contains CAN primitives and filtering.
 - `src/frames/` contains the canonical frame model layer.
 - `src/io/`, `src/playback/`, and `src/sender/` are natural traffic-operation boundaries.
 - `src/re/` contains the reverse-engineering workspaces that should eventually become coordinated workflows.
 - `src/bookmarks/`, `src/dbc/`, `src/connections/`, and `src/scripting/` are already close to the shared services the roadmap needs.
-- `test/` contains automated unit tests for analysis and buffer primitives (`tst_analysissession`, `tst_frameaggregatestore`, `tst_framecomparison`, `tst_framehistory`, `tst_payloaddiff`, `tst_lfqueue`).
+- `test/` contains automated unit tests for analysis and buffer primitives (`tst_analysissession`, `tst_frameaggregatestore`, `tst_framecomparison`, `tst_framehistory`, `tst_payloaddiff`, `tst_lfqueue`, `tst_rangestatistics`, `tst_discretestateanalysis`, `tst_transitionanalysis`).
 
 The main architectural recommendation is therefore **not to reorganize everything again**. Add a small number of explicit shared domains, then migrate existing windows toward them incrementally.
 
@@ -154,10 +154,10 @@ src/
 │   ├── activitystatistics.h
 │   ├── rangestatistics.cpp                   # [Implemented] CAN signal range analysis and candidate discovery
 │   ├── rangestatistics.h                     # [Implemented]
-│   ├── discretestateanalysis.cpp
-│   ├── discretestateanalysis.h
-│   ├── transitionanalysis.cpp
-│   ├── transitionanalysis.h
+│   ├── discretestateanalysis.cpp             # [Implemented] Bounded discrete-value evidence
+│   ├── discretestateanalysis.h               # [Implemented]
+│   ├── transitionanalysis.cpp                # [Implemented] Bounded directed transition evidence
+│   ├── transitionanalysis.h                  # [Implemented]
 │   ├── temporalanalysis.cpp
 │   ├── temporalanalysis.h
 │   ├── candidateanalysis.cpp
@@ -978,8 +978,8 @@ src/analysis/payloaddiff.h/.cpp               # [Implemented]
 src/analysis/framecomparison.h/.cpp           # [Implemented]
 src/analysis/rangestatistics.h/.cpp           # [Implemented]
 src/analysis/activitystatistics.h/.cpp
-src/analysis/discretestateanalysis.h/.cpp     # [Implemented] Bounded UI-neutral observed-state analysis
-src/analysis/transitionanalysis.h/.cpp
+src/analysis/discretestateanalysis.h/.cpp     # [Implemented] Bounded discrete-value evidence
+src/analysis/transitionanalysis.h/.cpp        # [Implemented] Bounded directed transition evidence
 src/analysis/temporalanalysis.h/.cpp
 ```
 
@@ -1782,7 +1782,7 @@ Update this table after each implementation thread or pull request.
 | 1. Frame/session | `[x]` | Define `AnalysisSession`, `SelectionContext`, `FrameAggregateStore`, `FrameHistory`, `PayloadDiff`, `FrameComparison`, markers | `feature/traffic-circle` | 2026-08-20 | Core analysis domain implemented in `src/analysis/` with unit tests in `test/` |
 | 2. Query | `[ ]` | Define initial grammar and evaluator | | 2026-08-20 | Planned: expression AST, lexer, parser, evaluator |
 | 3. Discoverability | `[~]` | Command palette / context handoffs | `feature/traffic-circle` | 2026-08-20 | Live Change Explorer handoffs to Frame Info & Graphing complete; global command palette pending |
-| 4. State Explorer | `[~]` | Live Change Explorer MVP completed; State Explorer tabs next | `feature/traffic-circle` | 2026-08-20 | First slice (Live Change Explorer QML + model + host) operational; range/discrete/timeline tabs next |
+| 4. State Explorer | `[~]` | Live Change Explorer MVP complete; headless range, discrete-state, and transition-analysis foundations complete; State Explorer tabs deferred | `feature/traffic-circle` | 2026-08-21 | Live Change Explorer QML + model + host operational. `RangeStatistics`, `DiscreteStateAnalysis`, and `TransitionAnalysis` are QtTest-validated; no State Explorer UI/tab migration started. |
 | 5. Project/findings | `[ ]` | Project schema and finding model | | 2026-08-20 | Planned: `src/project/` domain |
 | 6. Comparison | `[ ]` | Unified comparison model | | 2026-08-20 | Planned: `src/re/compare/` |
 | 7. Signals/visualization | `[ ]` | Signal Catalog design | | 2026-08-20 | Planned: `src/signals/`, `src/visualization/` |

@@ -7,7 +7,7 @@
 #include "tst_lfqueue.h"
 #include "tst_payloaddiff.h"
 #include "tst_rangestatistics.h"
-
+#include "tst_transitionanalysis.h"
 
 // Qt headers
 #include <QtTest>
@@ -28,6 +28,7 @@ int main(int argc, char **argv) {
   ASSERT_TEST(new TestPayloadDiff());
   ASSERT_TEST(new TestRangeStatistics());
   ASSERT_TEST(new TestDiscreteStateAnalysis());
+  ASSERT_TEST(new TestTransitionAnalysis());
   // ASSERT_TEST(new TestLFQueue());
 
   return status;
