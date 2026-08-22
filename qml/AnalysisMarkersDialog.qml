@@ -20,9 +20,9 @@ Popup {
     y: Math.round((root.parent.height - height) / 2)
 
     background: Rectangle {
-        radius: 5
-        color: Theme.surface
-        border.color: Theme.borderStrong
+        radius: Theme.radiusMedium
+        color: Theme.popoverSurface
+        border.color: Theme.tooltipBorder
         border.width: 1
     }
 
@@ -35,7 +35,7 @@ Popup {
 
             Rectangle {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 58
+                Layout.preferredHeight: Theme.topBarHeight
                 color: Theme.surfaceRaised
 
                 Rectangle {
@@ -90,13 +90,17 @@ Popup {
                     text: "×"
 
                     background: Rectangle {
-                        radius: 3
-                        color: closeButton.hovered
-                               ? Theme.surfaceInset
-                               : "transparent"
-                        border.color: closeButton.hovered
-                                      ? Theme.borderStrong
-                                      : "transparent"
+                        radius: Theme.radiusSmall
+                        color: closeButton.down
+                               ? Theme.pressed
+                               : closeButton.hovered
+                                 ? Theme.hover
+                                 : Theme.transparent
+                        border.color: closeButton.activeFocus
+                                      ? Theme.focus
+                                      : closeButton.hovered
+                                        ? Theme.borderStrong
+                                        : Theme.transparent
                         border.width: 1
                     }
 
@@ -124,7 +128,7 @@ Popup {
                     Text {
                         Layout.fillWidth: true
                         text: "Read-only in-memory analysis markers. These are separate from legacy bookmarks."
-                        color: Theme.textMuted
+                        color: Theme.readOnly
                         font.pixelSize: 11
                         wrapMode: Text.WordWrap
                     }

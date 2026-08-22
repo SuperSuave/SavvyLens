@@ -138,6 +138,7 @@ SOURCES += \
     src/app/main.cpp \
     src/app/mainsettingsdialog.cpp \
     src/app/mainwindow.cpp \
+    src/app/studiohost.cpp \
     src/bookmarks/bookmarkmanager.cpp \
     src/bookmarks/bookmarkmanagerdialog.cpp \
     src/bus_protocols/isotp_handler.cpp \
@@ -254,6 +255,7 @@ HEADERS += \
     src/app/livechangeexplorerhost.h \
     src/app/mainsettingsdialog.h \
     src/app/mainwindow.h \
+    src/app/studiohost.h \
     src/bookmarks/bookmarkmanager.h \
     src/bookmarks/bookmarkmanagerdialog.h \
     src/bus_protocols/isotp_handler.h \

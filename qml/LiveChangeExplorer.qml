@@ -108,9 +108,9 @@ Rectangle {
         y: Math.round((root.height - height) / 2)
 
         background: Rectangle {
-            radius: 5
-            color: Theme.surface
-            border.color: Theme.borderStrong
+            radius: Theme.radiusMedium
+            color: Theme.popoverSurface
+            border.color: Theme.tooltipBorder
             border.width: 1
         }
 
@@ -119,8 +119,8 @@ Rectangle {
 
             Column {
                 anchors.fill: parent
-                anchors.margins: 18
-                spacing: 12
+                anchors.margins: Theme.spacingLarge
+                spacing: Theme.spacingMedium
 
                 Text {
                     text: "CREATE ANALYSIS MARKER"
@@ -157,11 +157,10 @@ Rectangle {
                     placeholderTextColor: Theme.textFaint
                     selectByMouse: true
 
-                    background: Rectangle {
-                        radius: 3
+                        radius: Theme.radiusSmall
                         color: Theme.surfaceInset
                         border.color: markerLabelField.activeFocus
-                                      ? Theme.accent
+                                      ? Theme.focus
                                       : Theme.border
                         border.width: 1
                     }
@@ -185,11 +184,17 @@ Rectangle {
                         text: "Cancel"
 
                         background: Rectangle {
-                            radius: 3
-                            color: cancelMarkerButton.hovered
-                                   ? Theme.surfaceInset
-                                   : Theme.surfaceRaised
-                            border.color: Theme.border
+                            radius: Theme.radiusSmall
+                            color: cancelMarkerButton.down
+                                   ? Theme.pressed
+                                   : cancelMarkerButton.hovered
+                                     ? Theme.hover
+                                     : Theme.surfaceRaised
+                            border.color: cancelMarkerButton.activeFocus
+                                          ? Theme.focus
+                                          : cancelMarkerButton.hovered
+                                            ? Theme.borderStrong
+                                            : Theme.border
                             border.width: 1
                         }
 
@@ -210,11 +215,15 @@ Rectangle {
                         text: "Create Marker"
 
                         background: Rectangle {
-                            radius: 3
-                            color: confirmMarkerButton.hovered
-                                   ? Theme.accent
-                                   : Theme.accentSubtle
-                            border.color: Theme.accent
+                            radius: Theme.radiusSmall
+                            color: confirmMarkerButton.down
+                                   ? Theme.pressed
+                                   : confirmMarkerButton.hovered
+                                     ? Theme.accent
+                                     : Theme.accentSubtle
+                            border.color: confirmMarkerButton.activeFocus
+                                          ? Theme.focus
+                                          : Theme.accent
                             border.width: 1
                         }
 

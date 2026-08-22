@@ -5,6 +5,7 @@
 #include "analysis/selectioncontext.h"
 #include "app/helpwindow.h"
 #include "app/livechangeexplorerhost.h"
+#include "app/studiohost.h"
 #include "bookmarks/bookmarkmanager.h"
 #include "bookmarks/bookmarkmanagerdialog.h"
 #include "can/can_structs.h"
@@ -31,6 +32,7 @@
 #include <QHeaderView>
 #include <QItemSelectionModel>
 #include <QLabel>
+#include <QMenuBar>
 #include <QMouseEvent>
 #include <QPlainTextEdit>
 #include <QRegularExpression>
@@ -130,44 +132,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionLiveChangeExplorer,
             &QAction::triggered,
             this,
-            [this]()
-            {
-                if (!liveChangeExplorerHost_)
-                {
-                    liveChangeExplorerHost_ =
-                        new LiveChangeExplorerHost(
-                            liveChangeExplorerModel,
-                            this);
-
-                    connect(liveChangeExplorerHost_,
-                            &LiveChangeExplorerHost::createMarkerRequested,
-                            this,
-                            &MainWindow::createExplorerMarker);
-
-                    connect(liveChangeExplorerHost_,
-                            &LiveChangeExplorerHost::openFrameInfoRequested,
-                            this,
-                            &MainWindow::openExplorerFrameInfo);
-
-                    connect(liveChangeExplorerHost_,
-                            &LiveChangeExplorerHost::openGraphingRequested,
-                            this,
-                            &MainWindow::openExplorerGraphing);
-
-                    connect(liveChangeExplorerHost_,
-                            &LiveChangeExplorerHost::openAnalysisMarkersRequested,
-                            this,
-                            &MainWindow::showAnalysisMarkers);
-
-                    liveChangeExplorerHost_->setWindowTitle(
-                        tr("Live Change Explorer"));
-                    liveChangeExplorerHost_->resize(900, 500);
-                }
-
-                liveChangeExplorerHost_->show();
-                liveChangeExplorerHost_->raise();
-                liveChangeExplorerHost_->activateWindow();
-            });
+            &MainWindow::showStudio);
 
     setupEmbeddedAnalysisViews();
 
@@ -2144,6 +2109,38 @@ CANFrameModel* MainWindow::getCANFrameModel()
 /*
  * All functions past this point set up the various other windows that can be opened
 */
+void MainWindow::showStudio()
+{
+    if (studioHost_ == nullptr)
+    {
+        studioHost_ = new StudioHost(this);
+
+        connect(
+            studioHost_,
+            &StudioHost::studioClosed,
+            this,
+            [this]()
+            {
+                menuBar()->show();
+            });
+
+        connect(
+            studioHost_,
+            &QObject::destroyed,
+            this,
+            [this]()
+            {
+                studioHost_ = nullptr;
+                menuBar()->show();
+            });
+    }
+
+    menuBar()->hide();
+
+    studioHost_->show();
+    studioHost_->raise();
+    studioHost_->activateWindow();
+}
 
 void MainWindow::showSettingsDialog()
 {

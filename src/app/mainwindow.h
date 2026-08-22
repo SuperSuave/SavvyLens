@@ -70,6 +70,7 @@ class ControlStateDetector;
 class ISOTP_InterpreterWindow;
 class LiveChangeExplorerHost;
 class ScriptingWindow;
+class StudioHost;
 
 class QAction;
 class QDockWidget;
@@ -105,6 +106,7 @@ public slots:
     void handleContinousLogging();
     void showGraphingWindow();
     void showGraphingWindow(const SelectionContext &context);
+    void showStudio();
     void showFrameDataAnalysis();
     void clearFrames();
     void expandAllRows();
@@ -218,6 +220,7 @@ private:
     AnalysisSession analysisSession;
     LiveChangeExplorerModel *liveChangeExplorerModel = nullptr;
     LiveChangeExplorerHost *liveChangeExplorerHost_ = nullptr;
+    StudioHost *studioHost_ = nullptr;
 
     //canbus related data
     CANFrameModel *model;
