@@ -256,7 +256,8 @@ Rectangle {
         }
     }
 
-    function openAnalysisMarkersDialog(markers) {
+    function openAnalysisMarkersDialog(markers)
+    {
         analysisMarkersDialog.markersModel = markers
         analysisMarkersDialog.open()
     }

@@ -865,7 +865,7 @@ For an ID/frame/byte/time selection:
 
 Unify the user workflow around discovering changing IDs, ranges, discrete states, and temporal behavior.
 
-### Status: In Progress (Live Change Explorer MVP Slice Complete)
+### Status: In Progress (Live Change Explorer and explicit-demo Studio State Explorer MVP slices complete)
 
 ### Existing source scope
 
@@ -934,6 +934,59 @@ Not in scope:
 
 ### State Explorer tabs
 
+### Implemented Studio State Explorer evidence slice
+
+The first functional Studio workspace is implemented at:
+
+```text
+SavvyLens Studio → Explore → State Explorer
+```
+
+Implemented files and integration points:
+
+```text
+src/app/stateexplorerpresentation.h/.cpp
+src/app/studiohost.h/.cpp
+qml/Studio.qml
+qml/Studio/Pages/StateExplorerPage.qml
+qml/qml.qrc
+SavvyLens.pro
+test/tst_stateexplorerpresentation.h/.cpp
+test/test.pro
+test/main.cpp
+```
+
+Implemented behavior:
+
+- [x] Replace the Explore placeholder with an embeddable `StateExplorerPage.qml`.
+- [x] Add a narrow QML-facing `StateExplorerPresentation` snapshot object owned by `StudioHost`.
+- [x] Use `CandidateAnalysis::analyze()` as the sole State Explorer analysis composition boundary.
+- [x] Preserve the existing `RangeStatistics` extraction contract, including exact CAN-ID matching, CAN ID `0x000`, endian handling, signedness, and unsupported-payload exclusion.
+- [x] Present one explicit deterministic demo `RangeSignalSpec` and bounded in-memory CAN frame sequence.
+- [x] Present candidate identity: CAN ID, start bit, bit length, endian, and signedness.
+- [x] Present accepted sample count.
+- [x] Present bounded discrete-state evidence, including classification, completion/truncation state, and ordered observed values.
+- [x] Present bounded directed-transition evidence, including classification, completion/truncation state, occurrence counts, and accepted-sample indexes.
+- [x] Present bounded temporal-run evidence, including classification, completion/truncation state, consecutive-run sample counts, and accepted-sample indexes.
+- [x] Preserve analyzer-defined ordering at the QML boundary:
+  - discrete states retain ascending numeric-value order;
+  - transitions retain deterministic directed-pair order;
+  - temporal runs retain accepted-sequence encounter order.
+- [x] Frame evidence explicitly as “Observed evidence only” and “Not a vehicle-semantic conclusion.”
+- [x] Use read-only evidence framing for completed results and amber warning treatment only for incomplete/truncated evidence.
+- [x] Avoid green semantic status for completed passive analysis.
+- [x] Add focused `StateExplorerPresentation` QtTest coverage.
+- [x] Validate the QtTest suite, application build, and manual Studio launch under Qt 5.15.2 MinGW.
+
+Presentation-boundary test coverage includes:
+
+- [x] Candidate identity formatting, including CAN ID `0x000`.
+- [x] Accepted-sample counts.
+- [x] No-accepted-sample safety.
+- [x] `qint64` evidence-value conversion to display strings at the QML boundary.
+- [x] State, transition, and temporal-run ordering.
+- [x] Completed/truncated evidence flags and bounded-row counts.
+
 #### Overview
 
 - [x] ID/channel/flags/DLC (partial: covered in Live Change Explorer).
@@ -986,15 +1039,21 @@ src/analysis/temporalanalysis.h/.cpp
 ### Migration order
 
 1. [x] Extract aggregate/rate logic (`FrameAggregateStore`).
-2. [x] Add tests (`test/tst_frameaggregatestore.cpp`, `test/tst_payloaddiff.cpp`, `test/tst_framehistory.cpp`, `test/tst_framecomparison.cpp`, `test/tst_analysissession.cpp`, `test/tst_rangestatistics.cpp`, `test/tst_discretestateanalysis.cpp`).
+2. [x] Add tests (`test/tst_frameaggregatestore.cpp`, `test/tst_payloaddiff.cpp`, `test/tst_framehistory.cpp`, `test/tst_framecomparison.cpp`, `test/tst_analysissession.cpp`, `test/tst_rangestatistics.cpp`, `test/tst_discretestateanalysis.cpp`, `test/tst_transitionanalysis.cpp`, `test/tst_stateexplorerpresentation.cpp`).
 3. [x] Add Live Change Explorer (`LiveChangeExplorerModel`, `LiveChangeExplorerHost`, `qml/LiveChangeExplorer.qml`).
 4. [ ] Use it from the legacy sniffer.
 5. [x] Extract range algorithms (`RangeStatistics`).
 6. [x] Extract bounded discrete-state observation analysis (`DiscreteStateAnalysis`) with QtTest coverage; reuse `RangeStatistics::extractSignalValues()` for CAN-ID filtering, endian handling, signedness, and mixed-DLC short-frame skipping.
 7. [x] Add bounded transition analysis (`TransitionAnalysis`) using discrete-state evidence without UI integration.
-8. [ ] Use algorithms in old windows and new tabs.
-9. [ ] Migrate frame-info details into inspector widgets.
-10. [ ] Retire old windows only after parity.
+8. [x] Add bounded temporal-run analysis (`TemporalAnalysis`) with QtTest coverage and no timestamp or elapsed-dwell semantics.
+9. [x] Add `CandidateAnalysis` as the authoritative UI-neutral composition boundary for one `RangeSignalSpec`.
+10. [x] Add an explicit-demo Studio State Explorer evidence page using `StateExplorerPresentation` and `CandidateAnalysis::analyze()`.
+11. [x] Add focused QtTest coverage for the State Explorer presentation boundary.
+12. [ ] Replace the explicit demo input with a narrow explicit candidate-input seam.
+13. [ ] Connect a formal Studio/capture candidate source without broadening `SelectionContext` prematurely.
+14. [ ] Use algorithms in legacy windows only where doing so provides verification value or supports replacement.
+15. [ ] Migrate frame-info details into inspector widgets.
+16. [ ] Retire or replace old windows when the Studio workflow provides the intended replacement.
 
 ### Acceptance tests
 

@@ -138,6 +138,7 @@ SOURCES += \
     src/app/main.cpp \
     src/app/mainsettingsdialog.cpp \
     src/app/mainwindow.cpp \
+    src/app/stateexplorerpresentation.cpp \
     src/app/studiohost.cpp \
     src/bookmarks/bookmarkmanager.cpp \
     src/bookmarks/bookmarkmanagerdialog.cpp \
@@ -255,6 +256,7 @@ HEADERS += \
     src/app/livechangeexplorerhost.h \
     src/app/mainsettingsdialog.h \
     src/app/mainwindow.h \
+    src/app/stateexplorerpresentation.h \
     src/app/studiohost.h \
     src/bookmarks/bookmarkmanager.h \
     src/bookmarks/bookmarkmanagerdialog.h \

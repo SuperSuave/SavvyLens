@@ -20,9 +20,11 @@ SOURCES += \
     tst_lfqueue.cpp \
     tst_payloaddiff.cpp \
     tst_rangestatistics.cpp \
+    tst_stateexplorerpresentation.cpp \
     tst_temporalanalysis.cpp \
     tst_transitionanalysis.cpp \
     main.cpp \
+    $$PROJECT_ROOT/src/app/stateexplorerpresentation.cpp \
     $$PROJECT_ROOT/src/analysis/analysismarker.cpp \
     $$PROJECT_ROOT/src/analysis/analysismarkerstore.cpp \
     $$PROJECT_ROOT/src/analysis/analysissession.cpp \
@@ -47,8 +49,10 @@ HEADERS += \
     tst_lfqueue.h \
     tst_payloaddiff.h \
     tst_rangestatistics.h \
+    tst_stateexplorerpresentation.h \
     tst_temporalanalysis.h \
     tst_transitionanalysis.h \
+    $$PROJECT_ROOT/src/app/stateexplorerpresentation.h \
     $$PROJECT_ROOT/src/analysis/analysismarker.h \
     $$PROJECT_ROOT/src/analysis/analysismarkerstore.h \
     $$PROJECT_ROOT/src/analysis/analysissession.h \

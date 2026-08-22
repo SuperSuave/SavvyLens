@@ -32,7 +32,7 @@ Rectangle {
             "id": "explore",
             "label": "Explore",
             "summary": "Find and understand CAN behavior through selected-signal evidence, state observations, transitions, and temporal runs.",
-            "nextStep": "Next integration: State Explorer evidence page driven by CandidateAnalysis."
+            "nextStep": "Current integration: bounded State Explorer evidence for an explicit demo RangeSignalSpec."
         },
         {
             "id": "compare",
@@ -333,7 +333,9 @@ Rectangle {
                     active: true
                     sourceComponent: modelData.id === "dash"
                                      ? dashComponent
-                                     : placeholderComponent
+                                     : modelData.id === "explore"
+                                       ? stateExplorerComponent
+                                       : placeholderComponent
 
                     property var workspaceDefinition: modelData
                 }
@@ -348,7 +350,13 @@ Rectangle {
             anchors.fill: parent
         }
     }
+    Component {
+        id: stateExplorerComponent
 
+        StateExplorerPage {
+            anchors.fill: parent
+        }
+    }
     Component {
         id: placeholderComponent
 

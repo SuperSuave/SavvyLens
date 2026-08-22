@@ -8,6 +8,7 @@
 #include "tst_lfqueue.h"
 #include "tst_payloaddiff.h"
 #include "tst_rangestatistics.h"
+#include "tst_stateexplorerpresentation.h"
 #include "tst_temporalanalysis.h"
 #include "tst_transitionanalysis.h"
 
@@ -34,6 +35,7 @@ int main(int argc, char **argv)
     ASSERT_TEST(new TestTransitionAnalysis());
     ASSERT_TEST(new TestTemporalAnalysis());
     ASSERT_TEST(new TestCandidateAnalysis());
+    ASSERT_TEST(new TestStateExplorerPresentation());
     // ASSERT_TEST(new TestLFQueue());
 
     return status;

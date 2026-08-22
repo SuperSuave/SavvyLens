@@ -7,6 +7,7 @@
 #include "analysis/analysissession.h"
 #include "analysis/livechangeexplorermodel.h"
 #include "analysis/selectioncontext.h"
+#include "app/stateexplorerpresentation.h"
 #include "app/mainsettingsdialog.h"
 #include "bookmarks/bookmarkmanager.h"
 #include "bookmarks/bookmarkmanagerdialog.h"
