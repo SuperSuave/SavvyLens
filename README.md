@@ -167,6 +167,10 @@ For live capture, recommended interfaces:
 
 ## Building from Source
 
+> **Debian Trixie?** Trixie removed the Qt5 SerialBus module, so the system Qt
+> can't build SavvyLens. Use `./build-debian.sh` — see
+> **[BUILDING.md](BUILDING.md)**.
+
 ### Linux / macOS
 
 ```sh
