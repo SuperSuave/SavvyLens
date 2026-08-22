@@ -23,6 +23,10 @@ QT += \
     network \
     opengl
 
+greaterThan(QT_MAJOR_VERSION, 5) {
+    QT += openglwidgets
+}
+
 CONFIG += \
     c++17 \
     NO_UNIT_TESTS
@@ -87,6 +91,9 @@ unix:!macx {
     iconfiles.files = $$PWD/icons
     iconfiles.path = $$PREFIX/share/SavvyLens/icons
 
+    linuxiconfiles.files = $$PWD/icons/hicolor
+    linuxiconfiles.path = $$PREFIX/share/icons
+
     helpfiles.files = $$files($$PWD/help/*)
     helpfiles.path = $$PREFIX/share/SavvyLens/help
 
@@ -98,6 +105,7 @@ unix:!macx {
         shortcutfiles \
         examplefiles \
         iconfiles \
+        linuxiconfiles \
         helpfiles \
         templatefiles
 
