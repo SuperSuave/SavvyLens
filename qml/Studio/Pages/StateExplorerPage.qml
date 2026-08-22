@@ -7,6 +7,69 @@ Item {
 
     readonly property var presentation: stateExplorerPresentation
 
+    property bool littleEndian: true
+    property bool signedValue: false
+    property string analysisRequestError: ""
+
+    readonly property int parsedCanId: parseCanId(canIdField.text)
+    readonly property int parsedStartBit: parseDecimal(startBitField.text)
+    readonly property int parsedBitLength: parseDecimal(bitLengthField.text)
+
+    readonly property bool hasParseableCandidate:
+        parsedCanId >= 0
+        && parsedStartBit >= 0
+        && parsedBitLength > 0
+
+    readonly property bool candidateInputValid:
+        hasParseableCandidate
+        && parsedStartBit + parsedBitLength <= 64
+
+    function parseDecimal(text) {
+        var value = text.trim()
+
+        if (!/^[0-9]+$/.test(value))
+            return -1
+
+        var parsed = Number(value)
+        return Number.isSafeInteger(parsed) ? parsed : -1
+    }
+
+    function parseCanId(text) {
+        var value = text.trim()
+        var base = 10
+
+        if (/^0[xX][0-9a-fA-F]+$/.test(value)) {
+            base = 16
+            value = value.substring(2)
+        } else if (!/^[0-9]+$/.test(value)) {
+            return -1
+        }
+
+        var parsed = parseInt(value, base)
+        if (!Number.isSafeInteger(parsed) || parsed < 0 || parsed > 0x1FFFFFFF)
+            return -1
+
+        return parsed
+    }
+
+    function inputErrorText() {
+        if (!hasParseableCandidate)
+            return "Enter a CAN ID, start bit, and bit length using valid non-negative technical values."
+
+        if (parsedStartBit + parsedBitLength > 64)
+            return "Candidate bit range must fit within the 64-bit CAN payload layout."
+
+        return ""
+    }
+
+    function inputBorderColor(fieldValueValid) {
+        return fieldValueValid ? Theme.borderStrong : Theme.warningBorder
+    }
+
+    function inputBackground(fieldValueValid) {
+        return fieldValueValid ? Theme.surfaceInset : Theme.warningSubtle
+    }
+
     function statusColor(isTruncated) {
         return isTruncated ? Theme.warning : Theme.readOnly
     }
@@ -63,6 +126,447 @@ Item {
 
             Rectangle {
                 width: parent.width
+                height: candidateInputContent.implicitHeight
+                        + Theme.studioSpacingLarge * 2
+                radius: Theme.studioRadiusLarge
+                color: Theme.surface
+                border.color: root.candidateInputValid
+                              ? Theme.borderStrong
+                              : Theme.warningBorder
+                border.width: 1
+
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    width: 3
+                    radius: Theme.radiusSmall
+                    color: root.candidateInputValid
+                           ? Theme.accent
+                           : Theme.warning
+                }
+
+                Column {
+                    id: candidateInputContent
+
+                    anchors.fill: parent
+                    anchors.margins: Theme.studioSpacingLarge
+                    anchors.leftMargin: Theme.studioSpacingLarge
+                                        + Theme.studioSpacingSmall
+                    spacing: Theme.studioSpacingMedium
+
+                    Row {
+                        width: parent.width
+                        spacing: Theme.studioSpacingSmall
+
+                        Text {
+                            text: "Candidate definition"
+                            color: Theme.textPrimary
+                            font.pixelSize: Theme.studioTextSection
+                            font.bold: true
+                        }
+
+                        Rectangle {
+                            width: inputModeLabel.implicitWidth
+                                   + Theme.studioSpacingMedium * 2
+                            height: inputModeLabel.implicitHeight
+                                    + Theme.spacingSmall
+                            radius: Theme.radiusPill
+                            color: Theme.accentSubtle
+                            border.color: Theme.accentMuted
+                            border.width: 1
+
+                            Text {
+                                id: inputModeLabel
+                                anchors.centerIn: parent
+                                text: "DEMO INPUT"
+                                color: Theme.accent
+                                font.pixelSize: Theme.studioTextSmall
+                                font.bold: true
+                            }
+                        }
+                    }
+
+                    Text {
+                        width: parent.width
+                        text: "Edit one explicit RangeSignalSpec, then analyze only the controlled in-memory demo sequence. No capture, live traffic, or shared Studio selection is changed."
+                        color: Theme.textMuted
+                        font.pixelSize: Theme.studioTextBody
+                        wrapMode: Text.WordWrap
+                    }
+
+                    Grid {
+                        width: parent.width
+                        columns: width >= 850 ? 5 : 2
+                        columnSpacing: Theme.studioSpacingMedium
+                        rowSpacing: Theme.studioSpacingMedium
+
+                        Column {
+                            width: (parent.width
+                                    - parent.columnSpacing
+                                    * (parent.columns - 1))
+                                   / parent.columns
+                            spacing: Theme.spacingXSmall
+
+                            Text {
+                                text: "CAN ID"
+                                color: Theme.textFaint
+                                font.pixelSize: Theme.studioTextSmall
+                            }
+
+                            TextField {
+                                id: canIdField
+
+                                width: parent.width
+                                text: "0x321"
+                                selectByMouse: true
+                                color: Theme.textPrimary
+                                font.pixelSize: Theme.studioTextBody
+                                font.family: "monospace"
+                                placeholderText: "0x000"
+                                placeholderTextColor: Theme.textFaint
+                                background: Rectangle {
+                                    radius: Theme.radiusSmall
+                                    color: root.inputBackground(
+                                               root.parsedCanId >= 0)
+                                    border.color: root.inputBorderColor(
+                                                      root.parsedCanId >= 0)
+                                    border.width: 1
+                                }
+                            }
+                        }
+
+                        Column {
+                            width: (parent.width
+                                    - parent.columnSpacing
+                                    * (parent.columns - 1))
+                                   / parent.columns
+                            spacing: Theme.spacingXSmall
+
+                            Text {
+                                text: "START BIT"
+                                color: Theme.textFaint
+                                font.pixelSize: Theme.studioTextSmall
+                            }
+
+                            TextField {
+                                id: startBitField
+
+                                width: parent.width
+                                text: "0"
+                                selectByMouse: true
+                                color: Theme.textPrimary
+                                font.pixelSize: Theme.studioTextBody
+                                font.family: "monospace"
+                                inputMethodHints: Qt.ImhDigitsOnly
+                                background: Rectangle {
+                                    radius: Theme.radiusSmall
+                                    color: root.inputBackground(
+                                               root.parsedStartBit >= 0)
+                                    border.color: root.inputBorderColor(
+                                                      root.parsedStartBit >= 0)
+                                    border.width: 1
+                                }
+                            }
+                        }
+
+                        Column {
+                            width: (parent.width
+                                    - parent.columnSpacing
+                                    * (parent.columns - 1))
+                                   / parent.columns
+                            spacing: Theme.spacingXSmall
+
+                            Text {
+                                text: "BIT LENGTH"
+                                color: Theme.textFaint
+                                font.pixelSize: Theme.studioTextSmall
+                            }
+
+                            TextField {
+                                id: bitLengthField
+
+                                width: parent.width
+                                text: "8"
+                                selectByMouse: true
+                                color: Theme.textPrimary
+                                font.pixelSize: Theme.studioTextBody
+                                font.family: "monospace"
+                                inputMethodHints: Qt.ImhDigitsOnly
+                                background: Rectangle {
+                                    radius: Theme.radiusSmall
+                                    color: root.inputBackground(
+                                               root.parsedBitLength > 0)
+                                    border.color: root.inputBorderColor(
+                                                      root.parsedBitLength > 0)
+                                    border.width: 1
+                                }
+                            }
+                        }
+
+                        Column {
+                            width: (parent.width
+                                    - parent.columnSpacing
+                                    * (parent.columns - 1))
+                                   / parent.columns
+                            spacing: Theme.spacingXSmall
+
+                            Text {
+                                text: "ENDIAN"
+                                color: Theme.textFaint
+                                font.pixelSize: Theme.studioTextSmall
+                            }
+
+                            Row {
+                                spacing: Theme.spacingSmall
+
+                                RadioButton {
+                                    text: "Little"
+                                    checked: root.littleEndian
+
+                                    onClicked: root.littleEndian = true
+
+                                    contentItem: Text {
+                                        text: parent.text
+                                        leftPadding: parent.indicator.width
+                                                     + Theme.spacingSmall
+                                        color: Theme.textPrimary
+                                        font.pixelSize: Theme.studioTextBody
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+
+                                    indicator: Rectangle {
+                                        implicitWidth: 16
+                                        implicitHeight: 16
+                                        x: 0
+                                        y: parent.height / 2
+                                           - height / 2
+                                        radius: width / 2
+                                        color: Theme.surfaceInset
+                                        border.color: parent.checked
+                                                      ? Theme.accent
+                                                      : Theme.borderStrong
+                                        border.width: 1
+
+                                        Rectangle {
+                                            anchors.centerIn: parent
+                                            width: 8
+                                            height: 8
+                                            radius: width / 2
+                                            color: Theme.accent
+                                            visible: parent.parent.checked
+                                        }
+                                    }
+                                }
+
+                                RadioButton {
+                                    text: "Big"
+                                    checked: !root.littleEndian
+
+                                    onClicked: root.littleEndian = false
+
+                                    contentItem: Text {
+                                        text: parent.text
+                                        leftPadding: parent.indicator.width
+                                                     + Theme.spacingSmall
+                                        color: Theme.textPrimary
+                                        font.pixelSize: Theme.studioTextBody
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+
+                                    indicator: Rectangle {
+                                        implicitWidth: 16
+                                        implicitHeight: 16
+                                        x: 0
+                                        y: parent.height / 2
+                                           - height / 2
+                                        radius: width / 2
+                                        color: Theme.surfaceInset
+                                        border.color: parent.checked
+                                                      ? Theme.accent
+                                                      : Theme.borderStrong
+                                        border.width: 1
+
+                                        Rectangle {
+                                            anchors.centerIn: parent
+                                            width: 8
+                                            height: 8
+                                            radius: width / 2
+                                            color: Theme.accent
+                                            visible: parent.parent.checked
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Column {
+                            width: (parent.width
+                                    - parent.columnSpacing
+                                    * (parent.columns - 1))
+                                   / parent.columns
+                            spacing: Theme.spacingXSmall
+
+                            Text {
+                                text: "SIGNEDNESS"
+                                color: Theme.textFaint
+                                font.pixelSize: Theme.studioTextSmall
+                            }
+
+                            Row {
+                                spacing: Theme.spacingSmall
+
+                                RadioButton {
+                                    text: "Unsigned"
+                                    checked: !root.signedValue
+
+                                    onClicked: root.signedValue = false
+
+                                    contentItem: Text {
+                                        text: parent.text
+                                        leftPadding: parent.indicator.width
+                                                     + Theme.spacingSmall
+                                        color: Theme.textPrimary
+                                        font.pixelSize: Theme.studioTextBody
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+
+                                    indicator: Rectangle {
+                                        implicitWidth: 16
+                                        implicitHeight: 16
+                                        x: 0
+                                        y: parent.height / 2
+                                           - height / 2
+                                        radius: width / 2
+                                        color: Theme.surfaceInset
+                                        border.color: parent.checked
+                                                      ? Theme.accent
+                                                      : Theme.borderStrong
+                                        border.width: 1
+
+                                        Rectangle {
+                                            anchors.centerIn: parent
+                                            width: 8
+                                            height: 8
+                                            radius: width / 2
+                                            color: Theme.accent
+                                            visible: parent.parent.checked
+                                        }
+                                    }
+                                }
+
+                                RadioButton {
+                                    text: "Signed"
+                                    checked: root.signedValue
+
+                                    onClicked: root.signedValue = true
+
+                                    contentItem: Text {
+                                        text: parent.text
+                                        leftPadding: parent.indicator.width
+                                                     + Theme.spacingSmall
+                                        color: Theme.textPrimary
+                                        font.pixelSize: Theme.studioTextBody
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+
+                                    indicator: Rectangle {
+                                        implicitWidth: 16
+                                        implicitHeight: 16
+                                        x: 0
+                                        y: parent.height / 2
+                                           - height / 2
+                                        radius: width / 2
+                                        color: Theme.surfaceInset
+                                        border.color: parent.checked
+                                                      ? Theme.accent
+                                                      : Theme.borderStrong
+                                        border.width: 1
+
+                                        Rectangle {
+                                            anchors.centerIn: parent
+                                            width: 8
+                                            height: 8
+                                            radius: width / 2
+                                            color: Theme.accent
+                                            visible: parent.parent.checked
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Text {
+                        visible: !root.candidateInputValid
+                                 || root.analysisRequestError.length > 0
+                        width: parent.width
+                        text: root.analysisRequestError.length > 0
+                              ? root.analysisRequestError
+                              : root.inputErrorText()
+                        color: Theme.warning
+                        font.pixelSize: Theme.studioTextSmall
+                        wrapMode: Text.WordWrap
+                    }
+
+                    Button {
+                        id: analyzeButton
+
+                        text: "Analyze demo evidence"
+                        enabled: root.candidateInputValid
+                        implicitHeight: Math.max(
+                                            Theme.studioTextBody
+                                            + Theme.studioSpacingMedium,
+                                            36)
+
+                        onClicked: {
+                            root.analysisRequestError = ""
+
+                            var accepted =
+                                    studioHost.analyzeStateExplorerCandidate(
+                                        root.parsedCanId,
+                                        root.parsedStartBit,
+                                        root.parsedBitLength,
+                                        root.littleEndian,
+                                        root.signedValue)
+
+                            if (!accepted) {
+                                root.analysisRequestError =
+                                        "Candidate layout was rejected. Evidence was not refreshed."
+                            }
+                        }
+
+                        contentItem: Text {
+                            text: analyzeButton.text
+                            color: analyzeButton.enabled
+                                   ? Theme.textInverse
+                                   : Theme.textDisabled
+                            font.pixelSize: Theme.studioTextBody
+                            font.bold: true
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
+
+                        background: Rectangle {
+                            radius: Theme.radiusSmall
+                            color: !analyzeButton.enabled
+                                   ? Theme.disabled
+                                   : analyzeButton.down
+                                     ? Theme.pressed
+                                     : analyzeButton.hovered
+                                       ? Theme.accentMuted
+                                       : Theme.accent
+                            border.color: analyzeButton.enabled
+                                          ? Theme.accent
+                                          : Theme.disabled
+                            border.width: 1
+                        }
+                    }
+                }
+            }
+
+            Rectangle {
+                width: parent.width
                 height: identityContent.implicitHeight
                         + Theme.studioSpacingLarge * 2
                 radius: Theme.studioRadiusLarge
@@ -93,7 +597,7 @@ Item {
                         spacing: Theme.studioSpacingSmall
 
                         Text {
-                            text: "Explicit demo candidate"
+                            text: "Analyzed candidate identity"
                             color: Theme.readOnly
                             font.pixelSize: Theme.studioTextSection
                             font.bold: true

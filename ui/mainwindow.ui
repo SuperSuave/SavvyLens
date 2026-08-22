@@ -1248,10 +1248,10 @@
   </action>
   <action name="actionLiveChangeExplorer">
    <property name="text">
-    <string>Live Change Explorer</string>
+    <string>SavvyLens Studio</string>
    </property>
    <property name="toolTip">
-    <string>Open the Live Change Explorer</string>
+    <string>Open SavvyLens Studio</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>

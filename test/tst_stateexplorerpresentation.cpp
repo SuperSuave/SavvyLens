@@ -50,6 +50,34 @@ QVariantMap rowAt(const QVariantList &rows, int index)
 }
 }
 
+bool setExplicitCandidateEvidence(StateExplorerPresentation &presentation,
+                                  const QVector<CANFrame> &frames,
+                                  quint32 canId,
+                                  int startBit,
+                                  int bitLength,
+                                  bool isLittleEndian,
+                                  bool isSigned)
+{
+    RangeSignalSpec candidate;
+    candidate.canId = canId;
+    candidate.startBit = startBit;
+    candidate.bitLength = bitLength;
+    candidate.isLittleEndian = isLittleEndian;
+    candidate.isSigned = isSigned;
+
+    if (!candidate.isValid())
+        return false;
+
+    CandidateAnalysis::Config config;
+    config.candidate = candidate;
+    config.discreteState.maxDistinctValues = 32;
+    config.maximumDistinctTransitions = 64;
+    config.maximumRetainedRuns = 64;
+
+    presentation.setEvidence(frames, config);
+    return true;
+}
+
 void TestStateExplorerPresentation::mapsCandidateIdentityAndAcceptedSamples()
 {
     StateExplorerPresentation presentation;
@@ -260,4 +288,180 @@ void TestStateExplorerPresentation::mapsTruncatedEvidenceFlags()
     QCOMPARE(presentation.observedStates().size(), 2);
     QCOMPARE(presentation.observedTransitions().size(), 2);
     QCOMPARE(presentation.observedRuns().size(), 2);
+}
+
+bool setExplicitCandidateEvidence(StateExplorerPresentation &presentation,
+                                  const QVector<CANFrame> &frames,
+                                  quint32 canId,
+                                  int startBit,
+                                  int bitLength,
+                                  bool isLittleEndian,
+                                  bool isSigned)
+{
+    RangeSignalSpec candidate;
+    candidate.canId = canId;
+    candidate.startBit = startBit;
+    candidate.bitLength = bitLength;
+    candidate.isLittleEndian = isLittleEndian;
+    candidate.isSigned = isSigned;
+
+    if (!candidate.isValid())
+        return false;
+
+    CandidateAnalysis::Config config;
+    config.candidate = candidate;
+    config.discreteState.maxDistinctValues = 32;
+    config.maximumDistinctTransitions = 64;
+    config.maximumRetainedRuns = 64;
+
+    presentation.setEvidence(frames, config);
+    return true;
+}
+
+void TestStateExplorerPresentation::explicitCandidateRefreshesIdentityAndEvidence()
+{
+    StateExplorerPresentation presentation;
+    const QVector<CANFrame> frames = {
+        frame(0x321, QByteArray::fromHex("00")),
+        frame(0x321, QByteArray::fromHex("01")),
+        frame(0x321, QByteArray::fromHex("02")),
+        frame(0x321, QByteArray::fromHex("01"))
+    };
+
+    QVERIFY(setExplicitCandidateEvidence(
+        presentation,
+        frames,
+        0x321,
+        0,
+        8,
+        true,
+        false));
+
+    QCOMPARE(presentation.canIdText(), QStringLiteral("0x321"));
+    QCOMPARE(presentation.startBit(), 0);
+    QCOMPARE(presentation.bitLength(), 8);
+    QCOMPARE(presentation.endianText(), QStringLiteral("Little endian"));
+    QCOMPARE(presentation.signednessText(), QStringLiteral("Unsigned"));
+    QCOMPARE(presentation.acceptedSampleCount(), 4);
+    QVERIFY(presentation.hasEvidence());
+    QCOMPARE(presentation.observedStates().size(), 3);
+    QCOMPARE(presentation.observedTransitions().size(), 3);
+    QCOMPARE(presentation.observedRuns().size(), 4);
+}
+
+void TestStateExplorerPresentation::invalidCandidateIsRejectedBeforePresentationRefresh()
+{
+    StateExplorerPresentation presentation;
+    const QVector<CANFrame> frames = {
+        frame(0x321, QByteArray::fromHex("00")),
+        frame(0x321, QByteArray::fromHex("01"))
+    };
+
+    QVERIFY(setExplicitCandidateEvidence(
+        presentation,
+        frames,
+        0x321,
+        0,
+        8,
+        true,
+        false));
+
+    const QString previousCanId = presentation.canIdText();
+    const int previousStartBit = presentation.startBit();
+    const int previousBitLength = presentation.bitLength();
+    const int previousSampleCount = presentation.acceptedSampleCount();
+    const QVariantList previousStates = presentation.observedStates();
+
+    QVERIFY(!setExplicitCandidateEvidence(
+        presentation,
+        frames,
+        0x321,
+        63,
+        8,
+        true,
+        false));
+
+    QCOMPARE(presentation.canIdText(), previousCanId);
+    QCOMPARE(presentation.startBit(), previousStartBit);
+    QCOMPARE(presentation.bitLength(), previousBitLength);
+    QCOMPARE(presentation.acceptedSampleCount(), previousSampleCount);
+    QCOMPARE(presentation.observedStates(), previousStates);
+}
+
+void TestStateExplorerPresentation::canIdZeroRemainsSupported()
+{
+    StateExplorerPresentation presentation;
+    const QVector<CANFrame> frames = {
+        frame(0x000, QByteArray::fromHex("02")),
+        frame(0x000, QByteArray::fromHex("03"))
+    };
+
+    QVERIFY(setExplicitCandidateEvidence(
+        presentation,
+        frames,
+        0x000,
+        0,
+        8,
+        true,
+        false));
+
+    QCOMPARE(presentation.canIdText(), QStringLiteral("0x000"));
+    QCOMPARE(presentation.acceptedSampleCount(), 2);
+    QVERIFY(presentation.hasEvidence());
+}
+
+void TestStateExplorerPresentation::explicitEndianAndSignednessAreForwarded()
+{
+    StateExplorerPresentation presentation;
+    const QVector<CANFrame> frames = {
+        frame(0x321, QByteArray::fromHex("80"))
+    };
+
+    QVERIFY(setExplicitCandidateEvidence(
+        presentation,
+        frames,
+        0x321,
+        0,
+        8,
+        false,
+        true));
+
+    QCOMPARE(presentation.endianText(), QStringLiteral("Big endian"));
+    QCOMPARE(presentation.signednessText(), QStringLiteral("Signed"));
+    QCOMPARE(presentation.acceptedSampleCount(), 1);
+
+    const QVariantList states = presentation.observedStates();
+    QCOMPARE(states.size(), 1);
+    QCOMPARE(states.constFirst().toMap()
+             .value(QStringLiteral("valueText"))
+             .toString(),
+             QStringLiteral("-128"));
+}
+
+void TestStateExplorerPresentation::validCandidateWithNoAcceptedSamplesIsReadable()
+{
+    StateExplorerPresentation presentation;
+    const QVector<CANFrame> frames = {
+        frame(0x321, QByteArray::fromHex("00")),
+        frame(0x321, QByteArray::fromHex("01"))
+    };
+
+    QVERIFY(setExplicitCandidateEvidence(
+        presentation,
+        frames,
+        0x000,
+        0,
+        8,
+        true,
+        false));
+
+    QCOMPARE(presentation.canIdText(), QStringLiteral("0x000"));
+    QCOMPARE(presentation.acceptedSampleCount(), 0);
+    QVERIFY(!presentation.hasEvidence());
+    QCOMPARE(presentation.discreteClassificationText(),
+             QStringLiteral("No accepted samples"));
+    QCOMPARE(presentation.transitionClassificationText(),
+             QStringLiteral("No accepted samples"));
+    QCOMPARE(presentation.temporalClassificationText(),
+             QStringLiteral("No accepted samples"));
 }

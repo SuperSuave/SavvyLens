@@ -13,6 +13,11 @@ private slots:
     void preservesEvidenceOrderingAndStringValues();
     void mapsNoAcceptedSamplesSafely();
     void mapsTruncatedEvidenceFlags();
+    void explicitCandidateRefreshesIdentityAndEvidence();
+    void invalidCandidateIsRejectedBeforePresentationRefresh();
+    void canIdZeroRemainsSupported();
+    void explicitEndianAndSignednessAreForwarded();
+    void validCandidateWithNoAcceptedSamplesIsReadable();
 };
 
 #endif // TST_STATEEXPLORERPRESENTATION_H

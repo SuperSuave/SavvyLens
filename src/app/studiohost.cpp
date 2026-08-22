@@ -1,7 +1,7 @@
-#include "app/studiohost.h"
+#include "studiohost.h"
 
 // SavvyLens headers
-#include "app/stateexplorerpresentation.h"
+#include "stateexplorerpresentation.h"
 
 // Qt headers
 #include <QByteArray>
@@ -55,6 +55,28 @@ StudioHost::StudioHost(QWidget *parent)
     layout->addWidget(quickWidget_);
 }
 
+bool StudioHost::analyzeStateExplorerCandidate(quint32 canId,
+                                               int startBit,
+                                               int bitLength,
+                                               bool isLittleEndian,
+                                               bool isSigned)
+{
+    RangeSignalSpec candidate;
+    candidate.canId = canId;
+    candidate.startBit = startBit;
+    candidate.bitLength = bitLength;
+    candidate.isLittleEndian = isLittleEndian;
+    candidate.isSigned = isSigned;
+
+    if (!candidate.isValid())
+        return false;
+
+    stateExplorerPresentation_->setEvidence(
+        stateExplorerDemoFrames_,
+        stateExplorerDemoConfig(candidate));
+    return true;
+}
+
 void StudioHost::closeStudio()
 {
     close();
@@ -66,31 +88,36 @@ void StudioHost::closeEvent(QCloseEvent *event)
     QWidget::closeEvent(event);
 }
 
+CandidateAnalysis::Config StudioHost::stateExplorerDemoConfig(
+    const RangeSignalSpec &candidate) const
+{
+    CandidateAnalysis::Config config;
+    config.candidate = candidate;
+    config.discreteState.maxDistinctValues = 32;
+    config.maximumDistinctTransitions = 64;
+    config.maximumRetainedRuns = 64;
+    return config;
+}
+
 void StudioHost::loadStateExplorerDemo()
 {
     constexpr quint32 demoCanId = 0x321;
 
-    QVector<CANFrame> frames;
-    frames.append(demoFrame(demoCanId, 0));
-    frames.append(demoFrame(demoCanId, 0));
-    frames.append(demoFrame(demoCanId, 1));
-    frames.append(demoFrame(demoCanId, 1));
-    frames.append(demoFrame(demoCanId, 2));
-    frames.append(demoFrame(demoCanId, 2));
-    frames.append(demoFrame(demoCanId, 1));
-    frames.append(demoFrame(demoCanId, 1));
-    frames.append(demoFrame(demoCanId, 0));
+    stateExplorerDemoFrames_.clear();
+    stateExplorerDemoFrames_.append(demoFrame(demoCanId, 0));
+    stateExplorerDemoFrames_.append(demoFrame(demoCanId, 0));
+    stateExplorerDemoFrames_.append(demoFrame(demoCanId, 1));
+    stateExplorerDemoFrames_.append(demoFrame(demoCanId, 1));
+    stateExplorerDemoFrames_.append(demoFrame(demoCanId, 2));
+    stateExplorerDemoFrames_.append(demoFrame(demoCanId, 2));
+    stateExplorerDemoFrames_.append(demoFrame(demoCanId, 1));
+    stateExplorerDemoFrames_.append(demoFrame(demoCanId, 1));
+    stateExplorerDemoFrames_.append(demoFrame(demoCanId, 0));
 
-    CandidateAnalysis::Config config;
-    config.candidate.canId = demoCanId;
-    config.candidate.startBit = 0;
-    config.candidate.bitLength = 8;
-    config.candidate.isLittleEndian = true;
-    config.candidate.isSigned = false;
-
-    config.discreteState.maxDistinctValues = 32;
-    config.maximumDistinctTransitions = 64;
-    config.maximumRetainedRuns = 64;
-
-    stateExplorerPresentation_->setEvidence(frames, config);
+    analyzeStateExplorerCandidate(
+        demoCanId,
+        0,
+        8,
+        true,
+        false);
 }
