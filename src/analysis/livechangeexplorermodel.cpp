@@ -302,6 +302,35 @@ SelectionContext LiveChangeExplorerModel::selectionContextForRow(
     return context;
 }
 
+bool LiveChangeExplorerModel::aggregateKeyForRow(
+    int row,
+    FrameAggregateKey *key) const
+{
+    if (key == nullptr ||
+        row < 0 ||
+        row >= rows_.size())
+    {
+        return false;
+    }
+
+    *key = rows_.at(row).key;
+    return true;
+}
+
+int LiveChangeExplorerModel::rowForAggregateKey(
+    const FrameAggregateKey &key) const
+{
+    for (int row = 0; row < rows_.size(); ++row)
+    {
+        if (rows_.at(row).key == key)
+        {
+            return row;
+        }
+    }
+
+    return -1;
+}
+
 QVariant LiveChangeExplorerModel::data(
     const QModelIndex &index,
     int role) const

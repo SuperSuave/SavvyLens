@@ -13,6 +13,9 @@ Rectangle {
     color: Theme.background
 
     property string activeWorkspaceId: "dash"
+    property string stateExplorerSourceLabel:
+        "Source: Deterministic demo evidence"
+    property bool stateExplorerUsesLiveChangeSnapshot: false
     readonly property int shellMargin: Theme.studioSpacingMedium
 
     readonly property var workspaceDefinitions: [
@@ -95,6 +98,21 @@ Rectangle {
         }
 
         activeWorkspaceId = definition.id
+    }
+
+    function seedStateExplorerCandidate(canIdText) {
+        openWorkspace("explore")
+
+        for (var index = 0; index < workspaceStack.count; ++index) {
+            var item = workspaceStack.itemAt(index)
+
+            if (item
+                    && item.item
+                    && item.item.seedCandidate) {
+                item.item.seedCandidate(canIdText)
+                return
+            }
+        }
     }
 
     StudioTopBar {
@@ -332,10 +350,12 @@ Rectangle {
                 delegate: Loader {
                     active: true
                     sourceComponent: modelData.id === "dash"
-                                     ? dashComponent
-                                     : modelData.id === "explore"
-                                       ? stateExplorerComponent
-                                       : placeholderComponent
+                                    ? dashComponent
+                                    : modelData.id === "traffic"
+                                    ? trafficComponent
+                                    : modelData.id === "explore"
+                                        ? stateExplorerComponent
+                                        : placeholderComponent
 
                     property var workspaceDefinition: modelData
                 }
@@ -347,6 +367,13 @@ Rectangle {
         id: dashComponent
 
         DashPage {
+            anchors.fill: parent
+        }
+    }
+    Component {
+        id: trafficComponent
+
+        LiveChangeExplorer {
             anchors.fill: parent
         }
     }

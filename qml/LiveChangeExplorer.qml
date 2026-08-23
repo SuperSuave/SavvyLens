@@ -11,6 +11,7 @@ Rectangle {
     color: Theme.background
 
     property int selectedRow: -1
+    property var selectedAggregateKey: null
 
     readonly property var columnHeaders: [
         "Bus",
@@ -73,6 +74,66 @@ Rectangle {
         default:
             return ""
         }
+    }
+
+    function selectedRowKey() {
+        if (selectedRow < 0
+                || selectedRow >= liveChangeExplorerModel.rowCount())
+        {
+            return null
+        }
+
+        return {
+            bus: liveChangeExplorerModel.index(
+                    selectedRow, 0).data(
+                    liveChangeExplorerModel.BusRole),
+            canId: liveChangeExplorerModel.index(
+                    selectedRow, 0).data(
+                    liveChangeExplorerModel.CanIdRole),
+            isExtended: liveChangeExplorerModel.index(
+                            selectedRow, 0).data(
+                            liveChangeExplorerModel.IsExtendedRole),
+            frameType: liveChangeExplorerModel.index(
+                        selectedRow, 0).data(
+                        liveChangeExplorerModel.FrameTypeRole),
+            isReceived: liveChangeExplorerModel.index(
+                            selectedRow, 0).data(
+                            liveChangeExplorerModel.DirectionRole)
+        }
+    }
+
+    function restoreSelectedRow() {
+        if (selectedAggregateKey === null)
+            return
+
+        for (var row = 0;
+            row < liveChangeExplorerModel.rowCount();
+            ++row)
+        {
+            var index = liveChangeExplorerModel.index(row, 0)
+
+            var bus = index.data(liveChangeExplorerModel.BusRole)
+            var canId = index.data(liveChangeExplorerModel.CanIdRole)
+            var isExtended = index.data(
+                        liveChangeExplorerModel.IsExtendedRole)
+            var frameType = index.data(
+                        liveChangeExplorerModel.FrameTypeRole)
+            var isReceived = index.data(
+                        liveChangeExplorerModel.DirectionRole)
+
+            if (bus === selectedAggregateKey.bus
+                    && canId === selectedAggregateKey.canId
+                    && isExtended === selectedAggregateKey.isExtended
+                    && frameType === selectedAggregateKey.frameType
+                    && isReceived === selectedAggregateKey.isReceived)
+            {
+                selectedRow = row
+                return
+            }
+        }
+
+        selectedRow = -1
+        selectedAggregateKey = null
     }
 
     AnalysisMarkersDialog {
@@ -157,11 +218,12 @@ Rectangle {
                     placeholderTextColor: Theme.textFaint
                     selectByMouse: true
 
+                    background: Rectangle {
                         radius: Theme.radiusSmall
                         color: Theme.surfaceInset
                         border.color: markerLabelField.activeFocus
-                                      ? Theme.focus
-                                      : Theme.border
+                                    ? Theme.focus
+                                    : Theme.border
                         border.width: 1
                     }
 
@@ -737,6 +799,7 @@ Rectangle {
 
                     onClicked: {
                         root.selectedRow = row
+                        root.selectedAggregateKey = root.selectedRowKey()
                     }
                 }
             }
@@ -755,9 +818,12 @@ Rectangle {
         Connections {
             target: liveChangeExplorerModel
 
+            function onModelAboutToBeReset() {
+                root.selectedAggregateKey = root.selectedRowKey()
+            }
+
             function onModelReset() {
-                root.selectedRow = -1
-                tableView.contentY = 0
+                root.restoreSelectedRow()
             }
         }
 
@@ -895,6 +961,42 @@ Rectangle {
                     onClicked: {
                         liveChangeExplorerHost.openGraphingForRow(
                                     root.selectedRow)
+                    }
+                }
+
+                Button {
+                    id: exploreInStateExplorerButton
+
+                    text: "Explore in State Explorer"
+                    enabled: root.selectedRow >= 0
+
+                    background: Rectangle {
+                        radius: 3
+                        color: exploreInStateExplorerButton.enabled
+                            ? Theme.accentSubtle
+                            : Theme.surfaceInset
+                        border.color: exploreInStateExplorerButton.enabled
+                                    ? Theme.accent
+                                    : Theme.border
+                        border.width: 1
+                    }
+
+                    contentItem: Text {
+                        text: exploreInStateExplorerButton.text
+                        color: exploreInStateExplorerButton.enabled
+                            ? Theme.textPrimary
+                            : Theme.textFaint
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        font.pixelSize: 11
+                    }
+
+                    onClicked: {
+                        if (typeof studioHost !== "undefined")
+                        {
+                            studioHost.exploreLiveChangeRowInStateExplorer(
+                                    root.selectedRow)
+                        }
                     }
                 }
 

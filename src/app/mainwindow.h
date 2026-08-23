@@ -107,6 +107,7 @@ public slots:
     void showGraphingWindow();
     void showGraphingWindow(const SelectionContext &context);
     void showStudio();
+    void showLiveChangeExplorer();
     void showFrameDataAnalysis();
     void clearFrames();
     void expandAllRows();
@@ -388,6 +389,7 @@ private slots:
     void openExplorerFrameInfo(int row);
     void openExplorerGraphing(int row);
     void createExplorerMarker(int row, const QString &label);
+    void exploreLiveChangeRowInStateExplorer(int row);
     void showAnalysisMarkers();
     void killEmAll();
     void killWindow(QDialog *win);

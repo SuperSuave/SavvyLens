@@ -19,6 +19,11 @@ private slots:
     void activityAgeIsAvailableAfterIngest();
     void clearRemovesActivityAgeState();
     void comparisonOwnsDataAfterLaterIngest();
+    void stateExplorerSnapshotFiltersByCompleteAggregateKey();
+    void stateExplorerSnapshotOwnsFramesAfterLaterIngest();
+    void stateExplorerSnapshotSupportsCanIdZero();
+    void stateExplorerSnapshotAllowsEmptyFrameVector();
+    void clearRemovesStateExplorerSnapshotFrames();
 
 };
 

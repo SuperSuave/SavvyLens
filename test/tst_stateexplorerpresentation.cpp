@@ -45,37 +45,9 @@ CandidateAnalysis::Config makeConfig(
 }
 
 QVariantMap rowAt(const QVariantList &rows, int index)
-{
-    return rows.at(index).toMap();
-}
-}
-
-bool setExplicitCandidateEvidence(StateExplorerPresentation &presentation,
-                                  const QVector<CANFrame> &frames,
-                                  quint32 canId,
-                                  int startBit,
-                                  int bitLength,
-                                  bool isLittleEndian,
-                                  bool isSigned)
-{
-    RangeSignalSpec candidate;
-    candidate.canId = canId;
-    candidate.startBit = startBit;
-    candidate.bitLength = bitLength;
-    candidate.isLittleEndian = isLittleEndian;
-    candidate.isSigned = isSigned;
-
-    if (!candidate.isValid())
-        return false;
-
-    CandidateAnalysis::Config config;
-    config.candidate = candidate;
-    config.discreteState.maxDistinctValues = 32;
-    config.maximumDistinctTransitions = 64;
-    config.maximumRetainedRuns = 64;
-
-    presentation.setEvidence(frames, config);
-    return true;
+    {
+        return rows.at(index).toMap();
+    }
 }
 
 void TestStateExplorerPresentation::mapsCandidateIdentityAndAcceptedSamples()
@@ -322,10 +294,10 @@ void TestStateExplorerPresentation::explicitCandidateRefreshesIdentityAndEvidenc
 {
     StateExplorerPresentation presentation;
     const QVector<CANFrame> frames = {
-        frame(0x321, QByteArray::fromHex("00")),
-        frame(0x321, QByteArray::fromHex("01")),
-        frame(0x321, QByteArray::fromHex("02")),
-        frame(0x321, QByteArray::fromHex("01"))
+        makeFrame(0x321, QByteArray::fromHex("00")),
+        makeFrame(0x321, QByteArray::fromHex("01")),
+        makeFrame(0x321, QByteArray::fromHex("02")),
+        makeFrame(0x321, QByteArray::fromHex("01"))
     };
 
     QVERIFY(setExplicitCandidateEvidence(
@@ -353,8 +325,8 @@ void TestStateExplorerPresentation::invalidCandidateIsRejectedBeforePresentation
 {
     StateExplorerPresentation presentation;
     const QVector<CANFrame> frames = {
-        frame(0x321, QByteArray::fromHex("00")),
-        frame(0x321, QByteArray::fromHex("01"))
+        makeFrame(0x321, QByteArray::fromHex("00")),
+        makeFrame(0x321, QByteArray::fromHex("01"))
     };
 
     QVERIFY(setExplicitCandidateEvidence(
@@ -376,8 +348,8 @@ void TestStateExplorerPresentation::invalidCandidateIsRejectedBeforePresentation
         presentation,
         frames,
         0x321,
-        63,
-        8,
+        0,
+        0,
         true,
         false));
 
@@ -392,8 +364,8 @@ void TestStateExplorerPresentation::canIdZeroRemainsSupported()
 {
     StateExplorerPresentation presentation;
     const QVector<CANFrame> frames = {
-        frame(0x000, QByteArray::fromHex("02")),
-        frame(0x000, QByteArray::fromHex("03"))
+        makeFrame(0x000, QByteArray::fromHex("02")),
+        makeFrame(0x000, QByteArray::fromHex("03"))
     };
 
     QVERIFY(setExplicitCandidateEvidence(
@@ -414,14 +386,14 @@ void TestStateExplorerPresentation::explicitEndianAndSignednessAreForwarded()
 {
     StateExplorerPresentation presentation;
     const QVector<CANFrame> frames = {
-        frame(0x321, QByteArray::fromHex("80"))
+        makeFrame(0x321, QByteArray::fromHex("80"))
     };
 
     QVERIFY(setExplicitCandidateEvidence(
         presentation,
         frames,
         0x321,
-        0,
+        7,
         8,
         false,
         true));
@@ -442,8 +414,8 @@ void TestStateExplorerPresentation::validCandidateWithNoAcceptedSamplesIsReadabl
 {
     StateExplorerPresentation presentation;
     const QVector<CANFrame> frames = {
-        frame(0x321, QByteArray::fromHex("00")),
-        frame(0x321, QByteArray::fromHex("01"))
+        makeFrame(0x321, QByteArray::fromHex("00")),
+        makeFrame(0x321, QByteArray::fromHex("01"))
     };
 
     QVERIFY(setExplicitCandidateEvidence(

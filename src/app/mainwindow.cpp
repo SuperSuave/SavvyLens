@@ -129,10 +129,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(controlAnalysisDialog, &ControlAnalysisDialog::bookmarkCandidateRequested,
             this, &MainWindow::bookmarkControlCandidate);
 
-    connect(ui->actionLiveChangeExplorer,
-            &QAction::triggered,
-            this,
-            &MainWindow::showStudio);
+connect(
+    ui->actionLiveChangeExplorer,
+    &QAction::triggered,
+    this,
+    &MainWindow::showLiveChangeExplorer);
 
     setupEmbeddedAnalysisViews();
 
@@ -1506,9 +1507,9 @@ void MainWindow::tickGUIUpdate()
 
         rxFrames = 0;
 
-        if (liveChangeExplorerHost_ &&
-            liveChangeExplorerHost_->isVisible() &&
-            liveChangeExplorerModel)
+        if (liveChangeExplorerModel != nullptr &&
+            studioHost_ != nullptr &&
+            studioHost_->isVisible())
         {
             liveChangeExplorerModel->refresh();
         }
@@ -2109,11 +2110,67 @@ CANFrameModel* MainWindow::getCANFrameModel()
 /*
  * All functions past this point set up the various other windows that can be opened
 */
+
+void MainWindow::showLiveChangeExplorer()
+{
+    showStudio();
+
+    if (studioHost_ != nullptr)
+    {
+        studioHost_->openTrafficWorkspace();
+    }
+}
+
+void MainWindow::exploreLiveChangeRowInStateExplorer(int row)
+{
+    if (liveChangeExplorerModel == nullptr)
+    {
+        return;
+    }
+
+    FrameAggregateKey key;
+
+    if (!liveChangeExplorerModel->aggregateKeyForRow(
+            row,
+            &key))
+    {
+        return;
+    }
+
+    QVector<CANFrame> snapshot;
+
+    if (!analysisSession.stateExplorerSnapshot(
+            key,
+            &snapshot))
+    {
+        return;
+    }
+
+    showStudio();
+
+    if (studioHost_ == nullptr)
+    {
+        return;
+    }
+
+    studioHost_->loadStateExplorerSnapshot(
+        key,
+        snapshot);
+}
+
 void MainWindow::showStudio()
 {
     if (studioHost_ == nullptr)
     {
-        studioHost_ = new StudioHost(this);
+        studioHost_ = new StudioHost(
+            liveChangeExplorerModel,
+            this);
+
+        connect(
+            studioHost_,
+            &StudioHost::exploreLiveChangeRowRequested,
+            this,
+            &MainWindow::exploreLiveChangeRowInStateExplorer);
 
         connect(
             studioHost_,

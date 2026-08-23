@@ -3,8 +3,10 @@
 #include "can/can_structs.h"
 
 AnalysisSession::AnalysisSession(
-    std::size_t maximumSnapshotsPerKey)
-    : frameHistory(maximumSnapshotsPerKey)
+    std::size_t maximumSnapshotsPerKey,
+    std::size_t maximumStateExplorerFrames)
+    : maximumStateExplorerFrames(maximumStateExplorerFrames),
+      frameHistory(maximumSnapshotsPerKey)
 {
     activityClock.start();
 }
@@ -25,6 +27,14 @@ void AnalysisSession::ingest(const CANFrame &frame)
 
     frameHistory.ingest(frame);
 
+    stateExplorerFrames.append(frame);
+
+    while (static_cast<std::size_t>(stateExplorerFrames.size())
+        > maximumStateExplorerFrames)
+    {
+        stateExplorerFrames.removeFirst();
+    }
+
     lastActivityMilliseconds.insert(key, observedActivityMilliseconds);
 }
 
@@ -33,6 +43,7 @@ void AnalysisSession::clear() noexcept
     aggregateStore.clear();
     frameHistory.clear();
     markerStore.clear();
+    stateExplorerFrames.clear();
     lastActivityMilliseconds.clear();
 
     activityClock.restart();
@@ -91,6 +102,35 @@ bool AnalysisSession::compareLatest(
     *comparison = FrameComparisonCalculator::compare(
         *previous,
         *current);
+
+    return true;
+}
+
+bool AnalysisSession::stateExplorerSnapshot(
+    const FrameAggregateKey &key,
+    QVector<CANFrame> *frames) const
+{
+    if (frames == nullptr)
+    {
+        return false;
+    }
+
+    frames->clear();
+
+    if (aggregateStore.find(key) == nullptr)
+    {
+        return false;
+    }
+
+    frames->reserve(stateExplorerFrames.size());
+
+    for (const CANFrame &frame : stateExplorerFrames)
+    {
+        if (makeKey(frame) == key)
+        {
+            frames->append(frame);
+        }
+    }
 
     return true;
 }

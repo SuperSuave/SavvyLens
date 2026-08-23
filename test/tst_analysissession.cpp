@@ -289,3 +289,180 @@ void TestAnalysisSession::comparisonOwnsDataAfterLaterIngest()
     QCOMPARE(comparison.payloadDiff.changedBitMask,
              QByteArray::fromHex("03"));
 }
+
+void TestAnalysisSession::stateExplorerSnapshotFiltersByCompleteAggregateKey()
+{
+    AnalysisSession session;
+
+    const CANFrame selected = makeFrame(
+        0x123,
+        1,
+        true,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("01"));
+
+    const CANFrame sameKeyLater = makeFrame(
+        0x123,
+        1,
+        true,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("02"));
+
+    const CANFrame otherBus = makeFrame(
+        0x123,
+        2,
+        true,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("03"));
+
+    const CANFrame otherDirection = makeFrame(
+        0x123,
+        1,
+        false,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("04"));
+
+    const CANFrame otherFormat = makeFrame(
+        0x123,
+        1,
+        true,
+        true,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("05"));
+
+    const CANFrame otherType = makeFrame(
+        0x123,
+        1,
+        true,
+        false,
+        QCanBusFrame::RemoteRequestFrame,
+        QByteArray::fromHex("06"));
+
+    session.ingest(selected);
+    session.ingest(otherBus);
+    session.ingest(otherDirection);
+    session.ingest(otherFormat);
+    session.ingest(otherType);
+    session.ingest(sameKeyLater);
+
+    QVector<CANFrame> snapshot;
+
+    QVERIFY(session.stateExplorerSnapshot(
+        AnalysisSession::makeKey(selected),
+        &snapshot));
+
+    QCOMPARE(snapshot.size(), 2);
+    QCOMPARE(snapshot.at(0).payload(), QByteArray::fromHex("01"));
+    QCOMPARE(snapshot.at(1).payload(), QByteArray::fromHex("02"));
+}
+
+void TestAnalysisSession::stateExplorerSnapshotOwnsFramesAfterLaterIngest()
+{
+    AnalysisSession session;
+
+    const CANFrame first = makeFrame(
+        0x123,
+        1,
+        true,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("01"));
+
+    const CANFrame second = makeFrame(
+        0x123,
+        1,
+        true,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("02"));
+
+    session.ingest(first);
+
+    QVector<CANFrame> snapshot;
+
+    QVERIFY(session.stateExplorerSnapshot(
+        AnalysisSession::makeKey(first),
+        &snapshot));
+
+    session.ingest(second);
+
+    QCOMPARE(snapshot.size(), 1);
+    QCOMPARE(snapshot.constFirst().payload(),
+             QByteArray::fromHex("01"));
+}
+
+void TestAnalysisSession::stateExplorerSnapshotSupportsCanIdZero()
+{
+    AnalysisSession session;
+
+    const CANFrame frame = makeFrame(
+        0x000,
+        0,
+        true,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("7F"));
+
+    session.ingest(frame);
+
+    QVector<CANFrame> snapshot;
+
+    QVERIFY(session.stateExplorerSnapshot(
+        AnalysisSession::makeKey(frame),
+        &snapshot));
+
+    QCOMPARE(snapshot.size(), 1);
+    QCOMPARE(snapshot.constFirst().frameId(),
+             static_cast<quint32>(0x000));
+}
+
+void TestAnalysisSession::stateExplorerSnapshotAllowsEmptyFrameVector()
+{
+    AnalysisSession session;
+
+    const CANFrame frame = makeFrame(
+        0x123,
+        1,
+        true,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("01"));
+
+    session.ingest(frame);
+
+    QVector<CANFrame> snapshot;
+
+    QVERIFY(session.stateExplorerSnapshot(
+        AnalysisSession::makeKey(frame),
+        &snapshot));
+
+    QVERIFY(!snapshot.isEmpty());
+}
+
+void TestAnalysisSession::clearRemovesStateExplorerSnapshotFrames()
+{
+    AnalysisSession session;
+
+    const CANFrame frame = makeFrame(
+        0x123,
+        1,
+        true,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("01"));
+
+    session.ingest(frame);
+    session.clear();
+
+    QVector<CANFrame> snapshot;
+
+    QVERIFY(!session.stateExplorerSnapshot(
+        AnalysisSession::makeKey(frame),
+        &snapshot));
+
+    QVERIFY(snapshot.isEmpty());
+}

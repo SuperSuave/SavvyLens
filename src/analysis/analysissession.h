@@ -22,7 +22,8 @@ class AnalysisSession
 {
 public:
     explicit AnalysisSession(
-        std::size_t maximumSnapshotsPerKey = 2);
+        std::size_t maximumSnapshotsPerKey = 2,
+        std::size_t maximumStateExplorerFrames = 4096);
 
     void ingest(const CANFrame &frame);
     void clear() noexcept;
@@ -45,6 +46,10 @@ public:
         const FrameAggregateKey &key,
         FrameComparison *comparison) const;
 
+    bool stateExplorerSnapshot(
+        const FrameAggregateKey &key,
+        QVector<CANFrame> *frames) const;
+
     static FrameAggregateKey makeKey(const CANFrame &frame);
 
     bool hasActivityTimestamp(
@@ -58,6 +63,9 @@ public:
         const QString &label = QString());
 
     const QVector<AnalysisMarker> &markers() const noexcept;
+
+    std::size_t maximumStateExplorerFrames;
+    QVector<CANFrame> stateExplorerFrames;
 
 private:
     FrameAggregateStore aggregateStore;

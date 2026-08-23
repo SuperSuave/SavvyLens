@@ -116,6 +116,13 @@ public:
 
     SelectionContext selectionContextForRow(int row) const;
 
+    bool aggregateKeyForRow(
+        int row,
+        FrameAggregateKey *key) const;
+
+    int rowForAggregateKey(
+        const FrameAggregateKey &key) const;
+
     QString filterText() const;
     void setFilterText(const QString &filterText);
 

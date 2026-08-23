@@ -7,6 +7,15 @@ Item {
 
     readonly property var presentation: stateExplorerPresentation
 
+    readonly property string sourceLabel:
+        typeof stateExplorerSourceLabel !== "undefined"
+            ? stateExplorerSourceLabel
+            : "Source: Deterministic demo evidence"
+
+        readonly property bool usesLiveChangeSnapshot:
+            typeof stateExplorerUsesLiveChangeSnapshot !== "undefined"
+            && stateExplorerUsesLiveChangeSnapshot
+
     property bool littleEndian: true
     property bool signedValue: false
     property string analysisRequestError: ""
@@ -64,6 +73,15 @@ Item {
 
     function inputBorderColor(fieldValueValid) {
         return fieldValueValid ? Theme.borderStrong : Theme.warningBorder
+    }
+
+    function seedCandidate(canIdText) {
+        canIdField.text = canIdText
+        startBitField.text = "0"
+        bitLengthField.text = "8"
+        littleEndian = true
+        signedValue = false
+        analysisRequestError = ""
     }
 
     function inputBackground(fieldValueValid) {
@@ -179,7 +197,9 @@ Item {
                             Text {
                                 id: inputModeLabel
                                 anchors.centerIn: parent
-                                text: "DEMO INPUT"
+                                text: root.usesLiveChangeSnapshot
+                                      ? "SNAPSHOT INPUT"
+                                      : "DEMO INPUT"
                                 color: Theme.accent
                                 font.pixelSize: Theme.studioTextSmall
                                 font.bold: true
@@ -189,12 +209,35 @@ Item {
 
                     Text {
                         width: parent.width
-                        text: "Edit one explicit RangeSignalSpec, then analyze only the controlled in-memory demo sequence. No capture, live traffic, or shared Studio selection is changed."
+                        text: root.usesLiveChangeSnapshot
+                              ? "Edit one explicit RangeSignalSpec, then explicitly analyze the bounded Live Change Explorer snapshot. The source is not live and no shared Studio selection is changed."
+                              : "Edit one explicit RangeSignalSpec, then analyze only the controlled in-memory demo sequence. No capture, live traffic, or shared Studio selection is changed."
                         color: Theme.textMuted
                         font.pixelSize: Theme.studioTextBody
                         wrapMode: Text.WordWrap
                     }
+                    Rectangle {
+                        width: parent.width
+                        height: sourceText.implicitHeight
+                                + Theme.studioSpacingSmall * 2
+                        radius: Theme.radiusSmall
+                        color: Theme.readOnlySubtle
+                        border.color: Theme.readOnlyBorder
+                        border.width: 1
 
+                        Text {
+                            id: sourceText
+
+                            anchors.fill: parent
+                            anchors.margins: Theme.studioSpacingSmall
+
+                            text: root.sourceLabel
+                            color: Theme.readOnly
+                            font.pixelSize: Theme.studioTextSmall
+                            font.family: "monospace"
+                            wrapMode: Text.WordWrap
+                        }
+                    }
                     Grid {
                         width: parent.width
                         columns: width >= 850 ? 5 : 2
@@ -512,7 +555,9 @@ Item {
                     Button {
                         id: analyzeButton
 
-                        text: "Analyze demo evidence"
+                        text: root.usesLiveChangeSnapshot
+                              ? "Analyze snapshot evidence"
+                              : "Analyze demo evidence"
                         enabled: root.candidateInputValid
                         implicitHeight: Math.max(
                                             Theme.studioTextBody

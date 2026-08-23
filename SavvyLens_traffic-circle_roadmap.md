@@ -865,7 +865,7 @@ For an ID/frame/byte/time selection:
 
 Unify the user workflow around discovering changing IDs, ranges, discrete states, and temporal behavior.
 
-### Status: In Progress (Live Change Explorer and explicit-demo Studio State Explorer MVP slices complete)
+### Status: In Progress (Live Change Explorer, explicit-demo Studio State Explorer evidence MVP, and explicit candidate-input slices complete)
 
 ### Existing source scope
 
@@ -987,6 +987,62 @@ Presentation-boundary test coverage includes:
 - [x] State, transition, and temporal-run ordering.
 - [x] Completed/truncated evidence flags and bounded-row counts.
 
+
+### Implemented Studio State Explorer explicit candidate-input slice
+
+
+The State Explorer evidence page now accepts one explicitly supplied `RangeSignalSpec` while continuing to analyze only the controlled deterministic in-memory demo frame sequence.
+
+
+Implemented behavior:
+
+
+- [x] Add a compact technical candidate-definition panel above the analyzed identity and evidence sections.
+- [x] Allow explicit entry of CAN ID, start bit, bit length, endian, and signedness.
+- [x] Add an explicit passive `Analyze demo evidence` action.
+- [x] Keep `RangeSignalSpec` as the domain candidate specification.
+- [x] Keep `CANFrame` ownership entirely in C++; QML does not construct, own, or receive raw demo frames.
+- [x] Add a narrow host-mediated request path from QML through `StudioHost`.
+- [x] Construct and validate the requested candidate in C++ before analysis.
+- [x] Continue to use `StateExplorerPresentation` and `CandidateAnalysis::analyze()` as the sole evidence-analysis path.
+- [x] Refresh analyzed candidate identity, accepted samples, discrete evidence, transition evidence, and temporal-run evidence together after a valid request.
+- [x] Preserve the user-entered candidate fields when analysis is performed.
+- [x] Use `RangeSignalSpec::isValid()` as the authoritative C++ candidate-validity boundary.
+- [x] Prevent malformed candidate layouts from starting analysis.
+- [x] Preserve the prior evidence snapshot when malformed candidate input is rejected.
+- [x] Keep CAN ID `0x000` valid; it is not treated as a sentinel or missing value.
+- [x] Preserve readable no-accepted-sample evidence for valid candidates that do not match controlled demo frames.
+- [x] Preserve `qint64` evidence values as display strings at the QML boundary.
+- [x] Keep cyan for passive interaction/focus, read-only/steel framing for evidence, and amber for malformed input plus incomplete/truncated evidence.
+- [x] Do not use green merely because analysis completed.
+- [x] Retain the evidence-only wording: “Observed evidence only.” and “Not a vehicle-semantic conclusion.”
+
+
+Validation completed:
+
+
+- [x] Build the full SavvyLens application successfully under Qt 5.15.2 MinGW.
+- [x] Launch Studio manually and submit multiple valid explicit candidate configurations.
+- [x] Preserve default controlled-demo behavior for `0x321`, start bit `0`, bit length `8`, little endian, unsigned.
+- [x] Refresh the analyzed identity and all evidence sections after valid explicit candidate analysis.
+- [x] Reject malformed candidate layouts without replacing prior evidence.
+- [x] Verify valid unmatched CAN ID `0x000` produces a readable zero-accepted-sample result.
+- [x] Extend focused State Explorer presentation coverage for explicit candidate refresh, invalid input rejection, CAN ID `0x000`, endian/signedness forwarding, and readable no-sample results.
+- [x] Run the full QtTest suite successfully.
+
+
+Deliberately deferred by this slice:
+
+
+- Scenario selection and additional controlled demo frame sets.
+- Capture-backed, live-traffic, playback, replay, or shared Studio candidate sources.
+- `SelectionContext` integration and legacy-window handoffs.
+- QML exposure of raw analyzer structs, `CandidateAnalysis::Config`, `RangeSignalSpec`, or `CANFrame` data.
+- Changes to CAN extraction, CAN-ID filtering, endian handling, signedness handling, payload support, short-frame exclusion, ordering, or truncation semantics.
+- Persistence, findings, bookmarks, markers, filters, triggers, exports, scoring, ranking, confidence, DBC labels, and vehicle-semantic inference.
+- Timestamps, elapsed dwell duration, timeline, and scrubber behavior.
+
+
 #### Overview
 
 - [x] ID/channel/flags/DLC (partial: covered in Live Change Explorer).
@@ -1049,11 +1105,12 @@ src/analysis/temporalanalysis.h/.cpp
 9. [x] Add `CandidateAnalysis` as the authoritative UI-neutral composition boundary for one `RangeSignalSpec`.
 10. [x] Add an explicit-demo Studio State Explorer evidence page using `StateExplorerPresentation` and `CandidateAnalysis::analyze()`.
 11. [x] Add focused QtTest coverage for the State Explorer presentation boundary.
-12. [ ] Replace the explicit demo input with a narrow explicit candidate-input seam.
-13. [ ] Connect a formal Studio/capture candidate source without broadening `SelectionContext` prematurely.
-14. [ ] Use algorithms in legacy windows only where doing so provides verification value or supports replacement.
-15. [ ] Migrate frame-info details into inspector widgets.
-16. [ ] Retire or replace old windows when the Studio workflow provides the intended replacement.
+12. [x] Add a narrow explicit candidate-input seam: QML submits primitive field values, `StudioHost` constructs and validates one `RangeSignalSpec`, and valid requests refresh controlled-demo evidence through `CandidateAnalysis::analyze()`.
+13. [ ] Add controlled deterministic demo scenario selection to exercise static, no-sample, transition/run, and incomplete/truncated evidence states without connecting a real candidate source.
+14. [ ] Connect a formal Studio/capture candidate source without broadening `SelectionContext` prematurely.
+15. [ ] Use algorithms in legacy windows only where doing so provides verification value or supports replacement.
+16. [ ] Migrate frame-info details into inspector widgets.
+17. [ ] Retire or replace old windows when the Studio workflow provides the intended replacement.
 
 ### Acceptance tests
 
@@ -1063,6 +1120,13 @@ src/analysis/temporalanalysis.h/.cpp
 - [ ] Select a byte and see range, state, transition, and history information.
 - [ ] Freeze a baseline and perform an action.
 - [ ] Rank/filter changes after a marker.
+- [x] Enter a valid explicit CAN ID, start bit, bit length, endian selection, and signedness selection in Studio State Explorer.
+- [x] Refresh identity, accepted samples, discrete-state evidence, directed-transition evidence, and temporal-run evidence through the existing `CandidateAnalysis::analyze()` path.
+- [x] Prevent invalid candidate input from starting analysis and preserve the prior evidence snapshot.
+- [x] Accept CAN ID `0x000` as a valid candidate value.
+- [x] Show readable no-sample evidence for a valid unmatched candidate.
+- [x] Keep explicit candidate analysis isolated from capture, live bus, playback, replay, and shared Studio selection.
+- [x] Frame all results as observed evidence only, not a vehicle-semantic conclusion.
 
 ---
 
@@ -1273,9 +1337,57 @@ src/visualization/flowview.h/.cpp
 - [ ] Reuse graphs in live and playback sessions.
 - [ ] Add dashboard tiles for testing/monitoring.
 
+### Plotting backend modernization and QCustomPlot retirement
+
+#### Decision
+
+QCustomPlot is a legacy compatibility dependency, not the long-term visualization foundation for SavvyLens.
+
+New visualization APIs must be Qt-6-oriented and SavvyLens-owned. No new feature code may include QCustomPlot headers or expose `QCP*` types in public interfaces.
+
+Preserve working graph behavior during migration through a temporary compatibility adapter where needed. Remove QCustomPlot only after its remaining graph workflows have been migrated and validated.
+
+#### Proposed plotting integration files
+
+```text
+src/plotting/plotview.h
+src/plotting/plotpresenter.h/.cpp
+src/plotting/qcustomplotadapter.h/.cpp    # Temporary migration-only adapter
+test/tst_plotmodel.h/.cpp
+test/tst_plotpresenter.h/.cpp
+```
+
+#### Backend migration tasks
+
+- [ ] Inventory every `QCustomPlot`, `QCP*`, and QCustomPlot-specific build reference before changing graph behavior.
+- [ ] Keep `src/visualization/plotmodel.*` independent of QWidget, QML, Qt Charts, and QCustomPlot types.
+- [ ] Define renderer-neutral models for series, axis/range state, cursor state, selections, annotations, and marker overlays.
+- [ ] Make `graphworkspace` and graph-related feature code use SavvyLens plot-model/presenter APIs rather than direct plotting-library calls.
+- [ ] Confine any remaining QCustomPlot use to `src/plotting/qcustomplotadapter.*`.
+- [ ] Do not add new `QCustomPlot` includes outside that temporary adapter.
+- [ ] Evaluate a Qt 6-native renderer using representative CAN captures: use Qt Charts where it meets the requirements, or a SavvyLens-owned QWidget/QML renderer where dense trace performance or interaction requires it.
+- [ ] Migrate one representative existing graph workflow first, including its required multi-series, pan/zoom, cursor, marker, selection, and export behavior.
+- [ ] Benchmark the replacement using the Phase 0 representative capture set for CPU, memory, UI latency, zoom/pan responsiveness, and live-traffic frame-loss behavior.
+- [ ] Migrate remaining graph consumers after the representative workflow meets the acceptance criteria.
+- [ ] Remove QCustomPlot from `src/third_party/`, `SavvyLens.pro`, include paths, and dependency documentation when no production or test code references it.
+- [ ] Update architecture, build, repository-layout, and dependency-inventory documentation after removal.
+
+#### Backend migration acceptance criteria
+
+- [ ] Public visualization-domain APIs contain no `QCustomPlot`, `QCP*`, Qt Charts, QWidget, or QML rendering types.
+- [ ] If QCustomPlot is temporarily present, it is referenced only by `src/plotting/qcustomplotadapter.*` and is labeled migration-only.
+- [ ] At least one production graph workflow uses the renderer-independent SavvyLens plot model/presenter boundary.
+- [ ] The migrated workflow preserves the required current behavior: multiple series, pan/zoom, time-cursor inspection, range/point selection, and marker display where those features exist.
+- [ ] Automated tests cover plot-model series updates, ranges, cursor/marker state, and selection propagation without a graphical rendering backend.
+- [ ] Replacement performance against the representative capture set is documented, with any intentional trade-offs recorded.
+- [ ] No QCustomPlot or `QCP*` references remain in source, tests, project files, build scripts, or dependency documentation when the migration is marked complete.
+
 ### Exit criteria
 
 A custom signal created in the inspector can be plotted, triggered, scripted, exported, and displayed in a dashboard without redefining it.
+
+- [ ] Plot rendering is selected behind a SavvyLens-owned visualization boundary.
+- [ ] QCustomPlot has either been removed or is isolated exclusively in the temporary migration adapter with an explicit remaining-removal task.
 
 ---
 
