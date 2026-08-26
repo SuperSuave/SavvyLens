@@ -443,6 +443,166 @@ void TestAnalysisSession::stateExplorerSnapshotAllowsEmptyFrameVector()
     QVERIFY(!snapshot.isEmpty());
 }
 
+void TestAnalysisSession::stateExplorerSnapshotRetentionIsGloballyBounded()
+{
+    AnalysisSession session(2, 3);
+
+    const CANFrame selectedFirst = makeFrame(
+        0x123,
+        1,
+        true,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("01"));
+
+    const CANFrame otherFirst = makeFrame(
+        0x456,
+        1,
+        true,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("10"));
+
+    const CANFrame selectedSecond = makeFrame(
+        0x123,
+        1,
+        true,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("02"));
+
+    const CANFrame selectedThird = makeFrame(
+        0x123,
+        1,
+        true,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("03"));
+
+    session.ingest(selectedFirst);
+    session.ingest(otherFirst);
+    session.ingest(selectedSecond);
+    session.ingest(selectedThird);
+
+    QVector<CANFrame> selectedSnapshot;
+
+    QVERIFY(session.stateExplorerSnapshot(
+        AnalysisSession::makeKey(selectedFirst),
+        &selectedSnapshot));
+
+    // The global capacity is three. The oldest selected frame was evicted,
+    // while the two newest matching frames retain chronological order.
+    QCOMPARE(selectedSnapshot.size(), 2);
+    QCOMPARE(selectedSnapshot.at(0).payload(), QByteArray::fromHex("02"));
+    QCOMPARE(selectedSnapshot.at(1).payload(), QByteArray::fromHex("03"));
+
+    QVector<CANFrame> otherSnapshot;
+
+    QVERIFY(session.stateExplorerSnapshot(
+        AnalysisSession::makeKey(otherFirst),
+        &otherSnapshot));
+
+    QCOMPARE(otherSnapshot.size(), 1);
+    QCOMPARE(otherSnapshot.constFirst().payload(),
+             QByteArray::fromHex("10"));
+}
+
+void TestAnalysisSession::stateExplorerSnapshotCanBeEmptyAfterMatchingFramesAgeOut()
+{
+    AnalysisSession session(2, 2);
+
+    const CANFrame selected = makeFrame(
+        0x123,
+        1,
+        true,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("01"));
+
+    const CANFrame otherFirst = makeFrame(
+        0x456,
+        1,
+        true,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("10"));
+
+    const CANFrame otherSecond = makeFrame(
+        0x456,
+        1,
+        true,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("11"));
+
+    session.ingest(selected);
+    session.ingest(otherFirst);
+    session.ingest(otherSecond);
+
+    const FrameAggregateKey selectedKey =
+        AnalysisSession::makeKey(selected);
+
+    // Aggregate identity is still present even though its only raw frame
+    // has been evicted from the global State Explorer retention window.
+    QVERIFY(session.findAggregate(selectedKey) != nullptr);
+
+    QVector<CANFrame> snapshot;
+
+    QVERIFY(session.stateExplorerSnapshot(selectedKey, &snapshot));
+    QVERIFY(snapshot.isEmpty());
+}
+
+void TestAnalysisSession::stateExplorerSnapshotRejectsNullOutputPointer()
+{
+    AnalysisSession session;
+
+    const CANFrame frame = makeFrame(
+        0x123,
+        1,
+        true,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("01"));
+
+    session.ingest(frame);
+
+    QVERIFY(!session.stateExplorerSnapshot(
+        AnalysisSession::makeKey(frame),
+        nullptr));
+}
+
+void TestAnalysisSession::stateExplorerSnapshotUnknownKeyClearsOutput()
+{
+    AnalysisSession session;
+
+    const CANFrame knownFrame = makeFrame(
+        0x123,
+        1,
+        true,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("01"));
+
+    const CANFrame unknownFrame = makeFrame(
+        0x456,
+        1,
+        true,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("02"));
+
+    session.ingest(knownFrame);
+
+    QVector<CANFrame> snapshot;
+    snapshot.append(knownFrame);
+
+    QVERIFY(!session.stateExplorerSnapshot(
+        AnalysisSession::makeKey(unknownFrame),
+        &snapshot));
+
+    QVERIFY(snapshot.isEmpty());
+}
+
 void TestAnalysisSession::clearRemovesStateExplorerSnapshotFrames()
 {
     AnalysisSession session;

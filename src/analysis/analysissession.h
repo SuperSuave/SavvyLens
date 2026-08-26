@@ -68,6 +68,17 @@ public:
     QVector<CANFrame> stateExplorerFrames;
 
 private:
+    // A bounded, chronological, session-wide raw-frame retention window used
+    // only to create one-shot State Explorer snapshots. The capacity applies
+    // across all aggregate identities, not per FrameAggregateKey.
+    std::size_t maximumStateExplorerFrames_;
+
+    // Contains C++-owned value copies of the newest retained raw frames.
+    // A State Explorer snapshot filters this rolling window by complete
+    // FrameAggregateKey identity and may therefore be empty when a valid
+    // aggregate's older matching frames have aged out.
+    QVector<CANFrame> stateExplorerFrames_;
+
     FrameAggregateStore aggregateStore;
     FrameHistory frameHistory;
     AnalysisMarkerStore markerStore;

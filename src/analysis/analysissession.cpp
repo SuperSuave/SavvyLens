@@ -5,7 +5,7 @@
 AnalysisSession::AnalysisSession(
     std::size_t maximumSnapshotsPerKey,
     std::size_t maximumStateExplorerFrames)
-    : maximumStateExplorerFrames(maximumStateExplorerFrames),
+    : maximumStateExplorerFrames_(maximumStateExplorerFrames),
       frameHistory(maximumSnapshotsPerKey)
 {
     activityClock.start();
@@ -27,12 +27,12 @@ void AnalysisSession::ingest(const CANFrame &frame)
 
     frameHistory.ingest(frame);
 
-    stateExplorerFrames.append(frame);
+    stateExplorerFrames_.append(frame);
 
-    while (static_cast<std::size_t>(stateExplorerFrames.size())
-        > maximumStateExplorerFrames)
+    while (static_cast<std::size_t>(stateExplorerFrames_.size())
+        > maximumStateExplorerFrames_)
     {
-        stateExplorerFrames.removeFirst();
+        stateExplorerFrames_.removeFirst();
     }
 
     lastActivityMilliseconds.insert(key, observedActivityMilliseconds);
@@ -43,7 +43,7 @@ void AnalysisSession::clear() noexcept
     aggregateStore.clear();
     frameHistory.clear();
     markerStore.clear();
-    stateExplorerFrames.clear();
+    stateExplorerFrames_.clear();
     lastActivityMilliseconds.clear();
 
     activityClock.restart();
@@ -122,9 +122,9 @@ bool AnalysisSession::stateExplorerSnapshot(
         return false;
     }
 
-    frames->reserve(stateExplorerFrames.size());
+    frames->reserve(stateExplorerFrames_.size());
 
-    for (const CANFrame &frame : stateExplorerFrames)
+    for (const CANFrame &frame : stateExplorerFrames_)
     {
         if (makeKey(frame) == key)
         {

@@ -23,8 +23,11 @@ private slots:
     void stateExplorerSnapshotOwnsFramesAfterLaterIngest();
     void stateExplorerSnapshotSupportsCanIdZero();
     void stateExplorerSnapshotAllowsEmptyFrameVector();
+    void stateExplorerSnapshotRetentionIsGloballyBounded();
+    void stateExplorerSnapshotCanBeEmptyAfterMatchingFramesAgeOut();
+    void stateExplorerSnapshotRejectsNullOutputPointer();
+    void stateExplorerSnapshotUnknownKeyClearsOutput();
     void clearRemovesStateExplorerSnapshotFrames();
-
 };
 
 #endif // TST_ANALYSISSESSION_H
