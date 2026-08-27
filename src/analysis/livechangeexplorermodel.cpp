@@ -317,6 +317,27 @@ bool LiveChangeExplorerModel::aggregateKeyForRow(
     return true;
 }
 
+QVariantMap LiveChangeExplorerModel::aggregateKeyMapForRow(
+    int row) const
+{
+    if (row < 0 || row >= rows_.size())
+    {
+        return QVariantMap();
+    }
+
+    const FrameAggregateKey &key = rows_.at(row).key;
+
+    QVariantMap result;
+    result.insert(QStringLiteral("bus"), key.bus);
+    result.insert(QStringLiteral("canId"), key.frameId);
+    result.insert(QStringLiteral("isExtended"),
+                  key.hasExtendedFrameFormat);
+    result.insert(QStringLiteral("frameType"),
+                  static_cast<int>(key.frameType));
+    result.insert(QStringLiteral("isReceived"), key.isReceived);
+    return result;
+}
+
 int LiveChangeExplorerModel::rowForAggregateKey(
     const FrameAggregateKey &key) const
 {

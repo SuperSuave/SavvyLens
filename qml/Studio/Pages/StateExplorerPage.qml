@@ -7,14 +7,10 @@ Item {
 
     readonly property var presentation: stateExplorerPresentation
 
-    readonly property string sourceLabel:
-        typeof stateExplorerSourceLabel !== "undefined"
-            ? stateExplorerSourceLabel
-            : "Source: Deterministic demo evidence"
-
-        readonly property bool usesLiveChangeSnapshot:
-            typeof stateExplorerUsesLiveChangeSnapshot !== "undefined"
-            && stateExplorerUsesLiveChangeSnapshot
+    readonly property string sourceLabel: presentation.sourceLabel
+    readonly property string sourceScopeText: presentation.sourceScopeText
+    readonly property bool usesLiveChangeSnapshot:
+        presentation.usesLiveChangeSnapshot
 
     property bool littleEndian: true
     property bool signedValue: false
@@ -218,24 +214,36 @@ Item {
                     }
                     Rectangle {
                         width: parent.width
-                        height: sourceText.implicitHeight
+                        height: sourceContent.implicitHeight
                                 + Theme.studioSpacingSmall * 2
                         radius: Theme.radiusSmall
                         color: Theme.readOnlySubtle
                         border.color: Theme.readOnlyBorder
                         border.width: 1
 
-                        Text {
-                            id: sourceText
+                        Column {
+                            id: sourceContent
 
                             anchors.fill: parent
                             anchors.margins: Theme.studioSpacingSmall
+                            spacing: Theme.spacingXSmall
 
-                            text: root.sourceLabel
-                            color: Theme.readOnly
-                            font.pixelSize: Theme.studioTextSmall
-                            font.family: "monospace"
-                            wrapMode: Text.WordWrap
+                            Text {
+                                width: parent.width
+                                text: root.sourceLabel
+                                color: Theme.readOnly
+                                font.pixelSize: Theme.studioTextSmall
+                                font.family: "monospace"
+                                wrapMode: Text.WordWrap
+                            }
+
+                            Text {
+                                width: parent.width
+                                text: root.sourceScopeText
+                                color: Theme.textMuted
+                                font.pixelSize: Theme.studioTextSmall
+                                wrapMode: Text.WordWrap
+                            }
                         }
                     }
                     Grid {

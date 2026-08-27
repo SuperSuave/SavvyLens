@@ -77,29 +77,19 @@ Rectangle {
     }
 
     function selectedRowKey() {
-        if (selectedRow < 0
+        if (liveChangeExplorerModel === null
+                || selectedRow < 0
                 || selectedRow >= liveChangeExplorerModel.rowCount())
         {
             return null
         }
 
-        return {
-            bus: liveChangeExplorerModel.index(
-                    selectedRow, 0).data(
-                    liveChangeExplorerModel.BusRole),
-            canId: liveChangeExplorerModel.index(
-                    selectedRow, 0).data(
-                    liveChangeExplorerModel.CanIdRole),
-            isExtended: liveChangeExplorerModel.index(
-                            selectedRow, 0).data(
-                            liveChangeExplorerModel.IsExtendedRole),
-            frameType: liveChangeExplorerModel.index(
-                        selectedRow, 0).data(
-                        liveChangeExplorerModel.FrameTypeRole),
-            isReceived: liveChangeExplorerModel.index(
-                            selectedRow, 0).data(
-                            liveChangeExplorerModel.DirectionRole)
-        }
+        var aggregateKey =
+                liveChangeExplorerModel.aggregateKeyMapForRow(selectedRow)
+
+        return Object.keys(aggregateKey).length > 0
+                ? aggregateKey
+                : null
     }
 
     function restoreSelectedRow() {
@@ -110,16 +100,17 @@ Rectangle {
             row < liveChangeExplorerModel.rowCount();
             ++row)
         {
-            var index = liveChangeExplorerModel.index(row, 0)
+            var aggregateKey =
+                    liveChangeExplorerModel.aggregateKeyMapForRow(row)
 
-            var bus = index.data(liveChangeExplorerModel.BusRole)
-            var canId = index.data(liveChangeExplorerModel.CanIdRole)
-            var isExtended = index.data(
-                        liveChangeExplorerModel.IsExtendedRole)
-            var frameType = index.data(
-                        liveChangeExplorerModel.FrameTypeRole)
-            var isReceived = index.data(
-                        liveChangeExplorerModel.DirectionRole)
+            if (Object.keys(aggregateKey).length === 0)
+                continue
+
+            var bus = aggregateKey.bus
+            var canId = aggregateKey.canId
+            var isExtended = aggregateKey.isExtended
+            var frameType = aggregateKey.frameType
+            var isReceived = aggregateKey.isReceived
 
             if (bus === selectedAggregateKey.bus
                     && canId === selectedAggregateKey.canId
@@ -857,7 +848,9 @@ Rectangle {
                         width: 190
                         height: 28
 
-                        text: liveChangeExplorerModel.filterText
+                        text: liveChangeExplorerModel !== null
+                              ? liveChangeExplorerModel.filterText
+                              : ""
                         placeholderText: "e.g. 123, 7E0 0x646"
                         placeholderTextColor: Theme.textFaint
                         color: Theme.textPrimary
@@ -878,7 +871,9 @@ Rectangle {
 
                         onTextEdited: {
                             root.selectedRow = -1
-                            liveChangeExplorerModel.filterText = text
+
+                            if (liveChangeExplorerModel !== null)
+                                liveChangeExplorerModel.filterText = text
                         }
                     }
 

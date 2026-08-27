@@ -18,6 +18,8 @@ private slots:
     void canIdZeroRemainsSupported();
     void explicitEndianAndSignednessAreForwarded();
     void validCandidateWithNoAcceptedSamplesIsReadable();
+    void sourcePresentationDistinguishesDemoAndSnapshot();
+    void sourcePresentationChangesWithoutRefreshingEvidence();
 };
 
 #endif // TST_STATEEXPLORERPRESENTATION_H

@@ -9,6 +9,7 @@
 #include <QAbstractTableModel>
 #include <QByteArray>
 #include <QString>
+#include <QVariantMap>
 #include <QVector>
 
 // C++ standard-library headers
@@ -119,6 +120,8 @@ public:
     bool aggregateKeyForRow(
         int row,
         FrameAggregateKey *key) const;
+
+    Q_INVOKABLE QVariantMap aggregateKeyMapForRow(int row) const;
 
     int rowForAggregateKey(
         const FrameAggregateKey &key) const;

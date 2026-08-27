@@ -18,6 +18,10 @@ class StateExplorerPresentation final : public QObject
     Q_PROPERTY(QString endianText READ endianText NOTIFY changed)
     Q_PROPERTY(QString signednessText READ signednessText NOTIFY changed)
     Q_PROPERTY(QString candidateDisplayName READ candidateDisplayName NOTIFY changed)
+    Q_PROPERTY(QString sourceLabel READ sourceLabel NOTIFY changed)
+    Q_PROPERTY(QString sourceScopeText READ sourceScopeText NOTIFY changed)
+    Q_PROPERTY(bool usesLiveChangeSnapshot READ usesLiveChangeSnapshot
+                   NOTIFY changed)
 
     Q_PROPERTY(int acceptedSampleCount READ acceptedSampleCount NOTIFY changed)
     Q_PROPERTY(bool hasEvidence READ hasEvidence NOTIFY changed)
@@ -50,6 +54,15 @@ public:
 
     void setEvidence(const QVector<CANFrame> &frames,
                      const CandidateAnalysis::Config &config);
+    
+    void setDeterministicDemoSource();
+    void setLiveChangeExplorerSnapshotSource(
+        const QString &sourceLabel,
+        const QString &sourceScopeText);
+
+    QString sourceLabel() const;
+    QString sourceScopeText() const;
+    bool usesLiveChangeSnapshot() const;
 
     QString canIdText() const;
     int startBit() const;
@@ -84,6 +97,10 @@ signals:
 private:
     CandidateAnalysis::Result result_;
     bool hasResult_ = false;
+
+    QString sourceLabel_;
+    QString sourceScopeText_;
+    bool usesLiveChangeSnapshot_ = false;
 
     static QString canIdTextFor(quint32 canId);
     static QString discreteClassificationTextFor(

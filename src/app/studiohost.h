@@ -59,8 +59,6 @@ private:
     QQuickWidget *quickWidget_ = nullptr;
     StateExplorerPresentation *stateExplorerPresentation_ = nullptr;
     QVector<CANFrame> stateExplorerFrames_;
-    QString stateExplorerSourceLabel_;
-    bool stateExplorerUsesLiveChangeSnapshot_ = false;
 };
 
 #endif // STUDIOHOST_H

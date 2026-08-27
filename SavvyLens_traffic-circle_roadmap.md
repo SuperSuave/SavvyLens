@@ -865,7 +865,7 @@ For an ID/frame/byte/time selection:
 
 Unify the user workflow around discovering changing IDs, ranges, discrete states, and temporal behavior.
 
-### Status: In Progress (Live Change Explorer, explicit-demo Studio State Explorer evidence MVP, and explicit candidate-input slices complete)
+### Status: In Progress (Live Change Explorer, explicit-demo Studio State Explorer evidence MVP, explicit candidate-input slices, real-ID handoff, and bounded snapshot-retention hardening complete)
 
 ### Existing source scope
 
@@ -1042,6 +1042,33 @@ Deliberately deferred by this slice:
 - Persistence, findings, bookmarks, markers, filters, triggers, exports, scoring, ranking, confidence, DBC labels, and vehicle-semantic inference.
 - Timestamps, elapsed dwell duration, timeline, and scrubber behavior.
 
+- The Live Change Explorer handoff uses a bounded global rolling raw-frame retention window, not per-ID or per-aggregate historical retention. Older matching frames may be unavailable even while the aggregate remains visible; this is intentional MVP scope and does not imply capture persistence or timeline behavior.
+
+### Bounded Live Change Explorer snapshot retention
+
+- [x] Keep a C++-owned, bounded, chronological raw `CANFrame` retention window in `AnalysisSession` for one-shot State Explorer snapshot extraction.
+- [x] Apply the retention capacity globally across all aggregate identities, rather than per `FrameAggregateKey`.
+- [x] Keep retention storage private so callers cannot mutate the rolling buffer or its capacity outside `AnalysisSession`.
+- [x] Extract State Explorer evidence by complete `FrameAggregateKey` identity:
+  - bus
+  - CAN ID
+  - frame type
+  - extended/standard format
+  - receive/transmit direction
+- [x] Preserve chronological ordering among retained matching frames.
+- [x] Preserve value-copy snapshot independence after later traffic/session mutation.
+- [x] Define and test the valid empty-snapshot outcome: an aggregate can still exist after all of its matching raw frames have aged out of the global retained window.
+- [x] Clear caller output safely for an unknown aggregate key and reject a null snapshot output pointer.
+- [x] Keep the State Explorer handoff passive: snapshot extraction and loading do not auto-analyze or establish continuous traffic synchronization.
+
+#### Completed: State Explorer source-scope disclosure
+
+- State Explorer now exposes read-only C++-owned source presentation state through `StateExplorerPresentation`; QML receives source label, scope text, and snapshot/demo mode only, never raw `CANFrame` data or a live session model.
+- A Live Change Explorer handoff preserves the complete aggregate identity in its source label: bus, CAN ID, Rx/Tx direction, standard/extended format, and frame type.
+- Snapshot evidence is explicitly disclosed as a one-shot bounded retained snapshot, not live traffic. The disclosure states that retention is session-wide/global and rolling, so older matching frames may be absent after aging out.
+- The source disclosure is informational rather than a `CandidateAnalysis` truncation/error result; it does not auto-analyze, refresh, synchronize continuously, or create capture persistence.
+- Independent State Explorer opening remains visibly labeled as deterministic in-memory demo evidence, distinct from captured/live traffic.
+- Focused `TestStateExplorerPresentation` coverage verifies demo/snapshot distinction, scope wording, source-change notification, and that source metadata changes do not refresh or alter analyzed evidence.
 
 #### Overview
 

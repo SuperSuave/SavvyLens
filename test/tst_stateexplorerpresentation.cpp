@@ -6,6 +6,7 @@
 
 // Qt headers
 #include <QByteArray>
+#include <QSignalSpy>
 #include <QVariantList>
 #include <QVariantMap>
 #include <QtTest>
@@ -436,4 +437,72 @@ void TestStateExplorerPresentation::validCandidateWithNoAcceptedSamplesIsReadabl
              QStringLiteral("No accepted samples"));
     QCOMPARE(presentation.temporalClassificationText(),
              QStringLiteral("No accepted samples"));
+}
+void TestStateExplorerPresentation::sourcePresentationDistinguishesDemoAndSnapshot()
+{
+    StateExplorerPresentation presentation;
+    QSignalSpy changedSpy(&presentation, &StateExplorerPresentation::changed);
+
+    presentation.setDeterministicDemoSource();
+
+    QCOMPARE(presentation.sourceLabel(),
+             QStringLiteral("Source: Deterministic demo evidence"));
+    QCOMPARE(
+        presentation.sourceScopeText(),
+        QStringLiteral(
+            "Deterministic in-memory demo evidence. It is not captured "
+            "traffic and does not update from live traffic or session "
+            "history."));
+    QVERIFY(!presentation.usesLiveChangeSnapshot());
+    QCOMPARE(changedSpy.count(), 1);
+
+    const QString snapshotLabel =
+        QStringLiteral(
+            "Source: Live Change Explorer snapshot · "
+            "Bus 1 · Rx · Standard · Data · 0x000");
+
+    const QString snapshotScopeText =
+        QStringLiteral(
+            "Bounded retained evidence snapshot. It is not live traffic "
+            "and may exclude older matching frames that aged out of the "
+            "session-wide rolling buffer.");
+
+    presentation.setLiveChangeExplorerSnapshotSource(
+        snapshotLabel,
+        snapshotScopeText);
+
+    QCOMPARE(presentation.sourceLabel(), snapshotLabel);
+    QCOMPARE(presentation.sourceScopeText(), snapshotScopeText);
+    QVERIFY(presentation.usesLiveChangeSnapshot());
+    QCOMPARE(changedSpy.count(), 2);
+}
+
+void TestStateExplorerPresentation::sourcePresentationChangesWithoutRefreshingEvidence()
+{
+    StateExplorerPresentation presentation;
+
+    const QVector<CANFrame> frames = {
+        makeByteFrame(0x321, 1),
+        makeByteFrame(0x321, 2)
+    };
+
+    presentation.setEvidence(frames, makeConfig(0x321));
+
+    const QString candidateCanId = presentation.canIdText();
+    const int acceptedSampleCount = presentation.acceptedSampleCount();
+    const QVariantList observedStates = presentation.observedStates();
+
+    presentation.setLiveChangeExplorerSnapshotSource(
+        QStringLiteral(
+            "Source: Live Change Explorer snapshot · "
+            "Bus 2 · Tx · Extended · RTR · 0x18DAF110"),
+        QStringLiteral(
+            "Bounded retained evidence snapshot. It is not live traffic "
+            "and may exclude older matching frames that aged out of the "
+            "session-wide rolling buffer."));
+
+    QCOMPARE(presentation.canIdText(), candidateCanId);
+    QCOMPARE(presentation.acceptedSampleCount(), acceptedSampleCount);
+    QCOMPARE(presentation.observedStates(), observedStates);
+    QVERIFY(presentation.usesLiveChangeSnapshot());
 }

@@ -8,6 +8,41 @@ StateExplorerPresentation::StateExplorerPresentation(QObject *parent)
 {
 }
 
+void StateExplorerPresentation::setDeterministicDemoSource()
+{
+    sourceLabel_ = tr("Source: Deterministic demo evidence");
+    sourceScopeText_ = tr(
+        "Deterministic in-memory demo evidence. It is not captured traffic "
+        "and does not update from live traffic or session history.");
+    usesLiveChangeSnapshot_ = false;
+    emit changed();
+}
+
+void StateExplorerPresentation::setLiveChangeExplorerSnapshotSource(
+    const QString &sourceLabel,
+    const QString &sourceScopeText)
+{
+    sourceLabel_ = sourceLabel;
+    sourceScopeText_ = sourceScopeText;
+    usesLiveChangeSnapshot_ = true;
+    emit changed();
+}
+
+QString StateExplorerPresentation::sourceLabel() const
+{
+    return sourceLabel_;
+}
+
+QString StateExplorerPresentation::sourceScopeText() const
+{
+    return sourceScopeText_;
+}
+
+bool StateExplorerPresentation::usesLiveChangeSnapshot() const
+{
+    return usesLiveChangeSnapshot_;
+}
+
 void StateExplorerPresentation::setEvidence(
     const QVector<CANFrame> &frames,
     const CandidateAnalysis::Config &config)

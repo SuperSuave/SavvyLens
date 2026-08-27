@@ -59,14 +59,6 @@ StudioHost::StudioHost(
         QStringLiteral("stateExplorerPresentation"),
         stateExplorerPresentation_);
 
-    quickWidget_->rootContext()->setContextProperty(
-        QStringLiteral("stateExplorerSourceLabel"),
-        stateExplorerSourceLabel_);
-
-    quickWidget_->rootContext()->setContextProperty(
-        QStringLiteral("stateExplorerUsesLiveChangeSnapshot"),
-        stateExplorerUsesLiveChangeSnapshot_);
-
     quickWidget_->setSource(
         QUrl(QStringLiteral("qrc:/qml/Studio.qml")));
 
@@ -132,9 +124,7 @@ void StudioHost::loadStateExplorerDemo()
     stateExplorerFrames_.append(demoFrame(demoCanId, 1));
     stateExplorerFrames_.append(demoFrame(demoCanId, 0));
 
-    stateExplorerSourceLabel_ =
-        QStringLiteral("Source: Deterministic demo evidence");
-    stateExplorerUsesLiveChangeSnapshot_ = false;
+    stateExplorerPresentation_->setDeterministicDemoSource();
 
     analyzeStateExplorerCandidate(
         demoCanId,
@@ -164,21 +154,16 @@ void StudioHost::loadStateExplorerSnapshot(
     const QVector<CANFrame> &frames)
 {
     stateExplorerFrames_ = frames;
-    stateExplorerSourceLabel_ =
-        stateExplorerSnapshotSourceLabel(key);
-    stateExplorerUsesLiveChangeSnapshot_ = true;
 
-    if (quickWidget_ != nullptr &&
-        quickWidget_->rootObject() != nullptr)
-    {
-        quickWidget_->rootObject()->setProperty(
-            "stateExplorerSourceLabel",
-            stateExplorerSourceLabel_);
+    const QString sourceLabel = stateExplorerSnapshotSourceLabel(key);
+    const QString sourceScopeText = tr(
+        "Bounded retained evidence snapshot. It is not live traffic and may "
+        "exclude older matching frames that aged out of the session-wide "
+        "rolling buffer.");
 
-        quickWidget_->rootObject()->setProperty(
-            "stateExplorerUsesLiveChangeSnapshot",
-            stateExplorerUsesLiveChangeSnapshot_);
-    }
+    stateExplorerPresentation_->setLiveChangeExplorerSnapshotSource(
+        sourceLabel,
+        sourceScopeText);
 
     openWorkspace(QStringLiteral("explore"));
 
@@ -194,7 +179,6 @@ void StudioHost::loadStateExplorerSnapshot(
                     .toUpper()
                     .replace(0, 2, QStringLiteral("0x")))));
     }
-
 }
 
 void StudioHost::openWorkspace(const QString &workspaceId)
