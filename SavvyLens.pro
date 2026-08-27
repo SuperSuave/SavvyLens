@@ -406,6 +406,8 @@ FORMS += \
 # Qt resources and translations
 #-------------------------------------------------
 
+QML_IMPORT_PATH += $$PWD/qml
+
 RESOURCES += \
     icons.qrc \
     images.qrc \
