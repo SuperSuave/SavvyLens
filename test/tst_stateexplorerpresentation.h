@@ -21,6 +21,8 @@ private slots:
     void sourcePresentationDistinguishesDemoAndSnapshot();
     void sourcePresentationChangesWithoutRefreshingEvidence();
     void preservesCandidateParametersAcrossSnapshotRefetches();
+    void rangeSummarySurfacesMetricsAndStringFormatting();
+    void rangeSummaryHandlesZeroSampleEvidenceSafely();
 };
 
 #endif // TST_STATEEXPLORERPRESENTATION_H

@@ -865,7 +865,7 @@ For an ID/frame/byte/time selection:
 
 Unify the user workflow around discovering changing IDs, ranges, discrete states, and temporal behavior.
 
-### Status: In Progress (Live Change Explorer, explicit-demo Studio State Explorer evidence MVP, explicit candidate-input slices, real-ID handoff, and bounded snapshot-retention hardening complete)
+### Status: In Progress (Live Change Explorer, explicit-demo Studio State Explorer evidence MVP, explicit candidate-input slices, real-ID handoff, bounded snapshot retention & requery, and Range Summary metrics complete)
 
 ### Existing source scope
 
@@ -1060,15 +1060,20 @@ Deliberately deferred by this slice:
 - [x] Define and test the valid empty-snapshot outcome: an aggregate can still exist after all of its matching raw frames have aged out of the global retained window.
 - [x] Clear caller output safely for an unknown aggregate key and reject a null snapshot output pointer.
 - [x] Keep the State Explorer handoff passive: snapshot extraction and loading do not auto-analyze or establish continuous traffic synchronization.
+- [x] Provide a "Re-take snapshot" capability in `StudioHost`, `MainWindow`, and `StateExplorerPage.qml` to re-query the bounded rolling frame retention window on demand while preserving user candidate input fields.
+- [x] Add QtTest coverage for snapshot re-querying after ingesting newer frames, handling aged-out empty snapshots, and candidate parameter preservation.
 
-#### Completed: State Explorer source-scope disclosure
+#### Completed: State Explorer source-scope disclosure & Range Summary evidence
 
 - State Explorer now exposes read-only C++-owned source presentation state through `StateExplorerPresentation`; QML receives source label, scope text, and snapshot/demo mode only, never raw `CANFrame` data or a live session model.
 - A Live Change Explorer handoff preserves the complete aggregate identity in its source label: bus, CAN ID, Rx/Tx direction, standard/extended format, and frame type.
 - Snapshot evidence is explicitly disclosed as a one-shot bounded retained snapshot, not live traffic. The disclosure states that retention is session-wide/global and rolling, so older matching frames may be absent after aging out.
 - The source disclosure is informational rather than a `CandidateAnalysis` truncation/error result; it does not auto-analyze, refresh, synchronize continuously, or create capture persistence.
 - Independent State Explorer opening remains visibly labeled as deterministic in-memory demo evidence, distinct from captured/live traffic.
-- Focused `TestStateExplorerPresentation` coverage verifies demo/snapshot distinction, scope wording, source-change notification, and that source metadata changes do not refresh or alter analyzed evidence.
+- Added Range Summary metrics (`minValueText`, `maxValueText`, `rangeSpanText`, `rangeCoverageText`, `uniqueValueCount`, `smoothnessScoreText`, and `isRanging`) calculated via `RangeStatistics::evaluateSignal()` on snapshot frames and exposed through `StateExplorerPresentation`.
+- 64-bit integer values are formatted as `QString` at the presentation boundary to prevent precision loss in JavaScript/QML.
+- Rendered a compact, read-only steel-framed "Range summary evidence" UI card in `StateExplorerPage.qml` with passive evidence disclosures.
+- Focused `TestStateExplorerPresentation` coverage verifies demo/snapshot distinction, scope wording, source-change notification, candidate parameter preservation across refetches, Range Summary calculations, 64-bit string formatting, and zero-sample empty-snapshot safety.
 
 #### Overview
 
@@ -1080,9 +1085,9 @@ Deliberately deferred by this slice:
 
 #### Ranges
 
-- [ ] Min/max per byte/field.
-- [ ] Unique values.
-- [ ] Signed/unsigned representations.
+- [x] Min/max per byte/field (implemented in `RangeStatistics` & `StateExplorerPresentation` Range Summary).
+- [x] Unique values (implemented in `RangeStatistics` & `StateExplorerPresentation` Range Summary).
+- [x] Signed/unsigned representations (implemented in `RangeStatistics` & `StateExplorerPresentation`).
 - [ ] Optional value histograms.
 
 #### States
@@ -1133,17 +1138,21 @@ src/analysis/temporalanalysis.h/.cpp
 10. [x] Add an explicit-demo Studio State Explorer evidence page using `StateExplorerPresentation` and `CandidateAnalysis::analyze()`.
 11. [x] Add focused QtTest coverage for the State Explorer presentation boundary.
 12. [x] Add a narrow explicit candidate-input seam: QML submits primitive field values, `StudioHost` constructs and validates one `RangeSignalSpec`, and valid requests refresh controlled-demo evidence through `CandidateAnalysis::analyze()`.
-13. [ ] Add controlled deterministic demo scenario selection to exercise static, no-sample, transition/run, and incomplete/truncated evidence states without connecting a real candidate source.
-14. [ ] Connect a formal Studio/capture candidate source without broadening `SelectionContext` prematurely.
-15. [ ] Use algorithms in legacy windows only where doing so provides verification value or supports replacement.
-16. [ ] Migrate frame-info details into inspector widgets.
-17. [ ] Retire or replace old windows when the Studio workflow provides the intended replacement.
+13. [x] Implement snapshot re-query / re-take integration across `StudioHost`, `MainWindow`, and `StateExplorerPage.qml` with candidate parameter preservation.
+14. [x] Extract and surface numeric Range Summary metrics (min, max, span, coverage, unique count, smoothness score) in `StateExplorerPresentation` and `StateExplorerPage.qml` with QtTest coverage.
+15. [ ] Add controlled deterministic demo scenario selection to exercise static, no-sample, transition/run, and incomplete/truncated evidence states without connecting a real candidate source.
+16. [ ] Connect a formal Studio/capture candidate source without broadening `SelectionContext` prematurely.
+17. [ ] Use algorithms in legacy windows only where doing so provides verification value or supports replacement.
+18. [ ] Migrate frame-info details into inspector widgets.
+19. [ ] Retire or replace old windows when the Studio workflow provides the intended replacement.
 
 ### Acceptance tests
 
 - [x] Identify the highest-change ID in a live capture.
 - [x] Highlight changed bits and bytes between consecutive frames.
 - [x] Preserve selection when opening graph or frame details.
+- [x] Re-query live snapshot evidence on demand without losing user-entered candidate parameters.
+- [x] Surface min value, max value, span, coverage %, unique value count, and smoothness score in a dedicated read-only Range Summary card.
 - [ ] Select a byte and see range, state, transition, and history information.
 - [ ] Freeze a baseline and perform an action.
 - [ ] Rank/filter changes after a marker.

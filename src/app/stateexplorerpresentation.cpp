@@ -48,6 +48,16 @@ void StateExplorerPresentation::setEvidence(
     const CandidateAnalysis::Config &config)
 {
     result_ = CandidateAnalysis::analyze(frames, config);
+    
+    RangeSignalSpec rangeSpec;
+    rangeSpec.canId = config.candidate.canId;
+    rangeSpec.startBit = config.candidate.startBit;
+    rangeSpec.bitLength = config.candidate.bitLength;
+    rangeSpec.isLittleEndian = config.candidate.isLittleEndian;
+    rangeSpec.isSigned = config.candidate.isSigned;
+    
+    rangeStats_ = RangeStatistics::evaluateSignal(frames, rangeSpec);
+    
     hasResult_ = true;
     emit changed();
 }
@@ -84,6 +94,41 @@ QString StateExplorerPresentation::signednessText() const
 QString StateExplorerPresentation::candidateDisplayName() const
 {
     return result_.candidate.displayName();
+}
+
+QString StateExplorerPresentation::minValueText() const
+{
+    return QString::number(rangeStats_.minValue);
+}
+
+QString StateExplorerPresentation::maxValueText() const
+{
+    return QString::number(rangeStats_.maxValue);
+}
+
+QString StateExplorerPresentation::rangeSpanText() const
+{
+    return QString::number(rangeStats_.rangeSpan);
+}
+
+QString StateExplorerPresentation::rangeCoverageText() const
+{
+    return QString::number(rangeStats_.rangeCoverage * 100.0, 'f', 1) + QStringLiteral("%");
+}
+
+int StateExplorerPresentation::uniqueValueCount() const
+{
+    return rangeStats_.uniqueValueCount;
+}
+
+QString StateExplorerPresentation::smoothnessScoreText() const
+{
+    return QString::number(rangeStats_.smoothnessScore, 'f', 1);
+}
+
+bool StateExplorerPresentation::isRanging() const
+{
+    return rangeStats_.isRanging;
 }
 
 int StateExplorerPresentation::acceptedSampleCount() const

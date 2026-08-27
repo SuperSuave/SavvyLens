@@ -540,3 +540,44 @@ void TestStateExplorerPresentation::sourcePresentationChangesWithoutRefreshingEv
     QCOMPARE(presentation.observedStates(), observedStates);
     QVERIFY(presentation.usesLiveChangeSnapshot());
 }
+
+void TestStateExplorerPresentation::rangeSummarySurfacesMetricsAndStringFormatting()
+{
+    StateExplorerPresentation presentation;
+
+    QVector<CANFrame> frames;
+    frames.append(makeByteFrame(0x123, 10));
+    frames.append(makeByteFrame(0x123, 20));
+    frames.append(makeByteFrame(0x123, 30));
+    frames.append(makeByteFrame(0x123, 20));
+
+    CandidateAnalysis::Config config = makeConfig(0x123);
+    presentation.setEvidence(frames, config);
+
+    QVERIFY(presentation.hasEvidence());
+    QCOMPARE(presentation.minValueText(), QStringLiteral("10"));
+    QCOMPARE(presentation.maxValueText(), QStringLiteral("30"));
+    QCOMPARE(presentation.rangeSpanText(), QStringLiteral("20"));
+    QVERIFY(presentation.rangeCoverageText().endsWith(QStringLiteral("%")));
+    QCOMPARE(presentation.uniqueValueCount(), 3);
+}
+
+void TestStateExplorerPresentation::rangeSummaryHandlesZeroSampleEvidenceSafely()
+{
+    StateExplorerPresentation presentation;
+
+    QVector<CANFrame> frames;
+    // No frames matching candidate CAN ID 0x123
+    frames.append(makeByteFrame(0x456, 10));
+
+    CandidateAnalysis::Config config = makeConfig(0x123);
+    presentation.setEvidence(frames, config);
+
+    QVERIFY(!presentation.hasEvidence());
+    QCOMPARE(presentation.minValueText(), QStringLiteral("0"));
+    QCOMPARE(presentation.maxValueText(), QStringLiteral("0"));
+    QCOMPARE(presentation.rangeSpanText(), QStringLiteral("0"));
+    QCOMPARE(presentation.rangeCoverageText(), QStringLiteral("0.0%"));
+    QCOMPARE(presentation.uniqueValueCount(), 0);
+    QVERIFY(!presentation.isRanging());
+}

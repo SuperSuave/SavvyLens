@@ -816,6 +816,147 @@ Item {
                 }
             }
 
+            Rectangle {
+                width: parent.width
+                height: rangeSummaryContent.implicitHeight
+                        + Theme.studioSpacingLarge * 2
+                radius: Theme.studioRadiusLarge
+                color: Theme.surface
+                border.color: Theme.readOnlyBorder
+                border.width: 1
+
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    width: 3
+                    radius: Theme.radiusSmall
+                    color: Theme.readOnly
+                }
+
+                Column {
+                    id: rangeSummaryContent
+
+                    anchors.fill: parent
+                    anchors.margins: Theme.studioSpacingLarge
+                    anchors.leftMargin: Theme.studioSpacingLarge
+                                        + Theme.studioSpacingSmall
+                    spacing: Theme.studioSpacingMedium
+
+                    Row {
+                        width: parent.width
+                        spacing: Theme.studioSpacingSmall
+
+                        Column {
+                            width: parent.width - rangeEvidenceBadge.width
+                                   - Theme.studioSpacingSmall
+                            spacing: Theme.spacingXSmall
+
+                            Text {
+                                text: "Range summary evidence"
+                                color: Theme.textPrimary
+                                font.pixelSize: Theme.studioTextSection
+                                font.bold: true
+                            }
+
+                            Text {
+                                width: parent.width
+                                text: root.presentation.hasEvidence
+                                      ? (root.presentation.isRanging
+                                         ? "Continuous or smooth numeric signal behavior observed"
+                                         : "Discrete or step-like signal behavior observed")
+                                      : "No accepted samples available"
+                                color: Theme.textMuted
+                                font.pixelSize: Theme.studioTextBody
+                                wrapMode: Text.WordWrap
+                            }
+                        }
+
+                        Rectangle {
+                            id: rangeEvidenceBadge
+                            width: rangeEvidenceLabel.implicitWidth
+                                   + Theme.studioSpacingMedium * 2
+                            height: rangeEvidenceLabel.implicitHeight
+                                    + Theme.spacingSmall
+                            radius: Theme.radiusPill
+                            color: Theme.readOnlySubtle
+                            border.color: Theme.readOnlyBorder
+                            border.width: 1
+
+                            Text {
+                                id: rangeEvidenceLabel
+                                anchors.centerIn: parent
+                                text: "READ-ONLY EVIDENCE"
+                                color: Theme.readOnly
+                                font.pixelSize: Theme.studioTextSmall
+                                font.bold: true
+                            }
+                        }
+                    }
+
+                    Grid {
+                        width: parent.width
+                        columns: width >= 780 ? 6 : (width >= 500 ? 3 : 2)
+                        columnSpacing: Theme.studioSpacingMedium
+                        rowSpacing: Theme.studioSpacingMedium
+
+                        Repeater {
+                            model: [
+                                { "label": "MIN VALUE", "value": root.presentation.hasEvidence ? root.presentation.minValueText : "-" },
+                                { "label": "MAX VALUE", "value": root.presentation.hasEvidence ? root.presentation.maxValueText : "-" },
+                                { "label": "RANGE SPAN", "value": root.presentation.hasEvidence ? root.presentation.rangeSpanText : "-" },
+                                { "label": "COVERAGE", "value": root.presentation.hasEvidence ? root.presentation.rangeCoverageText : "-" },
+                                { "label": "UNIQUE VALUES", "value": root.presentation.hasEvidence ? root.presentation.uniqueValueCount : "-" },
+                                { "label": "SMOOTHNESS", "value": root.presentation.hasEvidence ? root.presentation.smoothnessScoreText : "-" }
+                            ]
+
+                            delegate: Rectangle {
+                                width: (parent.width
+                                        - parent.columnSpacing
+                                        * (parent.columns - 1))
+                                       / parent.columns
+                                height: blockCol.implicitHeight + Theme.spacingMedium * 2
+                                radius: Theme.radiusSmall
+                                color: Theme.surfaceInset
+                                border.color: Theme.borderStrong
+                                border.width: 1
+
+                                Column {
+                                    id: blockCol
+                                    anchors.fill: parent
+                                    anchors.margins: Theme.spacingMedium
+                                    spacing: Theme.spacingXSmall
+
+                                    Text {
+                                        text: modelData.label
+                                        color: Theme.textFaint
+                                        font.pixelSize: Theme.studioTextSmall
+                                        font.bold: true
+                                        elide: Text.ElideRight
+                                    }
+
+                                    Text {
+                                        text: modelData.value
+                                        color: Theme.textPrimary
+                                        font.pixelSize: Theme.studioTextSection
+                                        font.bold: true
+                                        elide: Text.ElideRight
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Text {
+                        width: parent.width
+                        text: "Observed evidence only. Not a vehicle-semantic conclusion."
+                        color: Theme.textFaint
+                        font.pixelSize: Theme.studioTextSmall
+                        wrapMode: Text.WordWrap
+                    }
+                }
+            }
+
             EvidenceSection {
                 width: parent.width
                 title: "Discrete state evidence"

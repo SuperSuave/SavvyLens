@@ -3,6 +3,7 @@
 
 // SavvyLens headers
 #include "analysis/candidateanalysis.h"
+#include "analysis/rangestatistics.h"
 
 // Qt headers
 #include <QObject>
@@ -22,6 +23,14 @@ class StateExplorerPresentation final : public QObject
     Q_PROPERTY(QString sourceScopeText READ sourceScopeText NOTIFY changed)
     Q_PROPERTY(bool usesLiveChangeSnapshot READ usesLiveChangeSnapshot
                    NOTIFY changed)
+
+    Q_PROPERTY(QString minValueText READ minValueText NOTIFY changed)
+    Q_PROPERTY(QString maxValueText READ maxValueText NOTIFY changed)
+    Q_PROPERTY(QString rangeSpanText READ rangeSpanText NOTIFY changed)
+    Q_PROPERTY(QString rangeCoverageText READ rangeCoverageText NOTIFY changed)
+    Q_PROPERTY(int uniqueValueCount READ uniqueValueCount NOTIFY changed)
+    Q_PROPERTY(QString smoothnessScoreText READ smoothnessScoreText NOTIFY changed)
+    Q_PROPERTY(bool isRanging READ isRanging NOTIFY changed)
 
     Q_PROPERTY(int acceptedSampleCount READ acceptedSampleCount NOTIFY changed)
     Q_PROPERTY(bool hasEvidence READ hasEvidence NOTIFY changed)
@@ -71,6 +80,14 @@ public:
     QString signednessText() const;
     QString candidateDisplayName() const;
 
+    QString minValueText() const;
+    QString maxValueText() const;
+    QString rangeSpanText() const;
+    QString rangeCoverageText() const;
+    int uniqueValueCount() const;
+    QString smoothnessScoreText() const;
+    bool isRanging() const;
+
     int acceptedSampleCount() const;
     bool hasEvidence() const;
 
@@ -96,6 +113,7 @@ signals:
 
 private:
     CandidateAnalysis::Result result_;
+    RangeSignalCandidate rangeStats_;
     bool hasResult_ = false;
 
     QString sourceLabel_;
