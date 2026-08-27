@@ -2158,6 +2158,27 @@ void MainWindow::exploreLiveChangeRowInStateExplorer(int row)
         snapshot);
 }
 
+void MainWindow::refreshStateExplorerSnapshot(const FrameAggregateKey &key)
+{
+    QVector<CANFrame> snapshot;
+
+    if (!analysisSession.stateExplorerSnapshot(
+            key,
+            &snapshot))
+    {
+        return;
+    }
+
+    if (studioHost_ == nullptr)
+    {
+        return;
+    }
+
+    studioHost_->loadStateExplorerSnapshot(
+        key,
+        snapshot);
+}
+
 void MainWindow::showStudio()
 {
     if (studioHost_ == nullptr)
@@ -2171,6 +2192,12 @@ void MainWindow::showStudio()
             &StudioHost::exploreLiveChangeRowRequested,
             this,
             &MainWindow::exploreLiveChangeRowInStateExplorer);
+
+        connect(
+            studioHost_,
+            &StudioHost::refreshStateExplorerSnapshotRequested,
+            this,
+            &MainWindow::refreshStateExplorerSnapshot);
 
         connect(
             studioHost_,

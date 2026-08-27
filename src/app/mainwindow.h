@@ -390,6 +390,7 @@ private slots:
     void openExplorerGraphing(int row);
     void createExplorerMarker(int row, const QString &label);
     void exploreLiveChangeRowInStateExplorer(int row);
+    void refreshStateExplorerSnapshot(const FrameAggregateKey &key);
     void showAnalysisMarkers();
     void killEmAll();
     void killWindow(QDialog *win);

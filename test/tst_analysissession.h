@@ -28,6 +28,8 @@ private slots:
     void stateExplorerSnapshotRejectsNullOutputPointer();
     void stateExplorerSnapshotUnknownKeyClearsOutput();
     void clearRemovesStateExplorerSnapshotFrames();
+    void stateExplorerSnapshotRequeriesAfterNewerFrames();
+    void stateExplorerSnapshotRequeryHandlesEmptyAgedOutSnapshots();
 };
 
 #endif // TST_ANALYSISSESSION_H

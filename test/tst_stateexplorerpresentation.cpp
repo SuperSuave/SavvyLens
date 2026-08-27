@@ -477,6 +477,40 @@ void TestStateExplorerPresentation::sourcePresentationDistinguishesDemoAndSnapsh
     QCOMPARE(changedSpy.count(), 2);
 }
 
+void TestStateExplorerPresentation::preservesCandidateParametersAcrossSnapshotRefetches()
+{
+    StateExplorerPresentation presentation;
+
+    QVector<CANFrame> frames;
+    frames.append(makeByteFrame(0x123, 4));
+
+    CandidateAnalysis::Config config =
+        makeConfig(0x123, 16, 12, false, true);
+
+    presentation.setEvidence(frames, config);
+
+    QCOMPARE(presentation.canIdText(), QStringLiteral("0x123"));
+    QCOMPARE(presentation.startBit(), 16);
+    QCOMPARE(presentation.bitLength(), 12);
+    QCOMPARE(presentation.endianText(), QStringLiteral("Big endian"));
+    QCOMPARE(presentation.signednessText(), QStringLiteral("Signed"));
+
+    // Simulate a snapshot refetch, updating the source presentation
+    QSignalSpy spy(&presentation, &StateExplorerPresentation::changed);
+    presentation.setLiveChangeExplorerSnapshotSource(
+        QStringLiteral("Refetched label"),
+        QStringLiteral("Refetched scope"));
+
+    QCOMPARE(spy.count(), 1);
+
+    // Verify candidate parameters are preserved after the source updates
+    QCOMPARE(presentation.canIdText(), QStringLiteral("0x123"));
+    QCOMPARE(presentation.startBit(), 16);
+    QCOMPARE(presentation.bitLength(), 12);
+    QCOMPARE(presentation.endianText(), QStringLiteral("Big endian"));
+    QCOMPARE(presentation.signednessText(), QStringLiteral("Signed"));
+}
+
 void TestStateExplorerPresentation::sourcePresentationChangesWithoutRefreshingEvidence()
 {
     StateExplorerPresentation presentation;

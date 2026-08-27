@@ -32,6 +32,7 @@ public:
                                                    bool isSigned);
     Q_INVOKABLE void openTrafficWorkspace();
     Q_INVOKABLE void exploreLiveChangeRowInStateExplorer(int row);
+    Q_INVOKABLE bool retakeStateExplorerSnapshot();
 
     void loadStateExplorerSnapshot(
         const FrameAggregateKey &key,
@@ -42,6 +43,7 @@ public slots:
 
 signals:
     void exploreLiveChangeRowRequested(int row);
+    void refreshStateExplorerSnapshotRequested(const FrameAggregateKey &key);
     void studioClosed();
 
 protected:
@@ -59,6 +61,8 @@ private:
     QQuickWidget *quickWidget_ = nullptr;
     StateExplorerPresentation *stateExplorerPresentation_ = nullptr;
     QVector<CANFrame> stateExplorerFrames_;
+    FrameAggregateKey currentSnapshotKey_;
+    bool hasSnapshotKey_ = false;
 };
 
 #endif // STUDIOHOST_H

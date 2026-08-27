@@ -149,10 +149,23 @@ void StudioHost::exploreLiveChangeRowInStateExplorer(int row)
     emit exploreLiveChangeRowRequested(row);
 }
 
+bool StudioHost::retakeStateExplorerSnapshot()
+{
+    if (!hasSnapshotKey_)
+    {
+        return false;
+    }
+
+    emit refreshStateExplorerSnapshotRequested(currentSnapshotKey_);
+    return true;
+}
+
 void StudioHost::loadStateExplorerSnapshot(
     const FrameAggregateKey &key,
     const QVector<CANFrame> &frames)
 {
+    currentSnapshotKey_ = key;
+    hasSnapshotKey_ = true;
     stateExplorerFrames_ = frames;
 
     const QString sourceLabel = stateExplorerSnapshotSourceLabel(key);

@@ -626,3 +626,76 @@ void TestAnalysisSession::clearRemovesStateExplorerSnapshotFrames()
 
     QVERIFY(snapshot.isEmpty());
 }
+
+void TestAnalysisSession::stateExplorerSnapshotRequeriesAfterNewerFrames()
+{
+    AnalysisSession session;
+
+    const CANFrame firstFrame = makeFrame(
+        0x123,
+        1,
+        true,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("01"));
+
+    session.ingest(firstFrame);
+
+    QVector<CANFrame> initialSnapshot;
+    QVERIFY(session.stateExplorerSnapshot(
+        AnalysisSession::makeKey(firstFrame),
+        &initialSnapshot));
+    QCOMPARE(initialSnapshot.size(), 1);
+    QCOMPARE(initialSnapshot.at(0).payload(), QByteArray::fromHex("01"));
+
+    const CANFrame secondFrame = makeFrame(
+        0x123,
+        1,
+        true,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("02"));
+
+    session.ingest(secondFrame);
+
+    QVector<CANFrame> refreshedSnapshot;
+    QVERIFY(session.stateExplorerSnapshot(
+        AnalysisSession::makeKey(firstFrame),
+        &refreshedSnapshot));
+    QCOMPARE(refreshedSnapshot.size(), 2);
+    QCOMPARE(refreshedSnapshot.at(0).payload(), QByteArray::fromHex("01"));
+    QCOMPARE(refreshedSnapshot.at(1).payload(), QByteArray::fromHex("02"));
+}
+
+void TestAnalysisSession::stateExplorerSnapshotRequeryHandlesEmptyAgedOutSnapshots()
+{
+    AnalysisSession session(2, 1);
+
+    const CANFrame firstFrame = makeFrame(
+        0x123,
+        1,
+        true,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("01"));
+
+    session.ingest(firstFrame);
+
+    const CANFrame secondFrame = makeFrame(
+        0x123,
+        1,
+        true,
+        false,
+        QCanBusFrame::DataFrame,
+        QByteArray::fromHex("02"));
+
+    session.ingest(secondFrame);
+
+    QVector<CANFrame> snapshot;
+    QVERIFY(session.stateExplorerSnapshot(
+        AnalysisSession::makeKey(firstFrame),
+        &snapshot));
+    
+    QCOMPARE(snapshot.size(), 1);
+    QCOMPARE(snapshot.at(0).payload(), QByteArray::fromHex("02"));
+}

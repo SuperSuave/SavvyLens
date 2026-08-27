@@ -72,6 +72,15 @@ Item {
     }
 
     function seedCandidate(canIdText) {
+        var newCanId = parseCanId(canIdText)
+        var currentCanId = parsedCanId
+
+        if (newCanId >= 0 && currentCanId === newCanId) {
+            canIdField.text = canIdText
+            analysisRequestError = ""
+            return
+        }
+
         canIdField.text = canIdText
         startBitField.text = "0"
         bitLengthField.text = "8"
@@ -226,7 +235,7 @@ Item {
 
                             anchors.fill: parent
                             anchors.margins: Theme.studioSpacingSmall
-                            spacing: Theme.spacingXSmall
+                            spacing: Theme.spacingSmall
 
                             Text {
                                 width: parent.width
@@ -243,6 +252,44 @@ Item {
                                 color: Theme.textMuted
                                 font.pixelSize: Theme.studioTextSmall
                                 wrapMode: Text.WordWrap
+                            }
+
+                            Button {
+                                id: retakeSnapshotButton
+                                visible: root.usesLiveChangeSnapshot
+                                text: "Re-take snapshot"
+                                implicitHeight: Math.max(
+                                                    Theme.studioTextSmall
+                                                    + Theme.studioSpacingMedium,
+                                                    28)
+
+                                onClicked: studioHost.retakeStateExplorerSnapshot()
+
+                                contentItem: Text {
+                                    text: retakeSnapshotButton.text
+                                    color: retakeSnapshotButton.enabled
+                                           ? Theme.textPrimary
+                                           : Theme.textDisabled
+                                    font.pixelSize: Theme.studioTextSmall
+                                    font.bold: true
+                                    horizontalAlignment: Text.AlignHCenter
+                                    verticalAlignment: Text.AlignVCenter
+                                }
+
+                                background: Rectangle {
+                                    radius: Theme.radiusSmall
+                                    color: !retakeSnapshotButton.enabled
+                                           ? Theme.disabled
+                                           : retakeSnapshotButton.down
+                                             ? Theme.pressed
+                                             : retakeSnapshotButton.hovered
+                                               ? Theme.chromeRaised
+                                               : Theme.surface
+                                    border.color: retakeSnapshotButton.hovered
+                                                  ? Theme.accent
+                                                  : Theme.borderStrong
+                                    border.width: 1
+                                }
                             }
                         }
                     }

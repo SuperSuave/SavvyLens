@@ -20,6 +20,7 @@ private slots:
     void validCandidateWithNoAcceptedSamplesIsReadable();
     void sourcePresentationDistinguishesDemoAndSnapshot();
     void sourcePresentationChangesWithoutRefreshingEvidence();
+    void preservesCandidateParametersAcrossSnapshotRefetches();
 };
 
 #endif // TST_STATEEXPLORERPRESENTATION_H
