@@ -37,6 +37,10 @@ greaterThan(QT_MAJOR_VERSION, 5) {
     QT += openglwidgets
 }
 
+greaterThan(QT_MAJOR_VERSION, 5) {
+    QT += openglwidgets
+}
+
 CONFIG += \
     c++17 \
     NO_UNIT_TESTS
