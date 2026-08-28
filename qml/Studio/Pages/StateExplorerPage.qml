@@ -78,6 +78,10 @@ Item {
             return false
         }
 
+        if (!studioHost) {
+            return false
+        }
+
         var accepted =
                 studioHost.analyzeStateExplorerCandidate(
                     parsedCanId,
@@ -286,7 +290,11 @@ Item {
                                                     + Theme.studioSpacingMedium,
                                                     28)
 
-                                onClicked: studioHost.retakeStateExplorerSnapshot()
+                                onClicked: {
+                                    if (studioHost) {
+                                        studioHost.retakeStateExplorerSnapshot()
+                                    }
+                                }
 
                                 contentItem: Text {
                                     text: retakeSnapshotButton.text
@@ -328,11 +336,13 @@ Item {
 
                                 ComboBox {
                                     id: demoScenarioSelector
-                                    model: studioHost.demoScenarioNames()
+                                    model: studioHost ? studioHost.demoScenarioNames() : []
                                     currentIndex: 0
 
                                     onActivated: {
-                                        studioHost.loadDemoScenario(index)
+                                        if (studioHost) {
+                                            studioHost.loadDemoScenario(index)
+                                        }
                                         if (root.candidateInputValid) {
                                             root.triggerAnalysis()
                                         }
@@ -1328,6 +1338,7 @@ Item {
                                         rightPadding: Theme.spacingSmall
 
                                         onClicked: {
+                                            if (!studioHost) return
                                             if (section.sectionType === "transition") {
                                                 studioHost.openGraphingForTransition(rowDelegate.delegateIndex)
                                             } else {
@@ -1360,6 +1371,7 @@ Item {
                                         rightPadding: Theme.spacingSmall
 
                                         onClicked: {
+                                            if (!studioHost) return
                                             if (section.sectionType === "transition") {
                                                 studioHost.openFrameInfoForTransition(rowDelegate.delegateIndex)
                                             } else {
@@ -1397,6 +1409,7 @@ Item {
                 MenuItem {
                     text: section.sectionType === "transition" ? "Graph transition" : "Graph state"
                     onTriggered: {
+                        if (!studioHost) return
                         if (section.sectionType === "transition") {
                             studioHost.openGraphingForTransition(rowContextMenu.currentRowIndex)
                         } else {
@@ -1408,6 +1421,7 @@ Item {
                 MenuItem {
                     text: "Inspect frames"
                     onTriggered: {
+                        if (!studioHost) return
                         if (section.sectionType === "transition") {
                             studioHost.openFrameInfoForTransition(rowContextMenu.currentRowIndex)
                         } else {

@@ -1,9 +1,9 @@
 #include "tst_stateexplorerpresentation.h"
 
 // SavvyLens headers
-#include "analysis/selectioncontext.h"
-#include "app/stateexplorerpresentation.h"
-#include "can/can_structs.h"
+#include "src/analysis/selectioncontext.h"
+#include "src/app/stateexplorerpresentation.h"
+#include "src/can/can_structs.h"
 
 // Qt headers
 #include <QByteArray>

@@ -1,7 +1,7 @@
 #include "analysis/frameaggregatestore.h"
 
 // SavvyLens headers
-#include "can/can_structs.h"
+#include "src/can/can_structs.h"
 #include "tst_frameaggregatestore.h"
 
 // Qt headers

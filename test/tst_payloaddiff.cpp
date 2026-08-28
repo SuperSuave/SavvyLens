@@ -1,6 +1,6 @@
 // SavvyLens headers
 #include "tst_payloaddiff.h"
-#include "analysis/payloaddiff.h"
+#include "src/analysis/payloaddiff.h"
 
 // Qt headers
 #include <QtTest>

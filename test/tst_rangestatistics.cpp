@@ -1,6 +1,6 @@
 #include "tst_rangestatistics.h"
-#include "analysis/rangestatistics.h"
-#include "can/can_structs.h"
+#include "src/analysis/rangestatistics.h"
+#include "src/can/can_structs.h"
 
 #include <QtTest>
 #include <cmath>

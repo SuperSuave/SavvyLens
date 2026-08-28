@@ -1,8 +1,8 @@
 #include "tst_temporalanalysis.h"
 
 // SavvyLens headers
-#include "analysis/temporalanalysis.h"
-#include "can/can_structs.h"
+#include "src/analysis/temporalanalysis.h"
+#include "src/can/can_structs.h"
 
 // Qt headers
 #include <QtTest>

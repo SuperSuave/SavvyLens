@@ -2,7 +2,7 @@
 
 #include <QtConcurrent/qtconcurrentrun.h>
 
-#include "utils/lfqueue.h"
+#include "src/utils/lfqueue.h"
 #include "tst_lfqueue.h"
 
 

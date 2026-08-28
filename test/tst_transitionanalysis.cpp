@@ -1,8 +1,8 @@
 #include "tst_transitionanalysis.h"
 
 // SavvyLens headers
-#include "analysis/transitionanalysis.h"
-#include "can/can_structs.h"
+#include "src/analysis/transitionanalysis.h"
+#include "src/can/can_structs.h"
 
 // Qt headers
 #include <QtTest>

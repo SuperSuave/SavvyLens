@@ -1,8 +1,8 @@
 #include "tst_candidateanalysis.h"
 
 // SavvyLens headers
-#include "analysis/candidateanalysis.h"
-#include "can/can_structs.h"
+#include "src/analysis/candidateanalysis.h"
+#include "src/can/can_structs.h"
 
 // Qt headers
 #include <QtTest>

@@ -44,10 +44,11 @@ SOURCES += \
     $$PROJECT_ROOT/src/analysis/rangestatistics.cpp \
     $$PROJECT_ROOT/src/analysis/selectioncontext.cpp \
     $$PROJECT_ROOT/src/analysis/temporalanalysis.cpp \
-    $$PROJECT_ROOT/src/analysis/transitionanalysis.cpp
+    $$PROJECT_ROOT/src/analysis/transitionanalysis.cpp \
     $$PROJECT_ROOT/src/app/stateexplorerpresentation.cpp \
     $$PROJECT_ROOT/src/bookmarks/bookmarkmanager.cpp \
     $$PROJECT_ROOT/src/can/canfilter.cpp \
+    $$PROJECT_ROOT/src/common/savvylenspaths.cpp \
     $$PROJECT_ROOT/src/common/utility.cpp \
     $$PROJECT_ROOT/src/connections/canbus.cpp \
     $$PROJECT_ROOT/src/connections/canconfactory.cpp \
@@ -59,7 +60,6 @@ SOURCES += \
     $$PROJECT_ROOT/src/connections/lawicel_serial.cpp \
     $$PROJECT_ROOT/src/connections/mqtt_bus.cpp \
     $$PROJECT_ROOT/src/connections/serialbusconnection.cpp \
-    $$PROJECT_ROOT/src/connections/socketcan.cpp \
     $$PROJECT_ROOT/src/connections/socketcand.cpp \
     $$PROJECT_ROOT/src/io/formats/blfhandler.cpp \
     $$PROJECT_ROOT/src/io/formats/pcaplite.cpp \
@@ -76,7 +76,7 @@ SOURCES += \
     $$PROJECT_ROOT/src/mqtt/qmqtt_timer.cpp \
     $$PROJECT_ROOT/src/mqtt/qmqtt_websocket.cpp \
     $$PROJECT_ROOT/src/mqtt/qmqtt_websocketiodevice.cpp \
-    $$PROJECT_ROOT/src/third_party/simplecrypt.cpp 
+    $$PROJECT_ROOT/src/third_party/simplecrypt.cpp
 
 HEADERS += \
     tst_analysissession.h \
@@ -111,7 +111,8 @@ HEADERS += \
     $$PROJECT_ROOT/src/app/stateexplorerpresentation.h \
     $$PROJECT_ROOT/src/bookmarks/bookmarkmanager.h \
     $$PROJECT_ROOT/src/can/can_structs.h \
-    $$PROJECT_ROOT/src/can/canfilter.h
+    $$PROJECT_ROOT/src/can/canfilter.h \
+    $$PROJECT_ROOT/src/common/savvylenspaths.h \
     $$PROJECT_ROOT/src/common/utility.h \
     $$PROJECT_ROOT/src/connections/canbus.h \
     $$PROJECT_ROOT/src/connections/canbus.h \
@@ -129,7 +130,6 @@ HEADERS += \
     $$PROJECT_ROOT/src/connections/lawicel_serial.h \
     $$PROJECT_ROOT/src/connections/mqtt_bus.h \
     $$PROJECT_ROOT/src/connections/serialbusconnection.h \
-    $$PROJECT_ROOT/src/connections/socketcan.h \
     $$PROJECT_ROOT/src/connections/socketcand.h \
     $$PROJECT_ROOT/src/io/formats/blfhandler.h \
     $$PROJECT_ROOT/src/io/formats/pcaplite.h \

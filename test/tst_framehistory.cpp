@@ -1,7 +1,7 @@
 // SavvyLens headers
 #include "tst_framehistory.h"
-#include "analysis/framehistory.h"
-#include "can/can_structs.h"
+#include "src/analysis/framehistory.h"
+#include "src/can/can_structs.h"
 
 // Qt headers
 #include <QtTest>

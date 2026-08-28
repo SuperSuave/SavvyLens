@@ -1,7 +1,7 @@
 #include "tst_discretestateanalysis.h"
 
-#include "analysis/discretestateanalysis.h"
-#include "can/can_structs.h"
+#include "src/analysis/discretestateanalysis.h"
+#include "src/can/can_structs.h"
 
 #include <QtTest>
 

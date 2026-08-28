@@ -1,7 +1,7 @@
 // SavvyLens headers
 #include "tst_analysissession.h"
-#include "analysis/analysissession.h"
-#include "can/can_structs.h"
+#include "src/analysis/analysissession.h"
+#include "src/can/can_structs.h"
 
 // Qt headers
 #include <QtTest>

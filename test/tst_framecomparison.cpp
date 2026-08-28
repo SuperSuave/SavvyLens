@@ -1,6 +1,6 @@
 // SavvyLens headers
 #include "tst_framecomparison.h"
-#include "analysis/framecomparison.h"
+#include "src/analysis/framecomparison.h"
 
 // Qt headers
 #include <QtTest>

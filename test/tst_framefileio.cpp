@@ -5,7 +5,7 @@
 #include <QElapsedTimer>
 #include <QDebug>
 
-#include "io/framefileio.h"
+#include "src/io/framefileio.h"
 #include "tst_framefileio.h"
 
 void TestFrameFileIO::benchmarkLoadVehicleSpyFile()

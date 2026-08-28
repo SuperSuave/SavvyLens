@@ -124,7 +124,11 @@ Rectangle {
             ToolTip.visible: hovered
             ToolTip.text: "Close SavvyLens Studio"
 
-            onClicked: studioHost.closeStudio()
+            onClicked: {
+                if (studioHost) {
+                    studioHost.closeStudio()
+                }
+            }
         }
     }
 }
