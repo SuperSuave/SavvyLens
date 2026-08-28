@@ -1,6 +1,7 @@
 // SavvyLens headers
 #include "tst_lfqueue.h"
 #include "tst_cancon.h"
+#include "tst_framefileio.h"
 
 // QT headers
 #include <QtTest>
@@ -16,7 +17,8 @@ int main(int argc, char** argv)
    };
 
    ASSERT_TEST(new TestLFQueue());
-   ASSERT_TEST(new TestCanCon(CANCon::SOCKETCAN, "vcan0", 1));
+   ASSERT_TEST(new TestCanCon(CANCon::NONE, "none", 1));
+   ASSERT_TEST(new TestFrameFileIO());
 
    return status;
 }
