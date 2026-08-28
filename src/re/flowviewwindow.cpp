@@ -183,11 +183,7 @@ FlowViewWindow::FlowViewWindow(const QVector<CANFrame> *frames, QWidget *parent)
     playbackTimer->setInterval(ui->spinPlayback->value()); //set the timer to the default value of the control
 }
 
-uint32_t FlowViewWindow::getSelectedId() const
-{
-    if (frameCache.count() > 0) return frameCache[0].frameId();
-    return 0;
-}
+
 
 int FlowViewWindow::getFrameCount() const
 {
