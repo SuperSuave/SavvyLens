@@ -147,3 +147,35 @@ BookmarkEventAnalyzer::analyzePreEventBaselinesForCrossId(
 
     return out;
 }
+
+QString BookmarkEventAnalyzer::formatBaselineSummary(const QVector<ByteBaselineInfo> &bytes) const
+{
+    if (bytes.isEmpty()) return QString();
+
+    QStringList lines;
+    lines << QStringLiteral("Pre-event baseline:");
+
+    for (const ByteBaselineInfo &b : bytes)
+    {
+        QString line = QStringLiteral("  Byte %1: %2 dominant (%3/%4, %5%)")
+                .arg(b.byteIndex)
+                .arg(formatByteValue(b.dominantValue))
+                .arg(b.dominantCount)
+                .arg(b.sampleCount)
+                .arg(QString::number(b.dominance * 100.0, 'f', 1));
+
+        if (b.dominantIsIdleSentinel)
+            line += QStringLiteral("  [idle sentinel]");
+
+        if (b.hasEventTransition)
+        {
+            line += QStringLiteral("  event %1 -> %2")
+                    .arg(formatByteValue(b.eventBeforeValue))
+                    .arg(formatByteValue(b.eventAfterValue));
+        }
+
+        lines << line;
+    }
+
+    return lines.join(QLatin1Char('\n'));
+}
