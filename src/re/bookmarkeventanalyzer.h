@@ -288,13 +288,6 @@ private:
             int anchorOriginalIndex,
             const QVector<EventByteStats> &eventBytes,
             int lookbackLimit) const;
-
-    QVector<ByteBaselineInfo> analyzePreEventBaselinesForCrossId(
-            const QVector<CANFrame> &frames,
-            const FrameKey &key,
-            int anchorOriginalIndex,
-            const QVector<int> &changedBytes,
-            int lookbackLimit) const;
 };
 
 
