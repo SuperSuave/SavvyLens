@@ -11,7 +11,9 @@ INCLUDEPATH += \
 DEPENDPATH += $$PROJECT_ROOT/src
 
 SOURCES += \
+    main.cpp \
     tst_analysissession.cpp \
+    tst_cancon.cpp \
     tst_candidateanalysis.cpp \
     tst_discretestateanalysis.cpp \
     tst_frameaggregatestore.cpp \
@@ -23,8 +25,6 @@ SOURCES += \
     tst_stateexplorerpresentation.cpp \
     tst_temporalanalysis.cpp \
     tst_transitionanalysis.cpp \
-    main.cpp \
-    $$PROJECT_ROOT/src/app/stateexplorerpresentation.cpp \
     $$PROJECT_ROOT/src/analysis/analysismarker.cpp \
     $$PROJECT_ROOT/src/analysis/analysismarkerstore.cpp \
     $$PROJECT_ROOT/src/analysis/analysissession.cpp \
@@ -38,9 +38,16 @@ SOURCES += \
     $$PROJECT_ROOT/src/analysis/selectioncontext.cpp \
     $$PROJECT_ROOT/src/analysis/temporalanalysis.cpp \
     $$PROJECT_ROOT/src/analysis/transitionanalysis.cpp
+    $$PROJECT_ROOT/src/app/stateexplorerpresentation.cpp \
+    $$PROJECT_ROOT/src/connections/canbus.cpp
+    $$PROJECT_ROOT/src/connections/canconfactory.cpp \
+    $$PROJECT_ROOT/src/connections/canconnection.cpp \
+    $$PROJECT_ROOT/src/connections/gvretserial.cpp \
+    $$PROJECT_ROOT/src/connections/socketcan.cpp \
 
 HEADERS += \
     tst_analysissession.h \
+    tst_cancon.h \
     tst_candidateanalysis.h \
     tst_discretestateanalysis.h \
     tst_frameaggregatestore.h \
@@ -52,7 +59,6 @@ HEADERS += \
     tst_stateexplorerpresentation.h \
     tst_temporalanalysis.h \
     tst_transitionanalysis.h \
-    $$PROJECT_ROOT/src/app/stateexplorerpresentation.h \
     $$PROJECT_ROOT/src/analysis/analysismarker.h \
     $$PROJECT_ROOT/src/analysis/analysismarkerstore.h \
     $$PROJECT_ROOT/src/analysis/analysissession.h \
@@ -66,7 +72,14 @@ HEADERS += \
     $$PROJECT_ROOT/src/analysis/selectioncontext.h \
     $$PROJECT_ROOT/src/analysis/temporalanalysis.h \
     $$PROJECT_ROOT/src/analysis/transitionanalysis.h \
-    $$PROJECT_ROOT/src/can/can_structs.h
+    $$PROJECT_ROOT/src/app/stateexplorerpresentation.h \
+    $$PROJECT_ROOT/src/can/can_structs.h \
+    $$PROJECT_ROOT/src/connections/canbus.h \
+    $$PROJECT_ROOT/src/connections/canconconst.h \
+    $$PROJECT_ROOT/src/connections/canconfactory.h \
+    $$PROJECT_ROOT/src/connections/canconnection.h \
+    $$PROJECT_ROOT/src/connections/gvretserial.h \
+    $$PROJECT_ROOT/src/connections/socketcan.h
 
 target.path = .
 INSTALLS += target
