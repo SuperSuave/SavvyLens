@@ -3,6 +3,7 @@
 
 // SavvyLens headers
 #include "app/helpwindow.h"
+#include "common/savvylenspaths.h"
 
 // QT headers
 #include <QEvent>
@@ -95,7 +96,7 @@ QString DBCComparatorWindow::loadDBC(DBCFile **file)
     QStringList filters;
     filters.append(QString(tr("DBC Files (*.dbc *.DBC)")));
 
-    dialog.setDirectory(settings.value("FileIO/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value("DBCComparator/LoadSaveDirectory", SavvyLensPaths::dbcDir()).toString());
     dialog.setFileMode(QFileDialog::ExistingFile);
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);
@@ -372,7 +373,7 @@ void DBCComparatorWindow::saveDetails()
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);
     dialog.setAcceptMode(QFileDialog::AcceptSave);
-    dialog.setDirectory(settings.value("FileComparator/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value("FileComparator/LoadSaveDirectory", SavvyLensPaths::exportsDir()).toString());
 
     if (dialog.exec() == QDialog::Accepted)
     {
