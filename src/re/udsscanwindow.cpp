@@ -4,6 +4,7 @@
 // SavvyLens headers
 #include "app/helpwindow.h"
 #include "app/mainwindow.h"
+#include "common/savvylenspaths.h"
 #include "bus_protocols/uds_handler.h"
 #include "common/utility.h"
 #include "connections/canconmanager.h"
@@ -87,7 +88,7 @@ UDSScanWindow::UDSScanWindow(const QVector<CANFrame> *frames, QWidget *parent) :
     connect(ui->cbSessType, &QComboBox::currentTextChanged, this, &UDSScanWindow::setSessType);
 
     int numBuses = CANConManager::getInstance()->getNumBuses();
-    for (int n = 0; n < numBuses; n++) ui->cbBuses->addItem(QString::number(n));
+    for (int n = 0; n < numBuses; n++) ui->cbBuses->addItem(Utility::getBusName(n));
 
     connect(ui->cbBuses, &QComboBox::currentTextChanged, this, &UDSScanWindow::setBusToScan);
 
@@ -220,7 +221,7 @@ void UDSScanWindow::loadScans()
     QStringList filters;
     filters.append(QString(tr("UDS Test Specification (*.uds *.UDS)")));
 
-    dialog.setDirectory(settings.value("FileIO/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value("FileIO/LoadSaveDirectory", SavvyLensPaths::exportsDir()).toString());
     dialog.setFileMode(QFileDialog::AnyFile);
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);
@@ -282,7 +283,7 @@ void UDSScanWindow::saveScans()
     QStringList filters;
     filters.append(QString(tr("UDS Test Specification (*.uds *.UDS)")));
 
-    dialog.setDirectory(settings.value("FileIO/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value("FileIO/LoadSaveDirectory", SavvyLensPaths::exportsDir()).toString());
     dialog.setFileMode(QFileDialog::AnyFile);
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);
@@ -548,7 +549,7 @@ void UDSScanWindow::saveResults()
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);
     dialog.setAcceptMode(QFileDialog::AcceptSave);
-    dialog.setDirectory(settings.value("UDSScan/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value("UDSScan/LoadSaveDirectory", SavvyLensPaths::exportsDir()).toString());
 
     if (dialog.exec() == QDialog::Accepted)
     {
@@ -806,7 +807,7 @@ void UDSScanWindow::openAndConfigure(int startId, int endId, int bus, int scanTy
     if (!isVisible()) show();
     ui->spinStartID->setValue(startId);
     ui->spinEndID->setValue(endId);
-    int busIdx = ui->cbBuses->findText(QString::number(bus));
+    int busIdx = ui->cbBuses->findText(Utility::getBusName(bus));
     if (busIdx >= 0) ui->cbBuses->setCurrentIndex(busIdx);
     if (scanType >= 0 && scanType < ui->cbScanType->count()) {
         ui->cbScanType->setCurrentIndex(scanType);

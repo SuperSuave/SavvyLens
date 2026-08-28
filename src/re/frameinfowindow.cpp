@@ -3,6 +3,7 @@
 
 // SavvyLens headers
 #include "app/mainwindow.h"
+#include "common/savvylenspaths.h"
 #include "app/helpwindow.h"
 #include "themes/thememanager.h"
 #include "widgets/filterutility.h"
@@ -1081,7 +1082,7 @@ void FrameInfoWindow::saveDetails()
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);
     dialog.setAcceptMode(QFileDialog::AcceptSave);
-    dialog.setDirectory(settings.value("FrameInfo/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value("FrameInfo/LoadSaveDirectory", SavvyLensPaths::exportsDir()).toString());
 
     if (dialog.exec() == QDialog::Accepted)
     {
@@ -1160,4 +1161,14 @@ void FrameInfoWindow::applyPlotTheme(QCustomPlot *plot)
     }
 
     plot->replot();
+}
+
+void FrameInfoWindow::setSelectionContext(const SelectionContext &context)
+{
+    if (!context.hasSingleCanId())
+        return;
+
+    selectID(QStringLiteral("0x%1")
+                 .arg(context.canId(), 0, 16)
+                 .toUpper());
 }
