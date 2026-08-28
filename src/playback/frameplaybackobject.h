@@ -22,6 +22,8 @@ struct SequenceItem
     int currentLoopCount;
 };
 
+Q_DECLARE_METATYPE(SequenceItem *)
+
 /*
   broken out functionality that used to be in frameplaybackwindow. That mixed code for Model/View/Controller into one giant
   class. I wasn't too concerned about that but the problem is that all code within a GUI object runs in GUI context and that

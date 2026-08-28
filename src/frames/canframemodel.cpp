@@ -230,8 +230,11 @@ void CANFrameModel::setFilterState(unsigned int ID, bool state)
 
     filters.insert(static_cast<int>(ID), state);
 
-    if (isNewFilterId)
+    if (needFilterRefresh)
+    {
+        needFilterRefresh = false;
         emit updatedFiltersList();
+    }
 
     sendRefresh();
 }

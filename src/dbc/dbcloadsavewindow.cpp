@@ -3,6 +3,7 @@
 
 // SavvyLens headers
 #include "app/helpwindow.h"
+#include "common/savvylenspaths.h"
 #include "connections/canconmanager.h"
 
 // QT headers
@@ -169,7 +170,7 @@ void DBCLoadSaveWindow::loadFile()
     filters.append(QString(tr("Tesla JSON File (*.json)")));
     filters.append(QString(tr("Secret CSV Signal Defs (*.csv)")));
 
-    dialog.setDirectory(settings.value("DBC/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value("DBC/LoadSaveDirectory", SavvyLensPaths::dbcDir()).toString());
     dialog.setFileMode(QFileDialog::ExistingFile);
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);

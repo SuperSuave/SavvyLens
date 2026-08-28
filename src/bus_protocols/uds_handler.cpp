@@ -3,6 +3,7 @@
 // SavvyLens headers
 #include "app/mainwindow.h"
 #include "bus_protocols/isotp_handler.h"
+#include "common/savvylenspaths.h"
 #include "connections/canconmanager.h"
 
 // QT headers
