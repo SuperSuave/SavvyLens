@@ -4,6 +4,7 @@
 // SavvyLens headers
 #include "app/helpwindow.h"
 #include "app/mainwindow.h"
+#include "common/savvylenspaths.h"
 #include "bus_protocols/uds_handler.h"
 #include "widgets/filterutility.h"
 
@@ -197,7 +198,7 @@ void ISOTP_InterpreterWindow::saveList()
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);
     dialog.setAcceptMode(QFileDialog::AcceptSave);
-    dialog.setDirectory(settings.value("FrameInfo/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value("FrameInfo/LoadSaveDirectory", SavvyLensPaths::exportsDir()).toString());
 
     if (dialog.exec() == QDialog::Accepted)
     {
