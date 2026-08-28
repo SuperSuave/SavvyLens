@@ -49,7 +49,7 @@ public:
 };
 
 class QCustomPlot;
-
+class SelectionContext;
 class GraphingWindow : public QDialog
 {
     Q_OBJECT
@@ -57,6 +57,7 @@ class GraphingWindow : public QDialog
 public:
     explicit GraphingWindow(const QVector<CANFrame> *, QWidget *parent = 0);
     ~GraphingWindow();
+    void setSelectionContext(const SelectionContext &context);
     void showEvent(QShowEvent*);
 
 public slots:
@@ -108,6 +109,8 @@ private:
     QCPSelectionDecorator *selDecorator;
     QCPItemText *locationText;
     QCPItemTracer *itemTracer;
+    quint32 m_pendingCanId = 0;
+    bool m_hasPendingCanId = false;
     bool needScaleSetup; //do we need to set x,y graphing extents?
     bool useOpenGL;
     bool followGraphEnd;

@@ -6,6 +6,7 @@
 // QT headers
 #include <QCoreApplication>
 #include <QDateTime>
+#include <QMutexLocker>
 #include <QSettings>
 
 CANConManager* CANConManager::mInstance = nullptr;
@@ -105,13 +106,21 @@ void CANConManager::refreshCanList()
 
     if (mConns.count() == 0)
     {
-        tempFrames.clear();
-        //TODO: Seems to crash under heavy load. Find out why.
-        if(buslessFrames.size()) {            
-            tempFrames = buslessFrames; //make a copy and pass that copy
-            buslessFrames.clear(); //delete all frames from the original
-            emit framesReceived(nullptr, tempFrames);
+        QVector<CANFrame> pendingFrames;
+
+        {
+            QMutexLocker locker(&buslessFramesMutex);
+
+            if (buslessFrames.isEmpty())
+            {
+                return;
+            }
+
+            pendingFrames.swap(buslessFrames);
         }
+
+        emit framesReceived(nullptr, pendingFrames);
+
         return;
     }
 
@@ -211,6 +220,8 @@ bool CANConManager::sendFrame(const CANFrame& pFrame)
 
     if (mConns.count() == 0)
     {
+        QMutexLocker locker(&buslessFramesMutex);
+
         buslessFrames.append(pFrame);
         return true;
     }
