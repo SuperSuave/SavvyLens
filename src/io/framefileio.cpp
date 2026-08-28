@@ -917,6 +917,8 @@ bool FrameFileIO::loadCARBUSAnalyzerFile(QString filename, QVector<CANFrame>* fr
         version = match.captured("version").toInt();
     }
 
+    QRegularExpression spaceRe("\\s+");
+
     while (!txt.atEnd()) {
         lineCounter++;
         if (lineCounter > 100)
@@ -927,7 +929,7 @@ bool FrameFileIO::loadCARBUSAnalyzerFile(QString filename, QVector<CANFrame>* fr
         line = txt.readLine().simplified();
         if (line.length() > 2)
         {
-            QList<QString> tokens = line.split(QRegularExpression("\\s+"));
+            QList<QString> tokens = line.split(spaceRe);
             if (tokens.length() > 3)
             {
                 QString time = tokens[0].replace(",", "");
