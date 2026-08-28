@@ -7,9 +7,10 @@
 #include "common/utility.h"
 #include "widgets/filterutility.h"
 
-RangeStateWindow::RangeStateWindow(const QVector<CANFrame> *frames, QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::RangeStateWindow)
+RangeStateWindow::RangeStateWindow(const QVector<CANFrame> *frames,
+                                   QWidget *parent)
+    : QDialog(parent),
+      ui(new Ui::RangeStateWindow)
 {
     ui->setupUi(this);
     setWindowFlags(Qt::Window);
@@ -17,11 +18,12 @@ RangeStateWindow::RangeStateWindow(const QVector<CANFrame> *frames, QWidget *par
     modelFrames = frames;
 
     ui->graphSignal->xAxis->setRange(0, 8);
-    ui->graphSignal->yAxis->setRange(-10, 265); //run range a bit outside possible number so they aren't plotted in a hard to see place
+    ui->graphSignal->yAxis->setRange(
+        -10, 265); // Run range a bit outside possible values for visibility.
     ui->graphSignal->xAxis->setVisible(false);
     ui->graphSignal->yAxis->setVisible(false);
 
-    //ui->graphSignal->axisRect()->setupFullAxesBox();
+    // ui->graphSignal->axisRect()->setupFullAxesBox();
 
     ui->cbSignalMode->addItem(tr("Big Endian"));
     ui->cbSignalMode->addItem(tr("Little Endian"));
@@ -31,24 +33,41 @@ RangeStateWindow::RangeStateWindow(const QVector<CANFrame> *frames, QWidget *par
     ui->cbSignedMode->addItem(tr("Unsigned Value"));
     ui->cbSignedMode->addItem(tr("Try Both"));
 
-//lambda expressions used here because these are tiny functions that don't have any reason to be full named functions
-//unfortunately the fact that valueChanged is overloaded makes the syntax here HORRIBLE. That sucks.
-    connect(ui->spinMaxSigSize, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-            [=](int newVal)
+    // First-open discovery defaults. These align with RangeScanConfig defaults
+    // and provide a practical byte-aligned first pass.
+    ui->spinMinSigSize->setValue(8);
+    ui->spinMaxSigSize->setValue(32);
+    ui->spinGranularity->setValue(8);
+    ui->slideSensitivity->setValue(128);
+    ui->cbSignalMode->setCurrentIndex(2); // Try Both
+    ui->cbSignedMode->setCurrentIndex(2); // Try Both
+
+    // Keep the selected signal-size range valid as either spin box changes.
+    connect(ui->spinMaxSigSize,
+            static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+            [=](int newValue)
             {
-                if (newVal < ui->spinMinSigSize->value()) ui->spinMinSigSize->setValue(newVal);
+                if (newValue < ui->spinMinSigSize->value())
+                {
+                    ui->spinMinSigSize->setValue(newValue);
+                }
             });
 
-    connect(ui->spinMinSigSize, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-            [=](int newVal)
+    connect(ui->spinMinSigSize,
+            static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+            [=](int newValue)
             {
-                if (newVal > ui->spinMaxSigSize->value()) ui->spinMaxSigSize->setValue(newVal);
+                if (newValue > ui->spinMaxSigSize->value())
+                {
+                    ui->spinMaxSigSize->setValue(newValue);
+                }
             });
 
-    connect(ui->btnAllFilter, &QAbstractButton::clicked,
+    connect(ui->btnAllFilter,
+            &QAbstractButton::clicked,
             [=]()
             {
-                for (int i = 0; i < ui->listFilter->count(); i++)
+                for (int i = 0; i < ui->listFilter->count(); ++i)
                 {
                     QListWidgetItem *item = ui->listFilter->item(i);
                     item->setCheckState(Qt::Checked);
@@ -56,10 +75,11 @@ RangeStateWindow::RangeStateWindow(const QVector<CANFrame> *frames, QWidget *par
                 }
             });
 
-    connect(ui->btnNoneFilter, &QAbstractButton::clicked,
+    connect(ui->btnNoneFilter,
+            &QAbstractButton::clicked,
             [=]()
             {
-                for (int i = 0; i < ui->listFilter->count(); i++)
+                for (int i = 0; i < ui->listFilter->count(); ++i)
                 {
                     QListWidgetItem *item = ui->listFilter->item(i);
                     item->setCheckState(Qt::Unchecked);
@@ -67,18 +87,29 @@ RangeStateWindow::RangeStateWindow(const QVector<CANFrame> *frames, QWidget *par
                 }
             });
 
-    connect(ui->listFilter, &QListWidget::itemChanged,
+    connect(ui->listFilter,
+            &QListWidget::itemChanged,
             [=](QListWidgetItem *item)
             {
-                bool isChecked = false;
-                int id = FilterUtility::getIdAsInt(item);
-                if (item->checkState() == Qt::Checked) isChecked = true;
+                const int id = FilterUtility::getIdAsInt(item);
+                const bool isChecked = item->checkState() == Qt::Checked;
                 idFilters[id] = isChecked;
             });
 
-    connect(ui->btnRecalc, &QAbstractButton::clicked, this, &RangeStateWindow::recalcButton);
-    connect(MainWindow::getReference(), SIGNAL(framesUpdated(int)), this, SLOT(updatedFrames(int)));
-    connect(ui->listCandidates, &QListWidget::currentRowChanged, this, &RangeStateWindow::clickedSignalList);
+    connect(ui->btnRecalc,
+            &QAbstractButton::clicked,
+            this,
+            &RangeStateWindow::recalcButton);
+
+    connect(MainWindow::getReference(),
+            SIGNAL(framesUpdated(int)),
+            this,
+            SLOT(updatedFrames(int)));
+
+    connect(ui->listCandidates,
+            &QListWidget::currentRowChanged,
+            this,
+            &RangeStateWindow::clickedSignalList);
 }
 
 RangeStateWindow::~RangeStateWindow()
@@ -86,12 +117,11 @@ RangeStateWindow::~RangeStateWindow()
     delete ui;
 }
 
-void RangeStateWindow::showEvent(QShowEvent* event)
+void RangeStateWindow::showEvent(QShowEvent *event)
 {
     QDialog::showEvent(event);
 
     readSettings();
-
     refreshFilterList();
 
     installEventFilter(this);
@@ -100,35 +130,47 @@ void RangeStateWindow::showEvent(QShowEvent* event)
 void RangeStateWindow::closeEvent(QCloseEvent *event)
 {
     Q_UNUSED(event);
+
     removeEventFilter(this);
     writeSettings();
 }
 
 bool RangeStateWindow::eventFilter(QObject *obj, QEvent *event)
 {
-    if (event->type() == QEvent::KeyRelease) {
+    if (event->type() == QEvent::KeyRelease)
+    {
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+
         switch (keyEvent->key())
         {
         case Qt::Key_F1:
             HelpWindow::getRef()->showHelp("rangestate.md");
             break;
+
+        default:
+            break;
         }
+
         return true;
-    } else {
-        // standard event processing
-        return QObject::eventFilter(obj, event);
     }
-    return false;
+
+    return QObject::eventFilter(obj, event);
 }
 
 void RangeStateWindow::readSettings()
 {
     QSettings settings;
+
     if (settings.value("Main/SaveRestorePositions", false).toBool())
     {
-        resize(settings.value("RangeStateView/WindowSize", QSize(765, 615)).toSize());
-        move(Utility::constrainedWindowPos(settings.value("RangeStateView/WindowPos", QPoint(50, 50)).toPoint()));
+        resize(settings
+                   .value("RangeStateView/WindowSize", QSize(765, 615))
+                   .toSize());
+
+        move(Utility::constrainedWindowPos(
+            settings
+                .value("RangeStateView/WindowPos", QPoint(50, 50))
+                .toPoint()));
     }
 }
 
@@ -145,45 +187,62 @@ void RangeStateWindow::writeSettings()
 
 void RangeStateWindow::updatedFrames(int numFrames)
 {
-    CANFrame thisFrame;
-    if (numFrames == -1) //all frames deleted. We don't need to do a thing on this window but erase everything in the filters section
+    if (numFrames == -1)
     {
+        // All frames were deleted.
         ui->listFilter->clear();
         idFilters.clear();
+        return;
     }
-    else if (numFrames == -2) //all new set of frames. Reset
+
+    if (numFrames == -2)
     {
+        // A complete new frame set was loaded.
         refreshFilterList();
+        return;
     }
-    else //just got some new frames. See if we need to update the filters list. Otherwise nothing to do - no recalc happens until the button is pressed
+
+    // New frames arrived. Update available ID filters only; recalculation
+    // remains an explicit action through the Recalculate button.
+    if (numFrames > modelFrames->count())
     {
-        if (numFrames > modelFrames->count()) return;
-        for (int i = modelFrames->count() - numFrames; i < modelFrames->count(); i++)
+        return;
+    }
+
+    for (int i = modelFrames->count() - numFrames;
+         i < modelFrames->count();
+         ++i)
+    {
+        const CANFrame &frame = modelFrames->at(i);
+
+        if (!idFilters.contains(frame.frameId()))
         {
-            thisFrame = modelFrames->at(i);
-            if (!idFilters.contains(thisFrame.frameId()))
-            {
-                idFilters.insert(thisFrame.frameId(), true);
-                FilterUtility::createCheckableFilterItem(thisFrame.frameId(), true, ui->listFilter);
-            }
+            idFilters.insert(frame.frameId(), true);
+
+            FilterUtility::createCheckableFilterItem(
+                frame.frameId(),
+                true,
+                ui->listFilter);
         }
     }
 }
 
 void RangeStateWindow::refreshFilterList()
 {
-    int id;
-
     idFilters.clear();
     ui->listFilter->clear();
 
-    for (int i = 0; i < modelFrames->length(); i++)
+    for (int i = 0; i < modelFrames->length(); ++i)
     {
-        id = modelFrames->at(i).frameId();
+        const int id = modelFrames->at(i).frameId();
+
         if (!idFilters.contains(id))
         {
             idFilters.insert(id, true);
-            FilterUtility::createCheckableFilterItem(id, true, ui->listFilter);
+            FilterUtility::createCheckableFilterItem(
+                id,
+                true,
+                ui->listFilter);
         }
     }
 
@@ -192,291 +251,188 @@ void RangeStateWindow::refreshFilterList()
 
 void RangeStateWindow::recalcButton()
 {
-    QMap<int, bool>::iterator iter;
-    uint32_t id;
-
     ui->listCandidates->clear();
-    foundSignals.clear();
+    foundCandidates.clear();
     ui->graphSignal->clearGraphs();
 
+    RangeScanConfig scanConfig;
+    scanConfig.minBitLength = ui->spinMinSigSize->value();
+    scanConfig.maxBitLength = ui->spinMaxSigSize->value();
+    scanConfig.bitGranularity = ui->spinGranularity->value();
+    scanConfig.sensitivity = ui->slideSensitivity->value();
+    scanConfig.maxCandidates = 2000;
+    scanConfig.populateSamples = true;
+
+    switch (ui->cbSignalMode->currentIndex())
+    {
+    case 0:
+        scanConfig.endianMode = RangeScanConfig::BigEndianOnly;
+        break;
+
+    case 1:
+        scanConfig.endianMode = RangeScanConfig::LittleEndianOnly;
+        break;
+
+    default:
+        scanConfig.endianMode = RangeScanConfig::TryBothEndian;
+        break;
+    }
+
+    switch (ui->cbSignedMode->currentIndex())
+    {
+    case 0:
+        scanConfig.signedMode = RangeScanConfig::SignedOnly;
+        break;
+
+    case 1:
+        scanConfig.signedMode = RangeScanConfig::UnsignedOnly;
+        break;
+
+    default:
+        scanConfig.signedMode = RangeScanConfig::TryBothSigned;
+        break;
+    }
+
     QProgressDialog progress(qApp->activeWindow());
+
     progress.setWindowModality(Qt::WindowModal);
-    progress.setLabelText("Calculating");
-    progress.setCancelButton(0);
-    progress.setRange(0,0);
+    progress.setLabelText(tr("Calculating"));
+    progress.setCancelButton(nullptr);
+    progress.setRange(0, 0);
     progress.setMinimumDuration(0);
     progress.show();
 
-
-
-    for (iter = idFilters.begin(); iter != idFilters.end(); ++iter)
+    for (QMap<int, bool>::const_iterator iter = idFilters.constBegin();
+         iter != idFilters.constEnd();
+         ++iter)
     {
-        if (iter.value() == true)
+        if (!iter.value())
         {
-            qDebug() << "Processing for ID: " << iter.key();
-            //so, we're supposed to process this frame ID. We'll need to create a frame cache for it
-            frameCache.clear();
-            frameCache.reserve(modelFrames->count()); //block allocate more than enough space
-            id = iter.key();
-            for (int j = 0; j < modelFrames->count(); j++)
-            {
-                if (modelFrames->at(j).frameId() == id) frameCache.append(modelFrames->at(j));
-            }
-            //now we've got a list with all the same ID. Time to send it off for processing
-            signalsFactory();
+            continue;
         }
+
+        const quint32 canId = static_cast<quint32>(iter.key());
+
+        qDebug() << "Processing for ID:" << canId;
+
+        const QVector<RangeSignalCandidate> candidates =
+            RangeStatistics::scanCandidates(
+                *modelFrames,
+                canId,
+                scanConfig);
+
+        for (const RangeSignalCandidate &candidate : candidates)
+        {
+            foundCandidates.append(candidate);
+            ui->listCandidates->addItem(candidate.summaryText());
+        }
+
+        qApp->processEvents();
     }
 
     progress.cancel();
-    qDebug() << "Found " << foundSignals.count() << " signals total.";
+
+    qDebug() << "Found" << foundCandidates.count()
+             << "signals total.";
 }
 
-/*
- * Uses the settings exposed to the user to generate a set of candidate signals that should be checked.
- * The user could specify signal sizes, granularity, endian type and we generate all the permutations from there
- * Should process from max to min and stop when a valid signal is found (at least as an option) to declutter a bit.
- * Mostly what we're interested in is the largest signal that matches
-*/
-void RangeStateWindow::signalsFactory()
+// Graphs extracted sample values by accepted-sample index.
+void RangeStateWindow::createGraph(const QVector<qint64> &values)
 {
-    int minSig = ui->spinMinSigSize->value();
-    int maxSig = ui->spinMaxSigSize->value();
-    int granularity = ui->spinGranularity->value();
-    int sigType = ui->cbSignalMode->currentIndex() + 1;
-    int signedType = ui->cbSignedMode->currentIndex() + 1;
-    int maxBits = frameCache.at(0).payload().length() * 8;
-    int sens = ui->slideSensitivity->value();
-
-    for (int sigSize = maxSig; sigSize >= minSig; sigSize -= granularity)
-    {
-        qApp->processEvents();
-        for (int startBit = 0; startBit < maxBits; startBit += granularity)
-        {
-            if (sigType & 1)
-            {
-                if (signedType & 1) processSignal(startBit, sigSize, sens, true, true);
-                if (signedType & 2) processSignal(startBit, sigSize, sens, true, false);
-            }
-            if (sigType & 2)
-            {
-                if (signedType & 1) processSignal(startBit, sigSize, sens, false, true);
-                if (signedType & 2) processSignal(startBit, sigSize, sens, false, false);
-            }
-            //have to try both types even with 8 bit and smaller signals
-            //because they could cross byte boundaries. Could check whether they
-            //do and not try both types if it is impossible.
-        }
-    }
-}
-
-/*
- * Given the signal we generate the relevant data and figure out whether this signal seems to be a smooth range signal
-*/
-bool RangeStateWindow::processSignal(int startBit, int bitLength, int sensitivity, bool bigEndian, bool isSigned)
-{
-    qDebug() << "";
-    qDebug() << "S:" << startBit << " B:" << bitLength << " Sens:" << sensitivity << " Big E:" << bigEndian << " Signed: " << isSigned;
-
-    QVector<int> scaledVals;
-    QVector<int> diff1;
-    QVector<int> diff2;
-    int64_t valu;
-    int64_t highestValue = -1000000000000LL;
-    int64_t lowestValue = 1000000000000LL;
-    double lerpPoint = ((double)sensitivity - 10.0) / 240.0;
-    int numFrames = frameCache.count();
-
-    scaledVals.reserve(frameCache.count());
-    diff1.reserve(frameCache.count() - 1);
-    diff2.reserve(frameCache.count() - 2);
-
-    int i;
-
-    for (i = 0; i < numFrames; i++)
-    {
-        valu = Utility::processIntegerSignal(frameCache.at(i).payload(), startBit, bitLength, !bigEndian, isSigned);
-        if (valu < lowestValue) lowestValue = valu;
-        if (valu > highestValue) highestValue = valu;
-    }
-
-    qDebug() << "Min: " << lowestValue << " Max: " << highestValue;
-
-    if (lowestValue == highestValue) return false; //a signal that never changes is worthless and not a range signal
-
-    int64_t range = highestValue - lowestValue;
-
-    int64_t maxRange = isSigned?(1<<(bitLength - 1)):(1 << bitLength);
-    //at highest sensitivity require signal to at least range 20% of max range
-    //at lowest  sensitivity require signal to at least range 1%  of max range
-    int64_t requiredRange = Utility::Lerp(maxRange * 0.01, maxRange * 0.2, lerpPoint);
-    if (range < requiredRange)
-        return false; //doesn't range enough.
-
-    for (i = 0; i < numFrames; i++)
-        scaledVals.append((int)((Utility::processIntegerSignal(frameCache.at(i).payload(), startBit, bitLength, !bigEndian, isSigned) - lowestValue)));
-
-    for (i = 1; i < numFrames; i++)
-    {
-        valu = scaledVals[i-1] - scaledVals[i];
-        diff1.append(valu);
-    }
-
-    for (i = 1; i < diff1.count(); i++)
-    {
-        valu = diff1[i-1] - diff1[i];
-        diff2.append(valu);
-    }
-
-    //now the differences are all stored so let's go through and see if first order diffs seem to suggest a ramping sort of signal or not.
-    //for a first test lets let through any signal where the first order diff doesn't seem too large
-    bool isGood = true;
-    int comparisonValue = Utility::Lerp((double)range * 0.55, 0, lerpPoint);
-    qDebug() << " 1st Delta comparisonvalue: " << comparisonValue;
-    int overValues = 0;
-    for (i = 0; i < diff1.count(); i++)
-    {
-        if (abs(diff1[i]) > comparisonValue) overValues++;
-    }
-    int maxOvers = Utility::Lerp(numFrames / 30.0, 2, lerpPoint);
-    qDebug() << "1st order overages: " << overValues << "   Max Overs: " << maxOvers;
-    if (overValues > maxOvers) isGood = false;
-
-    if (isGood)
-    {
-        //now look at the second order differentials. This is acceleration. There shouldn't be hard acceleration in values for a ranging signal
-        comparisonValue = Utility::Lerp((double)range * 0.20, 1, lerpPoint);
-        maxOvers = Utility::Lerp(8, 2, lerpPoint); //really clamp down on second order over limits
-        qDebug() << "2nd Delta comparisonvalue: " << comparisonValue;
-        overValues = 0;
-        for (i = 0; i < diff2.count(); i++)
-        {
-            if (abs(diff2[i]) > comparisonValue) overValues++;
-        }
-        if (overValues > maxOvers) isGood = false;
-        qDebug() << "2nd order overages: " << overValues << "   Max Overs: " << maxOvers;
-        if (overValues > maxOvers) isGood = false;
-    }
-
-    qDebug() << "Is this signal good: " << isGood << " Num overs: " << overValues;
-    if (isGood)
-    {
-        //createGraph(scaledVals);
-        QString temp;
-        temp = "ID: " + QString::number(frameCache.at(0).frameId(), 16) + " startBit: " + QString::number(startBit) + "  len: " + QString::number(bitLength);
-        int64_t foundSig;
-        foundSig = frameCache.at(0).frameId();
-        foundSig += (int64_t)startBit << 32;
-        foundSig += (int64_t)bitLength << 40;
-
-        if (isSigned)
-        {
-            temp += " Signed";
-            foundSig += (int64_t)1 << 48;
-        }
-        else
-        {
-            temp += " Unsigned";
-        }
-
-        if (bigEndian)
-        {
-            temp += " BigEndian";
-            foundSig += (int64_t)1 << 49;
-        }
-        else
-        {
-            temp += " LittleEndian";
-        }
-
-        ui->listCandidates->addItem(temp);
-        foundSignals.append(foundSig);
-    }
-    return isGood;
-}
-
-//graphs the vector such that the X axis is just the index into the vector and Y is perfectly graphed within the window
-void RangeStateWindow::createGraph(QVector<int> values)
-{
-
-    int tempVal;
-    float minval=1000000, maxval = -100000;
-
-    int numEntries = values.count();
-
     ui->graphSignal->clearGraphs();
 
-    QVector<double> x(numEntries), y(numEntries);
-
-    for (int j = 0; j < numEntries; j++)
+    if (values.isEmpty())
     {
-        tempVal = values[j];
-
-        x[j] = j;
-
-        y[j] = tempVal;
-        if (y[j] < minval) minval = y[j];
-        if (y[j] > maxval) maxval = y[j];
+        ui->graphSignal->replot();
+        return;
     }
 
-    qDebug() << "YMin: " << minval << " YMax: " << maxval;
+    const int numEntries = values.count();
 
-    double ymin, ymax;
+    QVector<double> x(numEntries);
+    QVector<double> y(numEntries);
 
-    ymin = minval;
+    double minValue = static_cast<double>(values.at(0));
+    double maxValue = minValue;
 
-    if (ymin < 0) ymin *= 1.2;
-    else ymin *= 0.8;
+    for (int index = 0; index < numEntries; ++index)
+    {
+        const qint64 value = values.at(index);
 
-    ymax = maxval;
-    if (ymax < 0) ymax *= 0.8;
-    else ymax *= 1.2;
+        x[index] = static_cast<double>(index);
+        y[index] = static_cast<double>(value);
 
-    if (fabs(ymin) < 0.01) ymin -= (ymax / 60.0);
-    if (fabs(ymax) < 0.01) ymax -= (ymin / 60.0);
+        if (y[index] < minValue)
+        {
+            minValue = y[index];
+        }
 
-    qDebug() << "YFm: " << ymin << " YFM: " << ymax;
+        if (y[index] > maxValue)
+        {
+            maxValue = y[index];
+        }
+    }
+
+    double yMinimum = minValue;
+    double yMaximum = maxValue;
+
+    if (yMinimum < 0.0)
+    {
+        yMinimum *= 1.2;
+    }
+    else
+    {
+        yMinimum *= 0.8;
+    }
+
+    if (yMaximum < 0.0)
+    {
+        yMaximum *= 0.8;
+    }
+    else
+    {
+        yMaximum *= 1.2;
+    }
+
+    if (qAbs(yMinimum) < 0.01)
+    {
+        yMinimum -= yMaximum / 60.0;
+    }
+
+    if (qAbs(yMaximum) < 0.01)
+    {
+        yMaximum -= yMinimum / 60.0;
+    }
+
+    if (qFuzzyCompare(yMinimum, yMaximum))
+    {
+        const double padding = qMax(1.0, qAbs(yMinimum) * 0.1);
+        yMinimum -= padding;
+        yMaximum += padding;
+    }
 
     ui->graphSignal->addGraph();
     ui->graphSignal->graph()->setName("Graph");
-    ui->graphSignal->graph()->setData(x,y);
-    ui->graphSignal->graph()->setLineStyle(QCPGraph::lsLine); //connect points with lines
+    ui->graphSignal->graph()->setData(x, y);
+    ui->graphSignal->graph()->setLineStyle(QCPGraph::lsLine);
+
     QPen graphPen;
     graphPen.setColor(Qt::black);
     graphPen.setWidth(1);
     ui->graphSignal->graph()->setPen(graphPen);
+
     ui->graphSignal->xAxis->setRange(0, numEntries);
-    ui->graphSignal->yAxis->setRange(ymin, ymax);
+    ui->graphSignal->yAxis->setRange(yMinimum, yMaximum);
     ui->graphSignal->replot();
 }
 
 void RangeStateWindow::clickedSignalList(int idx)
 {
-    if (idx == -1) return; //just in case...
-
-    uint32_t id, startBit, bitLength;
-    bool isSigned = false, isBigEndian = false;
-    int64_t valu;
-
-    valu = foundSignals.at(idx);
-    id = valu & 0xFFFFFFFFULL;
-    startBit = (valu >> 32) & 0xFF;
-    bitLength = (valu >> 40) & 0xFF;
-    if (valu & (1LL << 48)) isSigned = true;
-    if (valu & (1LL << 49)) isBigEndian = true;
-
-    qDebug() << "I:" << id << " sb:" << startBit << " len:" << bitLength << " signed:" << isSigned << " big:" << isBigEndian;
-
-    frameCache.clear();
-    frameCache.reserve(modelFrames->count()); //block allocate more than enough space
-
-    for (int j = 0; j < modelFrames->count(); j++)
+    if (idx < 0 || idx >= foundCandidates.size())
     {
-        if (modelFrames->at(j).frameId() == id) frameCache.append(modelFrames->at(j));
+        return;
     }
 
-    int numFrames = frameCache.count();
-    QVector<int> values;
-    values.reserve(numFrames);
-    for (int i = 0; i < numFrames; i++) values.append((int)((Utility::processIntegerSignal(frameCache.at(i).payload(), startBit, bitLength, !isBigEndian, isSigned))));
-    createGraph(values);
+    const RangeSignalCandidate &candidate = foundCandidates.at(idx);
+    createGraph(candidate.sampleValues);
 }

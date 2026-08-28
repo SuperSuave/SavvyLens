@@ -3,6 +3,7 @@
 
 // SavvyLens headers
 #include "app/helpwindow.h"
+#include "common/savvylenspaths.h"
 
 // QT headers
 #include <QEvent>
@@ -543,7 +544,7 @@ void FileComparatorWindow::saveDetails()
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);
     dialog.setAcceptMode(QFileDialog::AcceptSave);
-    dialog.setDirectory(settings.value("FileComparator/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value("FileComparator/LoadSaveDirectory", SavvyLensPaths::exportsDir()).toString());
 
     if (dialog.exec() == QDialog::Accepted)
     {
