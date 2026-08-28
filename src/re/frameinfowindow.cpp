@@ -263,22 +263,28 @@ void FrameInfoWindow::mouseDoubleClick()
 
     for (int i = 0; i < 8; i++)
     {
-        if (ui->gridLower->itemAt(i)->widget()->isHidden()) hideMode = false;
+        if (graphByte[i]->isHidden())
+        {
+            hideMode = false;
+            break;
+        }
     }
 
     if (hideMode)
     {
-    for (int i = 0; i < 8; i++)
+        for (int i = 0; i < 8; i++)
         {
-            if (ui->gridLower->itemAt(i)->widget() == (plot)) qDebug() << "Idx " << i << " matched!";
-            else ui->gridLower->itemAt(i)->widget()->setHidden(true);
+            if (graphByte[i] != plot)
+            {
+                graphByte[i]->setHidden(true);
+            }
         }
     }
     else
     {
         for (int i = 0; i < 8; i++)
         {
-            ui->gridLower->itemAt(i)->widget()->setHidden(false);
+            graphByte[i]->setHidden(false);
         }
     }
 }
