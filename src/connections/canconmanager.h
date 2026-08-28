@@ -6,6 +6,7 @@
 
 // QT headers
 #include <QElapsedTimer>
+#include <QMutex>
 #include <QObject>
 #include <QTimer>
 
@@ -82,6 +83,7 @@ private:
     uint64_t               mTimestampBasis;
     uint32_t               mNumActiveBuses;
     bool                   useSystemTime;
+    QMutex                 buslessFramesMutex;
     QVector<CANFrame>      buslessFrames;
     QVector<CANFrame>      tempFrames;
 };

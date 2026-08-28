@@ -2,6 +2,7 @@
 #define FRAMEINFOWINDOW_H
 
 // SavvyLens headers
+#include "analysis/selectioncontext.h"
 #include "bus_protocols/j1939_handler.h"
 #include "can/can_structs.h"
 #include "common/utility.h"
@@ -30,6 +31,7 @@ public:
     void showEvent(QShowEvent*);
     void selectID(QString idStr);
     QTreeWidget* getDetailsTree() const;
+    void setSelectionContext(const SelectionContext &context);
 
 private slots:
     void updateDetailsWindow(QString);

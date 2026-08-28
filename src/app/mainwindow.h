@@ -4,6 +4,9 @@
 #include "config.h"
 
 // SavvyLens headers
+#include "analysis/analysissession.h"
+#include "analysis/livechangeexplorermodel.h"
+#include "analysis/selectioncontext.h"
 #include "app/mainsettingsdialog.h"
 #include "bookmarks/bookmarkmanager.h"
 #include "bookmarks/bookmarkmanagerdialog.h"
@@ -41,6 +44,7 @@
 #include <QDialogButtonBox>
 #include <QHeaderView>
 #include <QMainWindow>
+#include <QMap>
 #include <QPushButton>
 #include <QSerialPort>
 #include <QSerialPortInfo>
@@ -64,7 +68,9 @@ class ControlAnalysisDialog;
 class ControlCandidateModel;
 class ControlStateDetector;
 class ISOTP_InterpreterWindow;
+class LiveChangeExplorerHost;
 class ScriptingWindow;
+class StudioHost;
 
 class QAction;
 class QDockWidget;
@@ -86,7 +92,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     static QString loadedFileName;
     static MainWindow *getReference();
-    CANFrameModel * getCANFrameModel();
+    CANFrameModel *getCANFrameModel();
     ~MainWindow();
 
     void handleDroppedFile(const QString &filename);
@@ -99,6 +105,9 @@ public slots:
     void handleLoadFilters();
     void handleContinousLogging();
     void showGraphingWindow();
+    void showGraphingWindow(const SelectionContext &context);
+    void showStudio();
+    void showLiveChangeExplorer();
     void showFrameDataAnalysis();
     void clearFrames();
     void expandAllRows();
@@ -174,6 +183,7 @@ public slots:
 
 public slots:
     void analyzeFrameData(QString frameId);
+    void analyzeSelectedFrameData();
     void updateCopilotStatus(int count);
     FrameInfoWindow* getFrameInfoWindow();
     SnifferWindow* getSnifferWindow() const;
@@ -208,9 +218,17 @@ private:
     QAction *copyAct;
     static MainWindow *selfRef;
 
+    AnalysisSession analysisSession;
+    LiveChangeExplorerModel *liveChangeExplorerModel = nullptr;
+    LiveChangeExplorerHost *liveChangeExplorerHost_ = nullptr;
+    StudioHost *studioHost_ = nullptr;
+
     //canbus related data
     CANFrameModel *model;
     DBCHandler *dbcHandler;
+
+    QMap<int, bool> displayedCanFilters;
+    QMap<int, bool> displayedBusFilters;
 
     void filterToFrameIds(const QSet<uint32_t> &ids);
     void removeFrameIdsFromFilterList(const QSet<uint32_t> &ids);
@@ -356,6 +374,7 @@ private:
     QString getSignalNameFromPosition(QPoint pos);
     uint32_t getMessageIDFromPosition(QPoint pos);
     bool getSelectedFrameInfo(CANFrame &outFrame, QModelIndex *outIndex = nullptr);
+    SelectionContext currentSelectionContext() const;
     bool selectFrameByOriginalIndex(int originalIndex);
     void copySelection();
     void handleSaveDecodedMethod(bool csv);
@@ -367,6 +386,12 @@ private:
     void onDbcNeedsRefresh(int idx);
 
 private slots:
+    void openExplorerFrameInfo(int row);
+    void openExplorerGraphing(int row);
+    void createExplorerMarker(int row, const QString &label);
+    void exploreLiveChangeRowInStateExplorer(int row);
+    void refreshStateExplorerSnapshot(const FrameAggregateKey &key);
+    void showAnalysisMarkers();
     void killEmAll();
     void killWindow(QDialog *win);
     void readSettings();

@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/qml">
+        <file>AnalysisMarkersDialog.qml</file>
+        <file>LiveChangeExplorer.qml</file>
+        <file>SavvyLens/qmldir</file>
+        <file>SavvyLens/Theme.qml</file>
+        <file>Studio.qml</file>
+        <file>Studio/Pages/DashPage.qml</file>
+        <file>Studio/Pages/StateExplorerPage.qml</file>
+        <file>Studio/StudioBottomBar.qml</file>
+        <file>Studio/StudioNavRail.qml</file>
+        <file>Studio/StudioTabStrip.qml</file>
+        <file>Studio/StudioTopBar.qml</file>
+        <file>Studio/WorkspacePlaceholder.qml</file>
+    </qresource>
+</RCC>

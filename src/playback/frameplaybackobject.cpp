@@ -1,7 +1,11 @@
 #include "playback/frameplaybackobject.h"
 
+#include <QMetaType>
+
 FramePlaybackObject::FramePlaybackObject()
 {
+    qRegisterMetaType<SequenceItem *>();
+    
     mThread_p = new QThread();
 
     currentPosition = 0;
@@ -26,7 +30,9 @@ FramePlaybackObject::~FramePlaybackObject()
 quint64 FramePlaybackObject::updatePosition(bool forward)
 {
     //qDebug() << "updatePosition";
-    if (!currentSeqItem) {
+    if (currentSeqItem == nullptr ||
+        currentSeqItem->data.isEmpty())
+    {
         playbackTimer->stop(); //pushing this button halts automatic playback
         playbackActive = false;
         currentPosition = 0;
@@ -292,7 +298,20 @@ void FramePlaybackObject::pausePlayback()
 
 void FramePlaybackObject::setSequenceObject(SequenceItem *item)
 {
+    if (mThread_p != nullptr &&
+        mThread_p != QThread::currentThread())
+    {
+        QMetaObject::invokeMethod(
+            this,
+            "setSequenceObject",
+            Qt::BlockingQueuedConnection,
+            Q_ARG(SequenceItem *, item));
+
+        return;
+    }
+
     currentSeqItem = item;
+    currentPosition = 0;
 }
 
 void FramePlaybackObject::setUseOriginalTiming(bool state)
