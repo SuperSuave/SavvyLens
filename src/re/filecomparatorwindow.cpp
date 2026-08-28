@@ -168,13 +168,14 @@ void FileComparatorWindow::calculateDetails()
 
         if (interestedIDs.contains(frame.frameId())) //if we saw this ID before then add to the QList in there
         {
+            FrameData &fd = interestedIDs[frame.frameId()];
             for (int y = 0; y < dataLen; y++)
             {
-                interestedIDs[frame.frameId()].values[y][data[y]]++;
+                fd.values[y][data[y]]++;
                 tmp = data[y];
                 tmp = tmp << (8 * y);
-                interestedIDs[frame.frameId()].bitmap |= tmp;
-                //qDebug() << "bitmap: " << QString::number(interestedIDs[frame.frameId()].bitmap, 16);
+                fd.bitmap |= tmp;
+                //qDebug() << "bitmap: " << QString::number(fd.bitmap, 16);
             }            
             if (msg)
             {
@@ -189,9 +190,8 @@ void FileComparatorWindow::calculateDetails()
                             QString sigVal;
                             if (sig->processAsText(frame, sigVal, false))
                             {
-                                QList<QString> tempList = interestedIDs[frame.frameId()].signalInstances[sig->name];
+                                QList<QString> &tempList = fd.signalInstances[sig->name];
                                 if (!tempList.contains(sigVal)) tempList.append(sigVal);
-                                interestedIDs[frame.frameId()].signalInstances[sig->name] = tempList;
                             }
                         }
                     }
@@ -260,13 +260,14 @@ void FileComparatorWindow::calculateDetails()
 
         if (referenceIDs.contains(frame.frameId())) //if we saw this ID before then add to the QList in there
         {
+            FrameData &fd = referenceIDs[frame.frameId()];
             for (int y = 0; y < dataLen; y++)
             {
-                referenceIDs[frame.frameId()].values[y][data[y]]++;
+                fd.values[y][data[y]]++;
                 tmp = data[y];
                 tmp = tmp << (8 * y);
-                referenceIDs[frame.frameId()].bitmap |= tmp;
-                //qDebug() << "bitmap: " << QString::number(referenceIDs[frame.frameId()].bitmap, 16);
+                fd.bitmap |= tmp;
+                //qDebug() << "bitmap: " << QString::number(fd.bitmap, 16);
             }
             if (msg)
             {
@@ -281,9 +282,8 @@ void FileComparatorWindow::calculateDetails()
                             QString sigVal;
                             if (sig->processAsText(frame, sigVal, false))
                             {
-                                QList<QString> tempList = referenceIDs[frame.frameId()].signalInstances[sig->name];
+                                QList<QString> &tempList = fd.signalInstances[sig->name];
                                 if (!tempList.contains(sigVal)) tempList.append(sigVal);
-                                referenceIDs[frame.frameId()].signalInstances[sig->name] = tempList;
                             }
                         }
                     }
