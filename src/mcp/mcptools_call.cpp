@@ -231,7 +231,6 @@ void MCPServer::handleToolsCall(const QJsonObject &request, QJsonObject &respons
                 }
                 if (MainWindow::getReference()->getFlowViewWindow()) {
                      QJsonObject obj;
-                     obj["selected_id"] = QString::number(MainWindow::getReference()->getFlowViewWindow()->getSelectedId(), 16).toUpper();
                      obj["frame_count"] = MainWindow::getReference()->getFlowViewWindow()->getFrameCount();
                      QJsonArray triggers;
                      for (int i=0; i<8; i++) {
