@@ -65,6 +65,80 @@ StudioHost::StudioHost(
     layout->addWidget(quickWidget_);
 }
 
+QStringList StudioHost::demoScenarioNames() const
+{
+    return {
+        QStringLiteral("Default (Multi-State)"),
+        QStringLiteral("Static Value"),
+        QStringLiteral("Sequential Counter"),
+        QStringLiteral("Empty / Unmatched ID")
+    };
+}
+
+bool StudioHost::loadDemoScenario(int scenarioIndex)
+{
+    constexpr quint32 demoCanId = 0x321;
+
+    stateExplorerFrames_.clear();
+    hasSnapshotKey_ = false;
+
+    switch (scenarioIndex)
+    {
+    case 0:
+        stateExplorerFrames_.append(demoFrame(demoCanId, 0));
+        stateExplorerFrames_.append(demoFrame(demoCanId, 0));
+        stateExplorerFrames_.append(demoFrame(demoCanId, 1));
+        stateExplorerFrames_.append(demoFrame(demoCanId, 1));
+        stateExplorerFrames_.append(demoFrame(demoCanId, 2));
+        stateExplorerFrames_.append(demoFrame(demoCanId, 2));
+        stateExplorerFrames_.append(demoFrame(demoCanId, 1));
+        stateExplorerFrames_.append(demoFrame(demoCanId, 1));
+        stateExplorerFrames_.append(demoFrame(demoCanId, 0));
+        break;
+
+    case 1:
+        stateExplorerFrames_.append(demoFrame(demoCanId, 5));
+        stateExplorerFrames_.append(demoFrame(demoCanId, 5));
+        stateExplorerFrames_.append(demoFrame(demoCanId, 5));
+        stateExplorerFrames_.append(demoFrame(demoCanId, 5));
+        stateExplorerFrames_.append(demoFrame(demoCanId, 5));
+        break;
+
+    case 2:
+        for (quint8 value = 0; value <= 7; ++value)
+        {
+            stateExplorerFrames_.append(demoFrame(demoCanId, value));
+        }
+        break;
+
+    case 3:
+        break;
+
+    default:
+        return false;
+    }
+
+    stateExplorerPresentation_->setDeterministicDemoSource();
+
+    if (hasCandidate_ && currentCandidate_.isValid())
+    {
+        stateExplorerPresentation_->setEvidence(
+            stateExplorerFrames_,
+            stateExplorerConfig(currentCandidate_));
+    }
+    else
+    {
+        analyzeStateExplorerCandidate(
+            demoCanId,
+            0,
+            8,
+            true,
+            false);
+    }
+
+    return true;
+}
+
 bool StudioHost::analyzeStateExplorerCandidate(quint32 canId,
                                                int startBit,
                                                int bitLength,
@@ -80,6 +154,9 @@ bool StudioHost::analyzeStateExplorerCandidate(quint32 canId,
 
     if (!candidate.isValid())
         return false;
+
+    currentCandidate_ = candidate;
+    hasCandidate_ = true;
 
     stateExplorerPresentation_->setEvidence(
         stateExplorerFrames_,
@@ -111,27 +188,7 @@ CandidateAnalysis::Config StudioHost::stateExplorerConfig(
 
 void StudioHost::loadStateExplorerDemo()
 {
-    constexpr quint32 demoCanId = 0x321;
-
-    stateExplorerFrames_.clear();
-    stateExplorerFrames_.append(demoFrame(demoCanId, 0));
-    stateExplorerFrames_.append(demoFrame(demoCanId, 0));
-    stateExplorerFrames_.append(demoFrame(demoCanId, 1));
-    stateExplorerFrames_.append(demoFrame(demoCanId, 1));
-    stateExplorerFrames_.append(demoFrame(demoCanId, 2));
-    stateExplorerFrames_.append(demoFrame(demoCanId, 2));
-    stateExplorerFrames_.append(demoFrame(demoCanId, 1));
-    stateExplorerFrames_.append(demoFrame(demoCanId, 1));
-    stateExplorerFrames_.append(demoFrame(demoCanId, 0));
-
-    stateExplorerPresentation_->setDeterministicDemoSource();
-
-    analyzeStateExplorerCandidate(
-        demoCanId,
-        0,
-        8,
-        true,
-        false);
+    loadDemoScenario(0);
 }
 
 void StudioHost::openTrafficWorkspace()

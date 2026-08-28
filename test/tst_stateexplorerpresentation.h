@@ -26,6 +26,9 @@ private slots:
     void seedsCandidateFromSelectionContextBitRange();
     void fallbacksToDefaultBitfieldWhenContextLacksBitRange();
     void preservesUserModificationsAfterContextSeeding();
+    void demoScenarioStaticProducesStaticClassification();
+    void demoScenarioCounterProducesExpectedTransitionsAndRuns();
+    void demoScenarioEmptyProducesNoSamplesClassification();
 };
 
 #endif // TST_STATEEXPLORERPRESENTATION_H

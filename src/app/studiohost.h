@@ -8,6 +8,7 @@
 #include "analysis/selectioncontext.h"
 
 // Qt headers
+#include <QStringList>
 #include <QVector>
 #include <QWidget>
 
@@ -26,6 +27,8 @@ public:
         LiveChangeExplorerModel *liveChangeExplorerModel,
         QWidget *parent = nullptr);
 
+    Q_INVOKABLE QStringList demoScenarioNames() const;
+    Q_INVOKABLE bool loadDemoScenario(int scenarioIndex);
     Q_INVOKABLE bool analyzeStateExplorerCandidate(quint32 canId,
                                                    int startBit,
                                                    int bitLength,
@@ -67,6 +70,8 @@ private:
     QVector<CANFrame> stateExplorerFrames_;
     FrameAggregateKey currentSnapshotKey_;
     bool hasSnapshotKey_ = false;
+    RangeSignalSpec currentCandidate_;
+    bool hasCandidate_ = false;
 };
 
 #endif // STUDIOHOST_H

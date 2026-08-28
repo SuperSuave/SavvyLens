@@ -703,3 +703,79 @@ void TestStateExplorerPresentation::preservesUserModificationsAfterContextSeedin
     QCOMPARE(states.constFirst().toMap().value(QStringLiteral("valueText")).toString(),
              QStringLiteral("-2"));
 }
+
+void TestStateExplorerPresentation::demoScenarioStaticProducesStaticClassification()
+{
+    StateExplorerPresentation presentation;
+    constexpr quint32 canId = 0x321;
+    
+    QVector<CANFrame> frames;
+    frames.append(makeByteFrame(canId, 5));
+    frames.append(makeByteFrame(canId, 5));
+    frames.append(makeByteFrame(canId, 5));
+    frames.append(makeByteFrame(canId, 5));
+    frames.append(makeByteFrame(canId, 5));
+    
+    presentation.setEvidence(frames, makeConfig(canId));
+    
+    QCOMPARE(presentation.acceptedSampleCount(), 5);
+    QVERIFY(presentation.hasEvidence());
+    QCOMPARE(presentation.discreteClassificationText(), QStringLiteral("Static observed value"));
+    
+    const QVariantList states = presentation.observedStates();
+    QCOMPARE(states.size(), 1);
+    QCOMPARE(rowAt(states, 0).value(QStringLiteral("valueText")).toString(), QStringLiteral("5"));
+    QCOMPARE(rowAt(states, 0).value(QStringLiteral("occurrenceCount")).toInt(), 5);
+    
+    QVERIFY(presentation.observedTransitions().isEmpty());
+    
+    const QVariantList runs = presentation.observedRuns();
+    QCOMPARE(runs.size(), 1);
+    QCOMPARE(rowAt(runs, 0).value(QStringLiteral("valueText")).toString(), QStringLiteral("5"));
+    QCOMPARE(rowAt(runs, 0).value(QStringLiteral("sampleCount")).toInt(), 5);
+}
+
+void TestStateExplorerPresentation::demoScenarioCounterProducesExpectedTransitionsAndRuns()
+{
+    StateExplorerPresentation presentation;
+    constexpr quint32 canId = 0x321;
+    
+    QVector<CANFrame> frames;
+    for (quint8 value = 0; value <= 7; ++value)
+    {
+        frames.append(makeByteFrame(canId, value));
+    }
+    
+    presentation.setEvidence(frames, makeConfig(canId));
+    
+    QCOMPARE(presentation.acceptedSampleCount(), 8);
+    QCOMPARE(presentation.observedStates().size(), 8);
+    
+    const QVariantList transitions = presentation.observedTransitions();
+    QCOMPARE(transitions.size(), 7);
+    QCOMPARE(rowAt(transitions, 0).value(QStringLiteral("fromValueText")).toString(), QStringLiteral("0"));
+    QCOMPARE(rowAt(transitions, 0).value(QStringLiteral("toValueText")).toString(), QStringLiteral("1"));
+    QCOMPARE(rowAt(transitions, 6).value(QStringLiteral("fromValueText")).toString(), QStringLiteral("6"));
+    QCOMPARE(rowAt(transitions, 6).value(QStringLiteral("toValueText")).toString(), QStringLiteral("7"));
+    
+    const QVariantList runs = presentation.observedRuns();
+    QCOMPARE(runs.size(), 8);
+    QCOMPARE(rowAt(runs, 0).value(QStringLiteral("valueText")).toString(), QStringLiteral("0"));
+    QCOMPARE(rowAt(runs, 0).value(QStringLiteral("sampleCount")).toInt(), 1);
+}
+
+void TestStateExplorerPresentation::demoScenarioEmptyProducesNoSamplesClassification()
+{
+    StateExplorerPresentation presentation;
+    constexpr quint32 canId = 0x321;
+    
+    QVector<CANFrame> frames; // Empty
+    
+    presentation.setEvidence(frames, makeConfig(canId));
+    
+    QCOMPARE(presentation.acceptedSampleCount(), 0);
+    QVERIFY(!presentation.hasEvidence());
+    QCOMPARE(presentation.discreteClassificationText(), QStringLiteral("No accepted samples"));
+    QCOMPARE(presentation.transitionClassificationText(), QStringLiteral("No accepted samples"));
+    QCOMPARE(presentation.temporalClassificationText(), QStringLiteral("No accepted samples"));
+}

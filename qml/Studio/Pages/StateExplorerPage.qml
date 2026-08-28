@@ -314,6 +314,99 @@ Item {
                                     border.width: 1
                                 }
                             }
+
+                            Row {
+                                visible: !root.usesLiveChangeSnapshot
+                                spacing: Theme.spacingSmall
+
+                                Text {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: "Demo scenario:"
+                                    color: Theme.textMuted
+                                    font.pixelSize: Theme.studioTextSmall
+                                }
+
+                                ComboBox {
+                                    id: demoScenarioSelector
+                                    model: studioHost.demoScenarioNames()
+                                    currentIndex: 0
+
+                                    onActivated: {
+                                        studioHost.loadDemoScenario(index)
+                                        if (root.candidateInputValid) {
+                                            root.triggerAnalysis()
+                                        }
+                                    }
+
+                                    contentItem: Text {
+                                        leftPadding: Theme.spacingSmall
+                                        rightPadding: demoScenarioSelector.indicator.width + Theme.spacingSmall
+                                        text: demoScenarioSelector.displayText
+                                        font.pixelSize: Theme.studioTextSmall
+                                        color: Theme.textPrimary
+                                        verticalAlignment: Text.AlignVCenter
+                                        elide: Text.ElideRight
+                                    }
+
+                                    indicator: Text {
+                                        x: demoScenarioSelector.width - width - Theme.spacingSmall
+                                        y: (demoScenarioSelector.height - height) / 2
+                                        text: "▼"
+                                        font.pixelSize: 8
+                                        color: demoScenarioSelector.hovered ? Theme.accent : Theme.textMuted
+                                    }
+
+                                    background: Rectangle {
+                                        implicitWidth: 200
+                                        implicitHeight: 28
+                                        radius: Theme.radiusSmall
+                                        color: demoScenarioSelector.hovered ? Theme.chromeRaised : Theme.surfaceInset
+                                        border.color: demoScenarioSelector.hovered ? Theme.accent : Theme.borderStrong
+                                        border.width: 1
+                                    }
+
+                                    popup: Popup {
+                                        y: demoScenarioSelector.height
+                                        width: demoScenarioSelector.width
+                                        implicitHeight: contentItem.implicitHeight
+                                        padding: 1
+
+                                        contentItem: ListView {
+                                            clip: true
+                                            implicitHeight: contentHeight
+                                            model: demoScenarioSelector.popup.visible ? demoScenarioSelector.delegateModel : null
+                                            currentIndex: demoScenarioSelector.highlightedIndex
+
+                                            ScrollIndicator.vertical: ScrollIndicator { }
+                                        }
+
+                                        background: Rectangle {
+                                            color: Theme.surfaceRaised
+                                            border.color: Theme.borderStrong
+                                            border.width: 1
+                                            radius: Theme.radiusSmall
+                                        }
+                                    }
+
+                                    delegate: ItemDelegate {
+                                        width: demoScenarioSelector.width
+                                        height: 28
+                                        highlighted: demoScenarioSelector.highlightedIndex === index
+
+                                        contentItem: Text {
+                                            text: modelData
+                                            color: highlighted ? Theme.accent : Theme.textPrimary
+                                            font.pixelSize: Theme.studioTextSmall
+                                            verticalAlignment: Text.AlignVCenter
+                                            elide: Text.ElideRight
+                                        }
+
+                                        background: Rectangle {
+                                            color: highlighted ? Theme.hover : (hovered ? Theme.chromeRaised : Theme.transparent)
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                     Grid {
