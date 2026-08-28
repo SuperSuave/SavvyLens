@@ -2137,6 +2137,9 @@ void MainWindow::exploreLiveChangeRowInStateExplorer(int row)
         return;
     }
 
+    const SelectionContext context =
+        liveChangeExplorerModel->selectionContextForRow(row);
+
     QVector<CANFrame> snapshot;
 
     if (!analysisSession.stateExplorerSnapshot(
@@ -2155,7 +2158,8 @@ void MainWindow::exploreLiveChangeRowInStateExplorer(int row)
 
     studioHost_->loadStateExplorerSnapshot(
         key,
-        snapshot);
+        snapshot,
+        context);
 }
 
 void MainWindow::refreshStateExplorerSnapshot(const FrameAggregateKey &key)

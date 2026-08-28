@@ -162,7 +162,8 @@ bool StudioHost::retakeStateExplorerSnapshot()
 
 void StudioHost::loadStateExplorerSnapshot(
     const FrameAggregateKey &key,
-    const QVector<CANFrame> &frames)
+    const QVector<CANFrame> &frames,
+    const SelectionContext &context)
 {
     currentSnapshotKey_ = key;
     hasSnapshotKey_ = true;
@@ -180,8 +181,12 @@ void StudioHost::loadStateExplorerSnapshot(
 
     openWorkspace(QStringLiteral("explore"));
 
-    if (quickWidget_ != nullptr &&
-        quickWidget_->rootObject() != nullptr)
+    if (context.bitRange().isValid() || context.hasSingleCanId() || !context.canIds().isEmpty())
+    {
+        seedStateExplorerCandidateFromContext(context);
+    }
+    else if (quickWidget_ != nullptr &&
+             quickWidget_->rootObject() != nullptr)
     {
         QMetaObject::invokeMethod(
             quickWidget_->rootObject(),
@@ -192,6 +197,57 @@ void StudioHost::loadStateExplorerSnapshot(
                     .toUpper()
                     .replace(0, 2, QStringLiteral("0x")))));
     }
+}
+
+void StudioHost::seedStateExplorerCandidateFromContext(
+    const SelectionContext &context)
+{
+    if (quickWidget_ == nullptr ||
+        quickWidget_->rootObject() == nullptr)
+    {
+        return;
+    }
+
+    quint32 frameId = 0;
+    if (context.hasSingleCanId())
+    {
+        frameId = context.canId();
+    }
+    else if (!context.canIds().isEmpty())
+    {
+        frameId = *context.canIds().constBegin();
+    }
+    else if (hasSnapshotKey_)
+    {
+        frameId = currentSnapshotKey_.frameId;
+    }
+
+    const QString canIdText = QStringLiteral("0x%1")
+                                  .arg(frameId, 3, 16, QLatin1Char('0'))
+                                  .toUpper()
+                                  .replace(0, 2, QStringLiteral("0x"));
+
+    int startBit = 0;
+    int bitLength = 8;
+    bool isLittleEndian = true;
+    bool isSigned = false;
+
+    if (context.bitRange().isValid())
+    {
+        startBit = context.bitRange().startBit;
+        bitLength = context.bitRange().bitLength;
+    }
+
+    openWorkspace(QStringLiteral("explore"));
+
+    QMetaObject::invokeMethod(
+        quickWidget_->rootObject(),
+        "seedStateExplorerCandidateWithSpec",
+        Q_ARG(QVariant, QVariant::fromValue(canIdText)),
+        Q_ARG(QVariant, QVariant::fromValue(startBit)),
+        Q_ARG(QVariant, QVariant::fromValue(bitLength)),
+        Q_ARG(QVariant, QVariant::fromValue(isLittleEndian)),
+        Q_ARG(QVariant, QVariant::fromValue(isSigned)));
 }
 
 void StudioHost::openWorkspace(const QString &workspaceId)

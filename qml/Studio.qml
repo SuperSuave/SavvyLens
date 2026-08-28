@@ -115,6 +115,21 @@ Rectangle {
         }
     }
 
+    function seedStateExplorerCandidateWithSpec(canIdText, startBit, bitLength, isLittleEndian, isSigned) {
+        openWorkspace("explore")
+
+        for (var index = 0; index < workspaceStack.count; ++index) {
+            var item = workspaceStack.itemAt(index)
+
+            if (item
+                    && item.item
+                    && item.item.seedCandidateWithSpec) {
+                item.item.seedCandidateWithSpec(canIdText, startBit, bitLength, isLittleEndian, isSigned)
+                return
+            }
+        }
+    }
+
     StudioTopBar {
         id: topBar
 

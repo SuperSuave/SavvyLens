@@ -23,6 +23,9 @@ private slots:
     void preservesCandidateParametersAcrossSnapshotRefetches();
     void rangeSummarySurfacesMetricsAndStringFormatting();
     void rangeSummaryHandlesZeroSampleEvidenceSafely();
+    void seedsCandidateFromSelectionContextBitRange();
+    void fallbacksToDefaultBitfieldWhenContextLacksBitRange();
+    void preservesUserModificationsAfterContextSeeding();
 };
 
 #endif // TST_STATEEXPLORERPRESENTATION_H

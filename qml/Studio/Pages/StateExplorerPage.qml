@@ -71,22 +71,45 @@ Item {
         return fieldValueValid ? Theme.borderStrong : Theme.warningBorder
     }
 
-    function seedCandidate(canIdText) {
-        var newCanId = parseCanId(canIdText)
-        var currentCanId = parsedCanId
+    function triggerAnalysis() {
+        analysisRequestError = ""
 
-        if (newCanId >= 0 && currentCanId === newCanId) {
-            canIdField.text = canIdText
-            analysisRequestError = ""
-            return
+        if (!candidateInputValid) {
+            return false
         }
 
+        var accepted =
+                studioHost.analyzeStateExplorerCandidate(
+                    parsedCanId,
+                    parsedStartBit,
+                    parsedBitLength,
+                    littleEndian,
+                    signedValue)
+
+        if (!accepted) {
+            analysisRequestError =
+                    "Candidate layout was rejected. Evidence was not refreshed."
+            return false
+        }
+
+        return true
+    }
+
+    function seedCandidate(canIdText, startBit, bitLength, isLittleEndian, isSigned) {
         canIdField.text = canIdText
-        startBitField.text = "0"
-        bitLengthField.text = "8"
-        littleEndian = true
-        signedValue = false
+        startBitField.text = (startBit !== undefined && startBit !== null && startBit >= 0) ? startBit.toString() : "0"
+        bitLengthField.text = (bitLength !== undefined && bitLength !== null && bitLength > 0) ? bitLength.toString() : "8"
+        littleEndian = (isLittleEndian !== undefined && isLittleEndian !== null) ? isLittleEndian : true
+        signedValue = (isSigned !== undefined && isSigned !== null) ? isSigned : false
         analysisRequestError = ""
+
+        if (candidateInputValid) {
+            triggerAnalysis()
+        }
+    }
+
+    function seedCandidateWithSpec(canIdText, startBit, bitLength, isLittleEndian, isSigned) {
+        seedCandidate(canIdText, startBit, bitLength, isLittleEndian, isSigned)
     }
 
     function inputBackground(fieldValueValid) {
@@ -620,20 +643,7 @@ Item {
                                             36)
 
                         onClicked: {
-                            root.analysisRequestError = ""
-
-                            var accepted =
-                                    studioHost.analyzeStateExplorerCandidate(
-                                        root.parsedCanId,
-                                        root.parsedStartBit,
-                                        root.parsedBitLength,
-                                        root.littleEndian,
-                                        root.signedValue)
-
-                            if (!accepted) {
-                                root.analysisRequestError =
-                                        "Candidate layout was rejected. Evidence was not refreshed."
-                            }
+                            root.triggerAnalysis()
                         }
 
                         contentItem: Text {

@@ -5,6 +5,7 @@
 #include "analysis/candidateanalysis.h"
 #include "analysis/frameaggregatestore.h"
 #include "analysis/rangestatistics.h"
+#include "analysis/selectioncontext.h"
 
 // Qt headers
 #include <QVector>
@@ -36,7 +37,10 @@ public:
 
     void loadStateExplorerSnapshot(
         const FrameAggregateKey &key,
-        const QVector<CANFrame> &frames);
+        const QVector<CANFrame> &frames,
+        const SelectionContext &context = SelectionContext());
+    void seedStateExplorerCandidateFromContext(
+        const SelectionContext &context);
 
 public slots:
     void closeStudio();

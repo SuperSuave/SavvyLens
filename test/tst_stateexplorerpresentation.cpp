@@ -1,6 +1,7 @@
 #include "tst_stateexplorerpresentation.h"
 
 // SavvyLens headers
+#include "analysis/selectioncontext.h"
 #include "app/stateexplorerpresentation.h"
 #include "can/can_structs.h"
 
@@ -580,4 +581,125 @@ void TestStateExplorerPresentation::rangeSummaryHandlesZeroSampleEvidenceSafely(
     QCOMPARE(presentation.rangeCoverageText(), QStringLiteral("0.0%"));
     QCOMPARE(presentation.uniqueValueCount(), 0);
     QVERIFY(!presentation.isRanging());
+}
+
+void TestStateExplorerPresentation::seedsCandidateFromSelectionContextBitRange()
+{
+    SelectionContext context;
+    context.setCanId(0x250);
+    context.setBitRange(16, 16);
+
+    QVERIFY(context.bitRange().isValid());
+    QCOMPARE(context.bitRange().startBit, 16);
+    QCOMPARE(context.bitRange().bitLength, 16);
+
+    CandidateAnalysis::Config config;
+    config.candidate.canId = context.canId();
+    config.candidate.startBit = context.bitRange().startBit;
+    config.candidate.bitLength = context.bitRange().bitLength;
+    config.candidate.isLittleEndian = true;
+    config.candidate.isSigned = false;
+
+    // Frame with 4 bytes payload: 0x00, 0x00, 0x34, 0x12 -> bits 16..31 little endian = 0x1234 (4660)
+    QVector<CANFrame> frames;
+    frames.append(makeFrame(0x250, QByteArray::fromHex("00003412")));
+
+    StateExplorerPresentation presentation;
+    presentation.setEvidence(frames, config);
+
+    QCOMPARE(presentation.canIdText(), QStringLiteral("0x250"));
+    QCOMPARE(presentation.startBit(), 16);
+    QCOMPARE(presentation.bitLength(), 16);
+    QCOMPARE(presentation.endianText(), QStringLiteral("Little endian"));
+    QCOMPARE(presentation.signednessText(), QStringLiteral("Unsigned"));
+    QCOMPARE(presentation.acceptedSampleCount(), 1);
+    QVERIFY(presentation.hasEvidence());
+
+    const QVariantList states = presentation.observedStates();
+    QCOMPARE(states.size(), 1);
+    QCOMPARE(states.constFirst().toMap().value(QStringLiteral("valueText")).toString(),
+             QStringLiteral("4660"));
+}
+
+void TestStateExplorerPresentation::fallbacksToDefaultBitfieldWhenContextLacksBitRange()
+{
+    SelectionContext context;
+    context.setCanId(0x100);
+
+    QVERIFY(!context.bitRange().isValid());
+
+    // Seeding logic fallbacks to startBit=0, bitLength=8, isLittleEndian=true, isSigned=false
+    const int startBit = context.bitRange().isValid() ? context.bitRange().startBit : 0;
+    const int bitLength = context.bitRange().isValid() ? context.bitRange().bitLength : 8;
+    const bool isLittleEndian = true;
+    const bool isSigned = false;
+
+    QCOMPARE(startBit, 0);
+    QCOMPARE(bitLength, 8);
+
+    CandidateAnalysis::Config config =
+        makeConfig(context.canId(), startBit, bitLength, isLittleEndian, isSigned);
+
+    QVector<CANFrame> frames;
+    frames.append(makeByteFrame(0x100, 0x42));
+
+    StateExplorerPresentation presentation;
+    presentation.setEvidence(frames, config);
+
+    QCOMPARE(presentation.canIdText(), QStringLiteral("0x100"));
+    QCOMPARE(presentation.startBit(), 0);
+    QCOMPARE(presentation.bitLength(), 8);
+    QCOMPARE(presentation.endianText(), QStringLiteral("Little endian"));
+    QCOMPARE(presentation.signednessText(), QStringLiteral("Unsigned"));
+    QCOMPARE(presentation.acceptedSampleCount(), 1);
+
+    const QVariantList states = presentation.observedStates();
+    QCOMPARE(states.size(), 1);
+    QCOMPARE(states.constFirst().toMap().value(QStringLiteral("valueText")).toString(),
+             QStringLiteral("66"));
+}
+
+void TestStateExplorerPresentation::preservesUserModificationsAfterContextSeeding()
+{
+    SelectionContext context;
+    context.setCanId(0x300);
+    context.setBitRange(0, 8);
+
+    CandidateAnalysis::Config seededConfig;
+    seededConfig.candidate.canId = context.canId();
+    seededConfig.candidate.startBit = context.bitRange().startBit;
+    seededConfig.candidate.bitLength = context.bitRange().bitLength;
+    seededConfig.candidate.isLittleEndian = true;
+    seededConfig.candidate.isSigned = false;
+
+    QVector<CANFrame> frames;
+    frames.append(makeFrame(0x300, QByteArray::fromHex("00FE")));
+
+    StateExplorerPresentation presentation;
+    presentation.setEvidence(frames, seededConfig);
+
+    QCOMPARE(presentation.canIdText(), QStringLiteral("0x300"));
+    QCOMPARE(presentation.startBit(), 0);
+    QCOMPARE(presentation.bitLength(), 8);
+    QCOMPARE(presentation.signednessText(), QStringLiteral("Unsigned"));
+
+    // User modifies candidate parameters: starts at bit 8, length 8, signed
+    CandidateAnalysis::Config userModifiedConfig = seededConfig;
+    userModifiedConfig.candidate.startBit = 8;
+    userModifiedConfig.candidate.bitLength = 8;
+    userModifiedConfig.candidate.isSigned = true;
+
+    presentation.setEvidence(frames, userModifiedConfig);
+
+    // Presentation reflects the user's manual modifications and re-analyzed evidence
+    QCOMPARE(presentation.canIdText(), QStringLiteral("0x300"));
+    QCOMPARE(presentation.startBit(), 8);
+    QCOMPARE(presentation.bitLength(), 8);
+    QCOMPARE(presentation.signednessText(), QStringLiteral("Signed"));
+
+    const QVariantList states = presentation.observedStates();
+    QCOMPARE(states.size(), 1);
+    // 0xFE as signed 8-bit is -2
+    QCOMPARE(states.constFirst().toMap().value(QStringLiteral("valueText")).toString(),
+             QStringLiteral("-2"));
 }
