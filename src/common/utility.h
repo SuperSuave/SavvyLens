@@ -415,6 +415,24 @@ public:
         const quint32 idx = hashString(s) % static_cast<quint32>(kRowPalette.size());
         return QColor(kRowPalette[idx]);
     }
+
+    // Returns a cached QString for the bus number to avoid temporary string allocations in UI loops.
+    static QString getBusName(int busNum)
+    {
+        static const QVector<QString> cachedNames = []() {
+            QVector<QString> list;
+            list.reserve(32);
+            for (int i = 0; i < 32; ++i) {
+                list.append(QString::number(i));
+            }
+            return list;
+        }();
+
+        if (busNum >= 0 && busNum < cachedNames.size()) {
+            return cachedNames[busNum];
+        }
+        return QString::number(busNum);
+    }
 };
 
 #endif // UTILITY_H

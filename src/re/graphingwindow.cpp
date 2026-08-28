@@ -2,8 +2,10 @@
 #include "ui_graphingwindow.h"
 
 // SavvyLens headers
+#include "analysis/selectioncontext.h"
 #include "app/helpwindow.h"
 #include "app/mainwindow.h"
+#include "common/savvylenspaths.h"
 #include "common/utility.h"
 #include "re/newgraphdialog.h"
 
@@ -728,7 +730,7 @@ void GraphingWindow::saveGraphs()
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);
     dialog.setAcceptMode(QFileDialog::AcceptSave);
-    dialog.setDirectory(settings.value("Graphing/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value("Graphing/LoadSaveDirectory", SavvyLensPaths::exportsDir()).toString());
 
     if (dialog.exec() == QDialog::Accepted)
     {
@@ -1218,30 +1220,48 @@ void GraphingWindow::loadDefinitions()
     }
 }
 
-void GraphingWindow::showParamsDialog(int idx = -1)
+void GraphingWindow::showParamsDialog(int idx)
 {
     dbcHandler = DBCHandler::getReference();
 
     NewGraphDialog *thisDialog = new NewGraphDialog(dbcHandler, this);
 
+    const bool applyPendingCanId = idx < 0 && m_hasPendingCanId;
+
     if (idx > -1)
     {
+        // Editing an existing graph: stored parameters always win.
         thisDialog->setParams(graphParams[idx]);
     }
-    else thisDialog->clearParams();
+    else
+    {
+        // Creating a new graph: begin with current normal defaults.
+        thisDialog->clearParams();
+
+        if (applyPendingCanId)
+        {
+            GraphParams params;
+            params.ID = m_pendingCanId;
+            thisDialog->setParams(params);
+        }
+    }
 
     if (thisDialog->exec() == QDialog::Accepted)
     {
-        if (idx > -1) //if there was an existing graph then delete it
+        if (applyPendingCanId)
+            m_hasPendingCanId = false;
+
+        if (idx > -1)
         {
             graphParams.removeAt(idx);
             ui->graphingView->removeGraph(idx);
         }
-        //create a new graph with the returned parameters.
+
         GraphParams params;
         thisDialog->getParams(params);
         createGraph(params);
     }
+
     delete thisDialog;
 }
 
@@ -1733,4 +1753,12 @@ void GraphingWindow::applyPlotTheme(QCustomPlot *plot)
     }
 
     plot->replot();
+}
+
+void GraphingWindow::setSelectionContext(const SelectionContext &context)
+{
+    m_hasPendingCanId = context.hasSingleCanId();
+
+    if (m_hasPendingCanId)
+        m_pendingCanId = context.canId();
 }

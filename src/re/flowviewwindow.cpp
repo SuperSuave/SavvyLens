@@ -4,6 +4,7 @@
 // SavvyLens headers
 #include "app/helpwindow.h"
 #include "app/mainwindow.h"
+#include "common/savvylenspaths.h"
 #include "themes/thememanager.h"
 #include "widgets/filterutility.h"
 #include "widgets/plotting/qcpaxistickerhex.h"
@@ -183,11 +184,7 @@ FlowViewWindow::FlowViewWindow(const QVector<CANFrame> *frames, QWidget *parent)
     playbackTimer->setInterval(ui->spinPlayback->value()); //set the timer to the default value of the control
 }
 
-uint32_t FlowViewWindow::getSelectedId() const
-{
-    if (frameCache.count() > 0) return frameCache[0].frameId();
-    return 0;
-}
+
 
 int FlowViewWindow::getFrameCount() const
 {
@@ -441,7 +438,7 @@ void FlowViewWindow::saveFileGraph()
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);
     dialog.setAcceptMode(QFileDialog::AcceptSave);
-    dialog.setDirectory(settings.value("FlowView/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value("FlowView/LoadSaveDirectory", SavvyLensPaths::exportsDir()).toString());
 
     if (dialog.exec() == QDialog::Accepted)
     {
