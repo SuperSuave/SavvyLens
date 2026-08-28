@@ -32,6 +32,8 @@ StudioHost::StudioHost(
     QWidget *parent)
     : QWidget(parent, Qt::Window)
 {
+    qRegisterMetaType<SelectionContext>("SelectionContext");
+
     setWindowTitle(tr("SavvyLens Studio"));
     resize(1800, 1075);
     setMinimumSize(1280, 760);
@@ -215,6 +217,54 @@ bool StudioHost::retakeStateExplorerSnapshot()
 
     emit refreshStateExplorerSnapshotRequested(currentSnapshotKey_);
     return true;
+}
+
+void StudioHost::openFrameInfoForStateExplorerContext(
+    const SelectionContext &context)
+{
+    emit openFrameInfoRequested(context);
+}
+
+void StudioHost::openGraphingForStateExplorerContext(
+    const SelectionContext &context)
+{
+    emit openGraphingRequested(context);
+}
+
+void StudioHost::openFrameInfoForState(int stateIndex)
+{
+    if (stateExplorerPresentation_ != nullptr)
+    {
+        openFrameInfoForStateExplorerContext(
+            stateExplorerPresentation_->selectionContextForState(stateIndex));
+    }
+}
+
+void StudioHost::openGraphingForState(int stateIndex)
+{
+    if (stateExplorerPresentation_ != nullptr)
+    {
+        openGraphingForStateExplorerContext(
+            stateExplorerPresentation_->selectionContextForState(stateIndex));
+    }
+}
+
+void StudioHost::openFrameInfoForTransition(int transitionIndex)
+{
+    if (stateExplorerPresentation_ != nullptr)
+    {
+        openFrameInfoForStateExplorerContext(
+            stateExplorerPresentation_->selectionContextForTransition(transitionIndex));
+    }
+}
+
+void StudioHost::openGraphingForTransition(int transitionIndex)
+{
+    if (stateExplorerPresentation_ != nullptr)
+    {
+        openGraphingForStateExplorerContext(
+            stateExplorerPresentation_->selectionContextForTransition(transitionIndex));
+    }
 }
 
 void StudioHost::loadStateExplorerSnapshot(

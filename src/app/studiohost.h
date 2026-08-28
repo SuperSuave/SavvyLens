@@ -37,6 +37,14 @@ public:
     Q_INVOKABLE void openTrafficWorkspace();
     Q_INVOKABLE void exploreLiveChangeRowInStateExplorer(int row);
     Q_INVOKABLE bool retakeStateExplorerSnapshot();
+    Q_INVOKABLE void openFrameInfoForStateExplorerContext(
+        const SelectionContext &context);
+    Q_INVOKABLE void openGraphingForStateExplorerContext(
+        const SelectionContext &context);
+    Q_INVOKABLE void openFrameInfoForState(int stateIndex);
+    Q_INVOKABLE void openGraphingForState(int stateIndex);
+    Q_INVOKABLE void openFrameInfoForTransition(int transitionIndex);
+    Q_INVOKABLE void openGraphingForTransition(int transitionIndex);
 
     void loadStateExplorerSnapshot(
         const FrameAggregateKey &key,
@@ -51,6 +59,8 @@ public slots:
 signals:
     void exploreLiveChangeRowRequested(int row);
     void refreshStateExplorerSnapshotRequested(const FrameAggregateKey &key);
+    void openFrameInfoRequested(const SelectionContext &context);
+    void openGraphingRequested(const SelectionContext &context);
     void studioClosed();
 
 protected:

@@ -1,6 +1,7 @@
 #ifndef SELECTIONCONTEXT_H
 #define SELECTIONCONTEXT_H
 
+#include <QMetaType>
 #include <QSet>
 #include <QString>
 #include <QtGlobal>
@@ -74,5 +75,7 @@ private:
     TimeRange m_timeRange;
     QString m_signalId;
 };
+
+Q_DECLARE_METATYPE(SelectionContext)
 
 #endif // SELECTIONCONTEXT_H

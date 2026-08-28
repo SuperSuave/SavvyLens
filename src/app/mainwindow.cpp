@@ -141,6 +141,7 @@ connect(
     qRegisterMetaTypeStreamOperators<QVector<QString>>();
     qRegisterMetaTypeStreamOperators<QVector<int>>();
 #endif
+    qRegisterMetaType<SelectionContext>("SelectionContext");
 
     useHex = true;
     useColorsByCanId = false;
@@ -2202,6 +2203,25 @@ void MainWindow::showStudio()
             &StudioHost::refreshStateExplorerSnapshotRequested,
             this,
             &MainWindow::refreshStateExplorerSnapshot);
+
+        connect(
+            studioHost_,
+            &StudioHost::openFrameInfoRequested,
+            this,
+            [this](const SelectionContext &context)
+            {
+                showFrameDataAnalysis();
+                if (frameInfoWindow != nullptr)
+                {
+                    frameInfoWindow->setSelectionContext(context);
+                }
+            });
+
+        connect(
+            studioHost_,
+            &StudioHost::openGraphingRequested,
+            this,
+            static_cast<void (MainWindow::*)(const SelectionContext &)>(&MainWindow::showGraphingWindow));
 
         connect(
             studioHost_,

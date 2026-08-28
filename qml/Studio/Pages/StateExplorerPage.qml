@@ -1069,11 +1069,13 @@ Item {
                 truncated: root.presentation.discreteTruncated
                 emptyText: "No observed state values were retained."
                 rowModel: root.presentation.observedStates
+                sectionType: "state"
                 columns: [
                     { "label": "VALUE", "role": "valueText" },
                     { "label": "OCCURRENCES", "role": "occurrenceCount" },
                     { "label": "FIRST SAMPLE", "role": "firstSampleIndex" },
-                    { "label": "LAST SAMPLE", "role": "lastSampleIndex" }
+                    { "label": "LAST SAMPLE", "role": "lastSampleIndex" },
+                    { "label": "ACTIONS", "role": "actions" }
                 ]
             }
 
@@ -1088,12 +1090,14 @@ Item {
                             + " observed value changes; repeated equal values are not transitions."
                 emptyText: "No directed transitions were retained."
                 rowModel: root.presentation.observedTransitions
+                sectionType: "transition"
                 columns: [
                     { "label": "FROM", "role": "fromValueText" },
                     { "label": "TO", "role": "toValueText" },
                     { "label": "OCCURRENCES", "role": "occurrenceCount" },
                     { "label": "FIRST SAMPLE", "role": "firstSampleIndex" },
-                    { "label": "LAST SAMPLE", "role": "lastSampleIndex" }
+                    { "label": "LAST SAMPLE", "role": "lastSampleIndex" },
+                    { "label": "ACTIONS", "role": "actions" }
                 ]
             }
 
@@ -1129,6 +1133,7 @@ Item {
         property string emptyText: ""
         property var rowModel: []
         property var columns: []
+        property string sectionType: ""
 
         height: sectionContent.implicitHeight
                 + Theme.studioSpacingLarge * 2
@@ -1238,6 +1243,9 @@ Item {
                         color: Theme.textFaint
                         font.pixelSize: Theme.studioTextSmall
                         font.bold: true
+                        horizontalAlignment: modelData.role === "actions"
+                                             ? Text.AlignRight
+                                             : Text.AlignLeft
                         elide: Text.ElideRight
                     }
                 }
@@ -1247,15 +1255,30 @@ Item {
                 model: section.rowModel
 
                 delegate: Rectangle {
+                    id: rowDelegate
                     property var rowData: modelData
+                    property int delegateIndex: index
 
                     width: sectionContent.width
-                    height: rowGrid.implicitHeight
-                            + Theme.spacingSmall * 2
+                    height: Math.max(
+                                rowGrid.implicitHeight + Theme.spacingSmall * 2,
+                                36)
                     radius: Theme.radiusSmall
                     color: index % 2 === 0
                            ? Theme.surfaceInset
                            : Theme.surfaceRaised
+
+                    MouseArea {
+                        anchors.fill: parent
+                        acceptedButtons: Qt.RightButton
+                        visible: section.sectionType === "state" || section.sectionType === "transition"
+                        onClicked: {
+                            if (mouse.button === Qt.RightButton) {
+                                rowContextMenu.currentRowIndex = rowDelegate.delegateIndex
+                                rowContextMenu.popup()
+                            }
+                        }
+                    }
 
                     Grid {
                         id: rowGrid
@@ -1268,19 +1291,127 @@ Item {
                         Repeater {
                             model: section.columns
 
-                            delegate: Text {
+                            delegate: Item {
                                 width: (rowGrid.width
                                         - rowGrid.columnSpacing
                                         * (rowGrid.columns - 1))
                                        / rowGrid.columns
-                                text: {
-                                    var key = modelData.role
-                                    return rowData[key] === undefined ? "" : rowData[key]
+                                height: Math.max(26, cellText.implicitHeight)
+
+                                Text {
+                                    id: cellText
+                                    visible: modelData.role !== "actions"
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: {
+                                        var key = modelData.role
+                                        return rowData[key] === undefined ? "" : rowData[key]
+                                    }
+                                    color: Theme.textPrimary
+                                    font.pixelSize: Theme.studioTextBody
+                                    elide: Text.ElideRight
                                 }
-                                color: Theme.textPrimary
-                                font.pixelSize: Theme.studioTextBody
-                                elide: Text.ElideRight
+
+                                Row {
+                                    id: actionsRow
+                                    visible: modelData.role === "actions"
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    spacing: Theme.spacingSmall
+
+                                    Button {
+                                        id: graphBtn
+                                        text: section.sectionType === "transition" ? "Graph" : "Graph state"
+                                        implicitHeight: 24
+                                        leftPadding: Theme.spacingSmall
+                                        rightPadding: Theme.spacingSmall
+
+                                        onClicked: {
+                                            if (section.sectionType === "transition") {
+                                                studioHost.openGraphingForTransition(rowDelegate.delegateIndex)
+                                            } else {
+                                                studioHost.openGraphingForState(rowDelegate.delegateIndex)
+                                            }
+                                        }
+
+                                        contentItem: Text {
+                                            text: graphBtn.text
+                                            color: graphBtn.hovered ? Theme.accent : Theme.textPrimary
+                                            font.pixelSize: Theme.studioTextSmall
+                                            font.bold: true
+                                            verticalAlignment: Text.AlignVCenter
+                                            horizontalAlignment: Text.AlignHCenter
+                                        }
+
+                                        background: Rectangle {
+                                            radius: Theme.radiusSmall
+                                            color: graphBtn.hovered ? Theme.hover : Theme.surface
+                                            border.color: graphBtn.hovered ? Theme.accent : Theme.borderStrong
+                                            border.width: 1
+                                        }
+                                    }
+
+                                    Button {
+                                        id: inspectBtn
+                                        text: "Inspect frames"
+                                        implicitHeight: 24
+                                        leftPadding: Theme.spacingSmall
+                                        rightPadding: Theme.spacingSmall
+
+                                        onClicked: {
+                                            if (section.sectionType === "transition") {
+                                                studioHost.openFrameInfoForTransition(rowDelegate.delegateIndex)
+                                            } else {
+                                                studioHost.openFrameInfoForState(rowDelegate.delegateIndex)
+                                            }
+                                        }
+
+                                        contentItem: Text {
+                                            text: inspectBtn.text
+                                            color: inspectBtn.hovered ? Theme.accent : Theme.textPrimary
+                                            font.pixelSize: Theme.studioTextSmall
+                                            font.bold: true
+                                            verticalAlignment: Text.AlignVCenter
+                                            horizontalAlignment: Text.AlignHCenter
+                                        }
+
+                                        background: Rectangle {
+                                            radius: Theme.radiusSmall
+                                            color: inspectBtn.hovered ? Theme.hover : Theme.surface
+                                            border.color: inspectBtn.hovered ? Theme.accent : Theme.borderStrong
+                                            border.width: 1
+                                        }
+                                    }
+                                }
                             }
+                        }
+                    }
+                }
+            }
+
+            Menu {
+                id: rowContextMenu
+                property int currentRowIndex: -1
+
+                MenuItem {
+                    text: section.sectionType === "transition" ? "Graph transition" : "Graph state"
+                    onTriggered: {
+                        if (section.sectionType === "transition") {
+                            studioHost.openGraphingForTransition(rowContextMenu.currentRowIndex)
+                        } else {
+                            studioHost.openGraphingForState(rowContextMenu.currentRowIndex)
+                        }
+                    }
+                }
+
+                MenuItem {
+                    text: "Inspect frames"
+                    onTriggered: {
+                        if (section.sectionType === "transition") {
+                            studioHost.openFrameInfoForTransition(rowContextMenu.currentRowIndex)
+                        } else {
+                            studioHost.openFrameInfoForState(rowContextMenu.currentRowIndex)
                         }
                     }
                 }

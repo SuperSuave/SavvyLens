@@ -4,6 +4,7 @@
 // SavvyLens headers
 #include "analysis/candidateanalysis.h"
 #include "analysis/rangestatistics.h"
+#include "analysis/selectioncontext.h"
 
 // Qt headers
 #include <QObject>
@@ -61,6 +62,9 @@ class StateExplorerPresentation final : public QObject
 public:
     explicit StateExplorerPresentation(QObject *parent = nullptr);
 
+    Q_INVOKABLE SelectionContext selectionContextForState(int stateIndex) const;
+    Q_INVOKABLE SelectionContext selectionContextForTransition(int transitionIndex) const;
+
     void setEvidence(const QVector<CANFrame> &frames,
                      const CandidateAnalysis::Config &config);
     
@@ -115,6 +119,7 @@ private:
     CandidateAnalysis::Result result_;
     RangeSignalCandidate rangeStats_;
     bool hasResult_ = false;
+    int bus_ = -1;
 
     QString sourceLabel_;
     QString sourceScopeText_;

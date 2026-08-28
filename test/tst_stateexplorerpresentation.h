@@ -29,6 +29,9 @@ private slots:
     void demoScenarioStaticProducesStaticClassification();
     void demoScenarioCounterProducesExpectedTransitionsAndRuns();
     void demoScenarioEmptyProducesNoSamplesClassification();
+    void generatesSelectionContextFromDiscreteStateRows();
+    void generatesSelectionContextFromTransitionRows();
+    void handlesOutOfBoundsSelectionContextQueriesSafely();
 };
 
 #endif // TST_STATEEXPLORERPRESENTATION_H

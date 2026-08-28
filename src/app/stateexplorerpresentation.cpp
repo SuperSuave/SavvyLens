@@ -43,10 +43,69 @@ bool StateExplorerPresentation::usesLiveChangeSnapshot() const
     return usesLiveChangeSnapshot_;
 }
 
+SelectionContext StateExplorerPresentation::selectionContextForState(
+    int stateIndex) const
+{
+    SelectionContext context;
+    if (!hasResult_ || stateIndex < 0 || stateIndex >= result_.discreteState.observedValues.size())
+    {
+        return context;
+    }
+
+    const DiscreteStateObservation &observation =
+        result_.discreteState.observedValues.at(stateIndex);
+
+    context.setCanId(result_.candidate.canId);
+    if (result_.candidate.startBit >= 0 && result_.candidate.bitLength > 0)
+    {
+        context.setBitRange(result_.candidate.startBit, result_.candidate.bitLength);
+    }
+    if (bus_ >= 0)
+    {
+        context.setBus(bus_);
+    }
+    if (observation.firstSampleIndex >= 0)
+    {
+        context.setFrameIndex(observation.firstSampleIndex);
+    }
+
+    return context;
+}
+
+SelectionContext StateExplorerPresentation::selectionContextForTransition(
+    int transitionIndex) const
+{
+    SelectionContext context;
+    if (!hasResult_ || transitionIndex < 0 || transitionIndex >= result_.transitions.transitions.size())
+    {
+        return context;
+    }
+
+    const TransitionAnalysis::TransitionEvidence &transition =
+        result_.transitions.transitions.at(transitionIndex);
+
+    context.setCanId(result_.candidate.canId);
+    if (result_.candidate.startBit >= 0 && result_.candidate.bitLength > 0)
+    {
+        context.setBitRange(result_.candidate.startBit, result_.candidate.bitLength);
+    }
+    if (bus_ >= 0)
+    {
+        context.setBus(bus_);
+    }
+    if (transition.firstAcceptedSampleIndex >= 0)
+    {
+        context.setFrameIndex(transition.firstAcceptedSampleIndex);
+    }
+
+    return context;
+}
+
 void StateExplorerPresentation::setEvidence(
     const QVector<CANFrame> &frames,
     const CandidateAnalysis::Config &config)
 {
+    bus_ = !frames.isEmpty() ? frames.first().bus : -1;
     result_ = CandidateAnalysis::analyze(frames, config);
     
     RangeSignalSpec rangeSpec;

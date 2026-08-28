@@ -865,7 +865,7 @@ For an ID/frame/byte/time selection:
 
 Unify the user workflow around discovering changing IDs, ranges, discrete states, and temporal behavior.
 
-### Status: In Progress (Live Change Explorer, explicit-demo Studio State Explorer evidence MVP, explicit candidate-input slices, real-ID handoff, bounded snapshot retention & requery, and Range Summary metrics complete)
+### Status: In Progress (Live Change Explorer, explicit-demo Studio State Explorer evidence MVP, explicit candidate-input slices, real-ID handoff, bounded snapshot retention & requery, Range Summary metrics, controlled demo scenarios, and SelectionContext evidence row pivoting complete)
 
 ### Existing source scope
 
@@ -1140,17 +1140,19 @@ src/analysis/temporalanalysis.h/.cpp
 12. [x] Add a narrow explicit candidate-input seam: QML submits primitive field values, `StudioHost` constructs and validates one `RangeSignalSpec`, and valid requests refresh controlled-demo evidence through `CandidateAnalysis::analyze()`.
 13. [x] Implement snapshot re-query / re-take integration across `StudioHost`, `MainWindow`, and `StateExplorerPage.qml` with candidate parameter preservation.
 14. [x] Extract and surface numeric Range Summary metrics (min, max, span, coverage, unique count, smoothness score) in `StateExplorerPresentation` and `StateExplorerPage.qml` with QtTest coverage.
-15. [ ] Add controlled deterministic demo scenario selection to exercise static, no-sample, transition/run, and incomplete/truncated evidence states without connecting a real candidate source.
-16. [ ] Connect a formal Studio/capture candidate source without broadening `SelectionContext` prematurely.
-17. [ ] Use algorithms in legacy windows only where doing so provides verification value or supports replacement.
-18. [ ] Migrate frame-info details into inspector widgets.
-19. [ ] Retire or replace old windows when the Studio workflow provides the intended replacement.
+15. [x] Add controlled deterministic demo scenario selection to exercise static, no-sample, transition/run, and incomplete/truncated evidence states without connecting a real candidate source.
+16. [x] Expose contextual actions/menus in State Explorer to pivot from evidence rows (states/transitions) directly to Graphing and Frame Info windows using QML/C++ SelectionContext handoff.
+17. [ ] Connect a formal Studio/capture candidate source without broadening `SelectionContext` prematurely.
+18. [ ] Use algorithms in legacy windows only where doing so provides verification value or supports replacement.
+19. [ ] Migrate frame-info details into inspector widgets.
+20. [ ] Retire or replace old windows when the Studio workflow provides the intended replacement.
 
 ### Acceptance tests
 
 - [x] Identify the highest-change ID in a live capture.
 - [x] Highlight changed bits and bytes between consecutive frames.
-- [x] Preserve selection when opening graph or frame details.
+- [x] Preserve selection when opening graph or frame details, including pivoting from observed State Explorer evidence rows directly to legacy Graphing or Frame Info windows via populated SelectionContext handoff.
+- [x] Toggle multiple controlled offline demo frame scenarios (Static, Counter, Transition, Empty) in State Explorer to verify statistical outcomes immediately.
 - [x] Re-query live snapshot evidence on demand without losing user-entered candidate parameters.
 - [x] Surface min value, max value, span, coverage %, unique value count, and smoothness score in a dedicated read-only Range Summary card.
 - [ ] Select a byte and see range, state, transition, and history information.

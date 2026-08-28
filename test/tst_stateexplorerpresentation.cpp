@@ -779,3 +779,127 @@ void TestStateExplorerPresentation::demoScenarioEmptyProducesNoSamplesClassifica
     QCOMPARE(presentation.transitionClassificationText(), QStringLiteral("No accepted samples"));
     QCOMPARE(presentation.temporalClassificationText(), QStringLiteral("No accepted samples"));
 }
+
+void TestStateExplorerPresentation::generatesSelectionContextFromDiscreteStateRows()
+{
+    StateExplorerPresentation presentation;
+    constexpr quint32 canId = 0x400;
+
+    CANFrame frame1 = makeFrame(canId, QByteArray::fromHex("00123400"));
+    frame1.bus = 2;
+    CANFrame frame2 = makeFrame(canId, QByteArray::fromHex("00567800"));
+    frame2.bus = 2;
+
+    QVector<CANFrame> frames = { frame1, frame2 };
+
+    CandidateAnalysis::Config config;
+    config.candidate.canId = canId;
+    config.candidate.startBit = 8;
+    config.candidate.bitLength = 16;
+    config.candidate.isLittleEndian = true;
+    config.candidate.isSigned = false;
+
+    presentation.setEvidence(frames, config);
+
+    QCOMPARE(presentation.observedStates().size(), 2);
+
+    // Query SelectionContext for state row 0
+    const SelectionContext context0 = presentation.selectionContextForState(0);
+    QVERIFY(!context0.isEmpty());
+    QVERIFY(context0.hasSingleCanId());
+    QCOMPARE(context0.canId(), canId);
+    QVERIFY(context0.hasBus());
+    QCOMPARE(context0.bus(), 2);
+    QVERIFY(context0.bitRange().isValid());
+    QCOMPARE(context0.bitRange().startBit, 8);
+    QCOMPARE(context0.bitRange().bitLength, 16);
+    QVERIFY(context0.hasFrameIndex());
+    QCOMPARE(context0.frameIndex(), 0);
+
+    // Query SelectionContext for state row 1
+    const SelectionContext context1 = presentation.selectionContextForState(1);
+    QVERIFY(!context1.isEmpty());
+    QVERIFY(context1.hasSingleCanId());
+    QCOMPARE(context1.canId(), canId);
+    QVERIFY(context1.hasBus());
+    QCOMPARE(context1.bus(), 2);
+    QVERIFY(context1.bitRange().isValid());
+    QCOMPARE(context1.bitRange().startBit, 8);
+    QCOMPARE(context1.bitRange().bitLength, 16);
+    QVERIFY(context1.hasFrameIndex());
+    QCOMPARE(context1.frameIndex(), 1);
+}
+
+void TestStateExplorerPresentation::generatesSelectionContextFromTransitionRows()
+{
+    StateExplorerPresentation presentation;
+    constexpr quint32 canId = 0x321;
+
+    CANFrame frame1 = makeByteFrame(canId, 10);
+    frame1.bus = 1;
+    CANFrame frame2 = makeByteFrame(canId, 20);
+    frame2.bus = 1;
+
+    QVector<CANFrame> frames = { frame1, frame2 };
+
+    CandidateAnalysis::Config config;
+    config.candidate.canId = canId;
+    config.candidate.startBit = 0;
+    config.candidate.bitLength = 8;
+    config.candidate.isLittleEndian = true;
+    config.candidate.isSigned = false;
+
+    presentation.setEvidence(frames, config);
+
+    QCOMPARE(presentation.observedTransitions().size(), 1);
+
+    const SelectionContext context = presentation.selectionContextForTransition(0);
+    QVERIFY(!context.isEmpty());
+    QVERIFY(context.hasSingleCanId());
+    QCOMPARE(context.canId(), canId);
+    QVERIFY(context.hasBus());
+    QCOMPARE(context.bus(), 1);
+    QVERIFY(context.bitRange().isValid());
+    QCOMPARE(context.bitRange().startBit, 0);
+    QCOMPARE(context.bitRange().bitLength, 8);
+    QVERIFY(context.hasFrameIndex());
+    QCOMPARE(context.frameIndex(), 1);
+}
+
+void TestStateExplorerPresentation::handlesOutOfBoundsSelectionContextQueriesSafely()
+{
+    StateExplorerPresentation uninitializedPresentation;
+
+    // Uninitialized presentation safe fallback
+    const SelectionContext uninitContextState =
+        uninitializedPresentation.selectionContextForState(0);
+    QVERIFY(uninitContextState.isEmpty());
+
+    const SelectionContext uninitContextTrans =
+        uninitializedPresentation.selectionContextForTransition(0);
+    QVERIFY(uninitContextTrans.isEmpty());
+
+    // Initialized presentation with evidence
+    StateExplorerPresentation presentation;
+    constexpr quint32 canId = 0x321;
+    QVector<CANFrame> frames = { makeByteFrame(canId, 5) };
+    presentation.setEvidence(frames, makeConfig(canId));
+
+    // Negative indexes
+    const SelectionContext negStateContext =
+        presentation.selectionContextForState(-1);
+    QVERIFY(negStateContext.isEmpty());
+
+    const SelectionContext negTransContext =
+        presentation.selectionContextForTransition(-1);
+    QVERIFY(negTransContext.isEmpty());
+
+    // Out-of-bounds positive indexes
+    const SelectionContext oobStateContext =
+        presentation.selectionContextForState(100);
+    QVERIFY(oobStateContext.isEmpty());
+
+    const SelectionContext oobTransContext =
+        presentation.selectionContextForTransition(100);
+    QVERIFY(oobTransContext.isEmpty());
+}
