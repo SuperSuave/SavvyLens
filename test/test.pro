@@ -21,6 +21,7 @@ SOURCES += \
     tst_analysissession.cpp \
     tst_cancon.cpp \
     tst_candidateanalysis.cpp \
+    tst_canquerylexer.cpp \
     tst_discretestateanalysis.cpp \
     tst_frameaggregatestore.cpp \
     tst_framecomparison.cpp \
@@ -29,6 +30,7 @@ SOURCES += \
     tst_lfqueue.cpp \
     tst_payloaddiff.cpp \
     tst_rangestatistics.cpp \
+    tst_signalresolver.cpp \
     tst_stateexplorerpresentation.cpp \
     tst_temporalanalysis.cpp \
     tst_transitionanalysis.cpp \
@@ -76,6 +78,9 @@ SOURCES += \
     $$PROJECT_ROOT/src/mqtt/qmqtt_timer.cpp \
     $$PROJECT_ROOT/src/mqtt/qmqtt_websocket.cpp \
     $$PROJECT_ROOT/src/mqtt/qmqtt_websocketiodevice.cpp \
+    $$PROJECT_ROOT/src/query/canquerylexer.cpp \
+    $$PROJECT_ROOT/src/signals/signaldefinition.cpp \
+    $$PROJECT_ROOT/src/signals/signalresolver.cpp \
     $$PROJECT_ROOT/src/third_party/simplecrypt.cpp
 
 HEADERS += \
@@ -83,6 +88,7 @@ HEADERS += \
     tst_cancon.h \
     tst_cancon.h \
     tst_candidateanalysis.h \
+    tst_canquerylexer.h \
     tst_discretestateanalysis.h \
     tst_frameaggregatestore.h \
     tst_framecomparison.h \
@@ -92,6 +98,7 @@ HEADERS += \
     tst_lfqueue.h \
     tst_payloaddiff.h \
     tst_rangestatistics.h \
+    tst_signalresolver.h \
     tst_stateexplorerpresentation.h \
     tst_temporalanalysis.h \
     tst_transitionanalysis.h \
@@ -153,6 +160,10 @@ HEADERS += \
     $$PROJECT_ROOT/src/mqtt/qmqtt_websocket_p.h \
     $$PROJECT_ROOT/src/mqtt/qmqtt_websocketiodevice_p.h \
     $$PROJECT_ROOT/src/mqtt/qmqtt.h \
+    $$PROJECT_ROOT/src/query/canquerylexer.h \
+    $$PROJECT_ROOT/src/query/canquerytoken.h \
+    $$PROJECT_ROOT/src/signals/signaldefinition.h \
+    $$PROJECT_ROOT/src/signals/signalresolver.h \
     $$PROJECT_ROOT/src/third_party/simplecrypt.h
 
 target.path = .

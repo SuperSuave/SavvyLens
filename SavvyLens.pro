@@ -29,54 +29,6 @@ greaterThan(QT_MAJOR_VERSION, 5) {
     QT += openglwidgets
 }
 
-greaterThan(QT_MAJOR_VERSION, 5) {
-    QT += openglwidgets
-}
-
-greaterThan(QT_MAJOR_VERSION, 5) {
-    QT += openglwidgets
-}
-
-greaterThan(QT_MAJOR_VERSION, 5) {
-    QT += openglwidgets
-}
-
-greaterThan(QT_MAJOR_VERSION, 5) {
-    QT += openglwidgets
-}
-
-greaterThan(QT_MAJOR_VERSION, 5) {
-    QT += openglwidgets
-}
-
-greaterThan(QT_MAJOR_VERSION, 5) {
-    QT += openglwidgets
-}
-
-greaterThan(QT_MAJOR_VERSION, 5) {
-    QT += openglwidgets
-}
-
-greaterThan(QT_MAJOR_VERSION, 5) {
-    QT += openglwidgets
-}
-
-greaterThan(QT_MAJOR_VERSION, 5) {
-    QT += openglwidgets
-}
-
-greaterThan(QT_MAJOR_VERSION, 5) {
-    QT += openglwidgets
-}
-
-greaterThan(QT_MAJOR_VERSION, 5) {
-    QT += openglwidgets
-}
-
-greaterThan(QT_MAJOR_VERSION, 5) {
-    QT += openglwidgets
-}
-
 CONFIG += \
     c++17 \
     NO_UNIT_TESTS
@@ -243,6 +195,7 @@ SOURCES += \
     src/mqtt/qmqtt_websocketiodevice.cpp \
     src/playback/frameplaybackobject.cpp \
     src/playback/frameplaybackwindow.cpp \
+    src/query/canquerylexer.cpp \
     src/re/bisectwindow.cpp \
     src/re/bookmarkeventanalyzer.cpp \
     src/re/controlanalysisdialog.cpp \
@@ -271,6 +224,8 @@ SOURCES += \
     src/sender/framesenderobject.cpp \
     src/sender/framesenderwindow.cpp \
     src/sender/triggerdialog.cpp \
+    src/signals/signaldefinition.cpp \
+    src/signals/signalresolver.cpp \
     src/themes/thememanager.cpp \
     src/third_party/qcustomplot.cpp \
     src/third_party/simplecrypt.cpp \
@@ -369,6 +324,8 @@ HEADERS += \
     src/mqtt/qmqtt.h \
     src/playback/frameplaybackobject.h \
     src/playback/frameplaybackwindow.h \
+    src/query/canquerylexer.h \
+    src/query/canquerytoken.h \
     src/re/bisectwindow.h \
     src/re/bookmarkeventanalyzer.h \
     src/re/controlanalysisdialog.h \
@@ -398,6 +355,8 @@ HEADERS += \
     src/sender/framesenderobject.h \
     src/sender/framesenderwindow.h \
     src/sender/triggerdialog.h \
+    src/signals/signaldefinition.h \
+    src/signals/signalresolver.h \
     src/themes/thememanager.h \
     src/third_party/qcustomplot.h \
     src/third_party/simplecrypt.h \
