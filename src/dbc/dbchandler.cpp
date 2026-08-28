@@ -1,6 +1,7 @@
 #include "dbc/dbchandler.h"
 
 // SavvyLens headers
+#include "common/savvylenspaths.h"
 #include "common/utility.h"
 #include "connections/canconmanager.h"
 
@@ -1817,7 +1818,7 @@ void DBCHandler::saveDBCFile(int idx)
     QStringList filters;
     filters.append(QString(tr("DBC File (*.dbc)")));
 
-    dialog.setDirectory(settings.value("DBC/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value("DBC/LoadSaveDirectory", SavvyLensPaths::dbcDir()).toString());
     dialog.setFileMode(QFileDialog::AnyFile);
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);

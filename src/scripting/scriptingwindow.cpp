@@ -2,8 +2,9 @@
 #include "ui_scriptingwindow.h"
 
 // SavvyLens headers
-#include "themes/thememanager.h"
 #include "common/utility.h"
+#include "common/savvylenspaths.h"
+#include "themes/thememanager.h"
 
 // QT headers
 #include <QAction>
@@ -294,56 +295,59 @@ void ScriptingWindow::valuesTimerElapsed()
 
 void ScriptingWindow::loadNewScript()
 {
-    QString filename;
-    QFileDialog dialog;
+    QFileDialog dialog(this);
     QSettings settings;
-    ScriptContainer *container;
 
-    QStringList filters;
-    filters.append(QString(tr("Javascript File (*.js)")));
+    const QStringList filters = {
+        tr("JavaScript File (*.js)")};
 
-    dialog.setDirectory(settings.value("ScriptingWindow/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value( "ScriptingWindow/ScriptDirectory", SavvyLensPaths::templatesDir()).toString());
+
     dialog.setFileMode(QFileDialog::ExistingFile);
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);
 
-    if (dialog.exec() == QDialog::Accepted)
+    if (dialog.exec() != QDialog::Accepted)
     {
-        filename = dialog.selectedFiles()[0];
-
-        if (dialog.selectedNameFilter() == filters[0])
-        {
-            QFile scriptFile(filename);
-
-            if (scriptFile.open(QIODevice::ReadOnly))
-            {
-                const QString contents = QString::fromUtf8(scriptFile.readAll());
-                scriptFile.close();
-
-                const QString justFileName = QFileInfo(filename).fileName();
-
-                container = new ScriptContainer(this);
-                container->fileName = justFileName;
-                container->filePath = filename;
-                container->scriptText = contents;
-
-                connectScriptContainer(container);
-                scripts.append(container);
-
-                new QListWidgetItem(container->fileName, ui->listLoadedScripts);
-
-                ui->listLoadedScripts->setCurrentRow(
-                    ui->listLoadedScripts->count() - 1);
-
-                updateScriptListItem(container);
-                updateExecutionControls();
-
-                settings.setValue(
-                    "ScriptingWindow/LoadSaveDirectory",
-                    dialog.directory().path());
-            }
-        }
+        return;
     }
+
+    const QString filename = dialog.selectedFiles().constFirst();
+
+    if (dialog.selectedNameFilter() != filters.constFirst())
+    {
+        return;
+    }
+
+    QFile scriptFile(filename);
+
+    if (!scriptFile.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QMessageBox::warning(
+            this,
+            tr("Load Script"),
+            tr("Unable to open \"%1\".").arg(filename));
+        return;
+    }
+
+    ScriptContainer *container = new ScriptContainer(this);
+    container->fileName = QFileInfo(filename).fileName();
+    container->filePath = filename;
+    container->scriptText = QString::fromUtf8(scriptFile.readAll());
+
+    scriptFile.close();
+
+    connectScriptContainer(container);
+    scripts.append(container);
+
+    new QListWidgetItem(container->fileName, ui->listLoadedScripts);
+
+    ui->listLoadedScripts->setCurrentRow(ui->listLoadedScripts->count() - 1);
+
+    updateScriptListItem(container);
+    updateExecutionControls();
+
+    settings.setValue("ScriptingWindow/ScriptDirectory", dialog.directory().absolutePath());
 }
 
 void ScriptingWindow::createNewScript()
@@ -451,37 +455,63 @@ void ScriptingWindow::saveScript()
 
 void ScriptingWindow::saveAsScript()
 {
-    QString filename;
     QFileDialog dialog(this);
     QSettings settings;
 
-    QStringList filters;
-    filters.append(QString(tr("Javascript File (*.js)")));
+    const QStringList filters = {
+        tr("JavaScript File (*.js)")};
 
-    dialog.setDirectory(settings.value("ScriptingWindow/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value(
+                                    "ScriptingWindow/ScriptDirectory",
+                                    SavvyLensPaths::templatesDir())
+                            .toString());
+
     dialog.setFileMode(QFileDialog::AnyFile);
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);
     dialog.setAcceptMode(QFileDialog::AcceptSave);
+    dialog.setDefaultSuffix(QStringLiteral("js"));
 
-    if (dialog.exec() == QDialog::Accepted)
+    if (dialog.exec() != QDialog::Accepted)
     {
-        filename = dialog.selectedFiles()[0];
-        if (!filename.contains('.')) filename += ".js";
-        if (dialog.selectedNameFilter() == filters[0])
-        {
-            QFile *outFile = new QFile(filename);
+        return;
+    }
 
-            if (!outFile->open(QIODevice::WriteOnly | QIODevice::Text))
-            {
-                delete outFile;
-                return;
-            }
-            outFile->write(editor->toPlainText().toUtf8());
-            outFile->close();
-            delete outFile;
-            settings.setValue("ScriptingWindow/LoadSaveDirectory", dialog.directory().path());
-        }
+    const QString filename = dialog.selectedFiles().constFirst();
+
+    if (dialog.selectedNameFilter() != filters.constFirst())
+    {
+        return;
+    }
+
+    QFile outFile(filename);
+
+    if (!outFile.open(QIODevice::WriteOnly |
+                      QIODevice::Text |
+                      QIODevice::Truncate))
+    {
+        QMessageBox::warning(
+            this,
+            tr("Save Script"),
+            tr("Unable to save \"%1\".").arg(filename));
+        return;
+    }
+
+    const QString source = editor->toPlainText();
+    outFile.write(source.toUtf8());
+    outFile.close();
+
+    settings.setValue(
+        "ScriptingWindow/ScriptDirectory",
+        dialog.directory().absolutePath());
+
+    if (currentScript)
+    {
+        currentScript->filePath = filename;
+        currentScript->fileName = QFileInfo(filename).fileName();
+        currentScript->scriptText = source;
+
+        updateScriptListItem(currentScript);
     }
 }
 
@@ -648,41 +678,64 @@ void ScriptingWindow::clickedLogClear()
 
 void ScriptingWindow::saveLog()
 {
-    QString filename;
     QFileDialog dialog(this);
     QSettings settings;
 
-    QStringList filters;
-    filters.append(QString(tr("Log File (*.log)")));
+    const QStringList filters = {
+        tr("Log File (*.log)")};
 
-    dialog.setDirectory(settings.value("ScriptingWindow/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value(
+                                    "ScriptingWindow/LogDirectory",
+                                    SavvyLensPaths::exportsDir())
+                            .toString());
+
     dialog.setFileMode(QFileDialog::AnyFile);
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);
     dialog.setAcceptMode(QFileDialog::AcceptSave);
+    dialog.setDefaultSuffix(QStringLiteral("log"));
 
-    if (dialog.exec() == QDialog::Accepted)
+    if (dialog.exec() != QDialog::Accepted)
     {
-        filename = dialog.selectedFiles()[0];
-        if (!filename.contains('.')) filename += ".log";
-        if (dialog.selectedNameFilter() == filters[0])
-        {
-            QFile *outFile = new QFile(filename);
-
-            if (!outFile->open(QIODevice::WriteOnly | QIODevice::Text))
-            {
-                delete outFile;
-                return;
-            }
-            int c = ui->listLog ->count();
-            for (int row = 0; row < c; row++) {
-                outFile->write(ui->listLog->item(row)->data(Qt::DisplayRole).toString().toUtf8() + "\n");
-            }
-            outFile->close();
-            delete outFile;
-            settings.setValue("ScriptingWindow/LoadSaveDirectory", dialog.directory().path());
-        }
+        return;
     }
+
+    const QString filename = dialog.selectedFiles().constFirst();
+
+    if (dialog.selectedNameFilter() != filters.constFirst())
+    {
+        return;
+    }
+
+    QFile outFile(filename);
+
+    if (!outFile.open(QIODevice::WriteOnly |
+                      QIODevice::Text |
+                      QIODevice::Truncate))
+    {
+        QMessageBox::warning(
+            this,
+            tr("Save Script Log"),
+            tr("Unable to save \"%1\".").arg(filename));
+        return;
+    }
+
+    for (int row = 0; row < ui->listLog->count(); ++row)
+    {
+        outFile.write(
+            ui->listLog->item(row)
+                ->data(Qt::DisplayRole)
+                .toString()
+                .toUtf8());
+
+        outFile.write("\n");
+    }
+
+    outFile.close();
+
+    settings.setValue(
+        "ScriptingWindow/LogDirectory",
+        dialog.directory().absolutePath());
 }
 
 void ScriptingWindow::log(QString text)
@@ -1049,23 +1102,7 @@ void ScriptingWindow::navigateToRuntimeError(QListWidgetItem *item)
 
 QString ScriptingWindow::builtInTemplateDirectory() const
 {
-    const QString installedDirectory = QStandardPaths::locate(
-        QStandardPaths::GenericDataLocation,
-        QStringLiteral("SavvyLens/templates"),
-        QStandardPaths::LocateDirectory);
-
-    if (!installedDirectory.isEmpty())
-    {
-        return installedDirectory;
-    }
-
-    /*
-     * Development fallback: look beside the executable, which lets a local
-     * Debug or Release build use a manually/deployment-copied templates
-     * directory without installing the application system-wide.
-     */
-    return QDir(QCoreApplication::applicationDirPath())
-        .filePath(QStringLiteral("templates"));
+    return SavvyLensPaths::packagedTemplatesDir();
 }
 
 QList<ScriptingWindow::ScriptTemplate>
@@ -1112,10 +1149,7 @@ ScriptingWindow::availableTemplates() const
 
 QString ScriptingWindow::userTemplateDirectory() const
 {
-    const QString appDataPath = QStandardPaths::writableLocation(
-        QStandardPaths::AppDataLocation);
-
-    return QDir(appDataPath).filePath(QStringLiteral("templates"));
+    return SavvyLensPaths::templatesDir();
 }
 
 void ScriptingWindow::rebuildTemplateMenu()
