@@ -14,14 +14,52 @@ TEMPLATE = app
 QT += \
     core \
     gui \
-    printsupport \
-    qml \
-    serialbus \
-    serialport \
-    widgets \
     help \
     network \
-    opengl
+    opengl \
+    printsupport \
+    qml \
+    quick \
+    quickwidgets \
+    serialbus \
+    serialport \
+    widgets
+
+greaterThan(QT_MAJOR_VERSION, 5) {
+    QT += openglwidgets
+}
+
+greaterThan(QT_MAJOR_VERSION, 5) {
+    QT += openglwidgets
+}
+
+greaterThan(QT_MAJOR_VERSION, 5) {
+    QT += openglwidgets
+}
+
+greaterThan(QT_MAJOR_VERSION, 5) {
+    QT += openglwidgets
+}
+
+greaterThan(QT_MAJOR_VERSION, 5) {
+    QT += openglwidgets
+}
+
+greaterThan(QT_MAJOR_VERSION, 5) {
+    QT += openglwidgets
+}
+
+greaterThan(QT_MAJOR_VERSION, 5) {
+    QT += openglwidgets
+}
+
+greaterThan(QT_MAJOR_VERSION, 5) {
+    QT += openglwidgets
+}
+
+greaterThan(QT_MAJOR_VERSION, 5) {
+    QT += openglwidgets
+}
 
 greaterThan(QT_MAJOR_VERSION, 5) {
     QT += openglwidgets
@@ -101,12 +139,12 @@ unix:!macx {
     templatefiles.path = $$PREFIX/share/SavvyLens/templates
 
     INSTALLS += \
-        target \
-        shortcutfiles \
         examplefiles \
+        helpfiles \
         iconfiles \
         linuxiconfiles \
-        helpfiles \
+        shortcutfiles \
+        target \
         templatefiles
 
     DISTFILES += $$PWD/src/packaging/linux/SavvyLens.desktop
@@ -117,16 +155,34 @@ unix:!macx {
 #-------------------------------------------------
 
 SOURCES += \
+    src/analysis/analysismarker.cpp \
+    src/analysis/analysismarkerstore.cpp \
+    src/analysis/analysissession.cpp \
+    src/analysis/candidateanalysis.cpp \
+    src/analysis/discretestateanalysis.cpp \
+    src/analysis/frameaggregatestore.cpp \
+    src/analysis/framecomparison.cpp \
+    src/analysis/framehistory.cpp \
+    src/analysis/livechangeexplorermodel.cpp \
+    src/analysis/payloaddiff.cpp \
+    src/analysis/rangestatistics.cpp \
+    src/analysis/selectioncontext.cpp \
+    src/analysis/temporalanalysis.cpp \
+    src/analysis/transitionanalysis.cpp \
     src/app/helpwindow.cpp \
+    src/app/livechangeexplorerhost.cpp \
     src/app/main.cpp \
     src/app/mainsettingsdialog.cpp \
     src/app/mainwindow.cpp \
+    src/app/stateexplorerpresentation.cpp \
+    src/app/studiohost.cpp \
     src/bookmarks/bookmarkmanager.cpp \
     src/bookmarks/bookmarkmanagerdialog.cpp \
     src/bus_protocols/isotp_handler.cpp \
     src/bus_protocols/j1939_handler.cpp \
     src/bus_protocols/uds_handler.cpp \
     src/can/canfilter.cpp \
+    src/common/savvylenspaths.cpp \
     src/common/utility.cpp \
     src/connections/canbridgewindow.cpp \
     src/connections/canbus.cpp \
@@ -218,9 +274,26 @@ SOURCES += \
 
 HEADERS += \
     config.h \
+    src/analysis/analysismarker.h \
+    src/analysis/analysismarkerstore.h \
+    src/analysis/analysissession.h \
+    src/analysis/candidateanalysis.h \
+    src/analysis/discretestateanalysis.h \
+    src/analysis/frameaggregatestore.h \
+    src/analysis/framecomparison.h \
+    src/analysis/framehistory.h \
+    src/analysis/livechangeexplorermodel.h \
+    src/analysis/payloaddiff.h \
+    src/analysis/rangestatistics.h \
+    src/analysis/selectioncontext.h \
+    src/analysis/temporalanalysis.h \
+    src/analysis/transitionanalysis.h \
     src/app/helpwindow.h \
+    src/app/livechangeexplorerhost.h \
     src/app/mainsettingsdialog.h \
     src/app/mainwindow.h \
+    src/app/stateexplorerpresentation.h \
+    src/app/studiohost.h \
     src/bookmarks/bookmarkmanager.h \
     src/bookmarks/bookmarkmanagerdialog.h \
     src/bus_protocols/isotp_handler.h \
@@ -229,6 +302,7 @@ HEADERS += \
     src/bus_protocols/uds_handler.h \
     src/can/can_structs.h \
     src/can/canfilter.h \
+    src/common/savvylenspaths.h \
     src/common/utility.h \
     src/connections/canbridgewindow.h \
     src/connections/canbus.h \
@@ -368,9 +442,12 @@ FORMS += \
 # Qt resources and translations
 #-------------------------------------------------
 
+QML_IMPORT_PATH += $$PWD/qml
+
 RESOURCES += \
     icons.qrc \
-    images.qrc
+    images.qrc \
+    qml/qml.qrc
 
 TRANSLATIONS += \
     translations/SavvyLens_en.ts \
