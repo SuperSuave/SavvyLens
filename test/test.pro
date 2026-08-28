@@ -1,25 +1,85 @@
-QT += core gui serialbus widgets testlib serialbus
+QT += core gui serialbus testlib
 
 CONFIG += c++11
 
-INCLUDEPATH += ../src ../
+PROJECT_ROOT = $$clean_path($$PWD/..)
+
+INCLUDEPATH += \
+    $$PROJECT_ROOT \
+    $$PROJECT_ROOT/src
+
+DEPENDPATH += $$PROJECT_ROOT/src
 
 SOURCES += \
-    tst_lfqueue.cpp \
     main.cpp \
+    tst_analysissession.cpp \
     tst_cancon.cpp \
-    ../src/connections/canconfactory.cpp \
-    ../src/connections/canconnection.cpp \
-    ../src/connections/gvretserial.cpp \
-    ../src/connections/socketcan.cpp \
-    ../src/connections/canbus.cpp
+    tst_candidateanalysis.cpp \
+    tst_discretestateanalysis.cpp \
+    tst_frameaggregatestore.cpp \
+    tst_framecomparison.cpp \
+    tst_framehistory.cpp \
+    tst_lfqueue.cpp \
+    tst_payloaddiff.cpp \
+    tst_rangestatistics.cpp \
+    tst_stateexplorerpresentation.cpp \
+    tst_temporalanalysis.cpp \
+    tst_transitionanalysis.cpp \
+    $$PROJECT_ROOT/src/analysis/analysismarker.cpp \
+    $$PROJECT_ROOT/src/analysis/analysismarkerstore.cpp \
+    $$PROJECT_ROOT/src/analysis/analysissession.cpp \
+    $$PROJECT_ROOT/src/analysis/candidateanalysis.cpp \
+    $$PROJECT_ROOT/src/analysis/discretestateanalysis.cpp \
+    $$PROJECT_ROOT/src/analysis/frameaggregatestore.cpp \
+    $$PROJECT_ROOT/src/analysis/framecomparison.cpp \
+    $$PROJECT_ROOT/src/analysis/framehistory.cpp \
+    $$PROJECT_ROOT/src/analysis/payloaddiff.cpp \
+    $$PROJECT_ROOT/src/analysis/rangestatistics.cpp \
+    $$PROJECT_ROOT/src/analysis/selectioncontext.cpp \
+    $$PROJECT_ROOT/src/analysis/temporalanalysis.cpp \
+    $$PROJECT_ROOT/src/analysis/transitionanalysis.cpp
+    $$PROJECT_ROOT/src/app/stateexplorerpresentation.cpp \
+    $$PROJECT_ROOT/src/connections/canbus.cpp
+    $$PROJECT_ROOT/src/connections/canconfactory.cpp \
+    $$PROJECT_ROOT/src/connections/canconnection.cpp \
+    $$PROJECT_ROOT/src/connections/gvretserial.cpp \
+    $$PROJECT_ROOT/src/connections/socketcan.cpp \
 
 HEADERS += \
-    tst_lfqueue.h \
+    tst_analysissession.h \
     tst_cancon.h \
-    ../src/connections/canconconst.h \
-    ../src/connections/canconfactory.h \
-    ../src/connections/canconnection.h \
-    ../src/connections/gvretserial.h \
-    ../src/connections/socketcan.h \
-    ../src/connections/canbus.h
+    tst_candidateanalysis.h \
+    tst_discretestateanalysis.h \
+    tst_frameaggregatestore.h \
+    tst_framecomparison.h \
+    tst_framehistory.h \
+    tst_lfqueue.h \
+    tst_payloaddiff.h \
+    tst_rangestatistics.h \
+    tst_stateexplorerpresentation.h \
+    tst_temporalanalysis.h \
+    tst_transitionanalysis.h \
+    $$PROJECT_ROOT/src/analysis/analysismarker.h \
+    $$PROJECT_ROOT/src/analysis/analysismarkerstore.h \
+    $$PROJECT_ROOT/src/analysis/analysissession.h \
+    $$PROJECT_ROOT/src/analysis/candidateanalysis.h \
+    $$PROJECT_ROOT/src/analysis/discretestateanalysis.h \
+    $$PROJECT_ROOT/src/analysis/frameaggregatestore.h \
+    $$PROJECT_ROOT/src/analysis/framecomparison.h \
+    $$PROJECT_ROOT/src/analysis/framehistory.h \
+    $$PROJECT_ROOT/src/analysis/payloaddiff.h \
+    $$PROJECT_ROOT/src/analysis/rangestatistics.h \
+    $$PROJECT_ROOT/src/analysis/selectioncontext.h \
+    $$PROJECT_ROOT/src/analysis/temporalanalysis.h \
+    $$PROJECT_ROOT/src/analysis/transitionanalysis.h \
+    $$PROJECT_ROOT/src/app/stateexplorerpresentation.h \
+    $$PROJECT_ROOT/src/can/can_structs.h \
+    $$PROJECT_ROOT/src/connections/canbus.h \
+    $$PROJECT_ROOT/src/connections/canconconst.h \
+    $$PROJECT_ROOT/src/connections/canconfactory.h \
+    $$PROJECT_ROOT/src/connections/canconnection.h \
+    $$PROJECT_ROOT/src/connections/gvretserial.h \
+    $$PROJECT_ROOT/src/connections/socketcan.h
+
+target.path = .
+INSTALLS += target

@@ -1,5 +1,13 @@
-#Build directory
+# Build directories
 build/
+**/build/
+debug/
+release/
+**/debug/
+**/release/
+.qtcreator/
+**/.qtcreator/
+.qtc_clangd/
 
 # Compiled Object files
 *.slo
@@ -35,18 +43,34 @@ build/
 *.user
 SavvyLens
 
-# Generated files
+# Generated qmake makefiles and scripts
+Makefile*
+**/Makefile*
+object_script.*
+**/object_script.*
+SavvyLens_resource.rc
+*.qmake.stash
+**/.qmake.stash
+.qmake.cache
+.qmake.stash
+
+# Generated Qt files
 **/moc_*
 **/ui_*.h
 **/qrc_*.cpp
-.qtc_clangd
 SavvyLens.pro.user.*
-.qmake.stash
-Makefile
 
-# Editor files
+# Test run logs and temporary output
+test_*.txt
+**/test_*.txt
+test_out.txt
+test_output.txt
+test_results.txt
+*.log
+
+# Editor & IDE files
 *.code-workspace
 SavvyLens.pro.qtds
 .xcode
 SavvyLens.xcodeproj
-.vscode
+.vscode/
