@@ -94,7 +94,7 @@ const unsigned char *pcap_next_ng(pcap_t *p, struct pcap_pkthdr *h) {
     struct block_header { 
         unsigned int block_type;
         unsigned int block_size;
-        unsigned int interface_id;
+        unsigned int interface_id; // Required for binary offset alignment matching PCAP-NG Enhanced Packet Block layout
         unsigned int timestamp_hi;
         unsigned int timestamp_lo;
         unsigned int cap_len;
