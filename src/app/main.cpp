@@ -1,6 +1,7 @@
 #include "app/mainwindow.h"
 
 // SavvyLens headers
+#include "common/savvylenspaths.h"
 #include "mcp/mcpserver.h"
 #include "themes/thememanager.h"
 #include "utils/logger.h"
@@ -54,9 +55,15 @@ int main(int argc, char *argv[])
     a.addLibraryPath("plugins");
 
     //These things are used by QSettings to set up setting storage
-    a.setOrganizationName("EVTV");
+    a.setOrganizationName("SuaveEV");
     a.setApplicationName("SavvyLens");
-    a.setOrganizationDomain("evtv.me");
+    a.setOrganizationDomain("github.com/SuperSuave");
+
+    if (!SavvyLensPaths::initialize())
+    {
+        qWarning() << "Unable to fully initialize the SavvyLens workspace:"
+                   << SavvyLensPaths::workspaceRoot();
+    }
 
     QSettings::setDefaultFormat(QSettings::IniFormat);
     QSettings settings;

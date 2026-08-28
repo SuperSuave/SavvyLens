@@ -22,7 +22,6 @@ public:
     explicit FlowViewWindow(const QVector<CANFrame> *frames, QWidget *parent = 0);
     ~FlowViewWindow();
     void showEvent(QShowEvent*);
-    uint32_t getSelectedId() const;
     int getFrameCount() const;
     int getTriggerValue(int index) const;
     void btnBackOneClick();

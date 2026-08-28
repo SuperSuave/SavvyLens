@@ -2,6 +2,7 @@
 
 // SavvyLens headers
 #include "bookmarks/bookmarkmanager.h"
+#include "common/savvylenspaths.h"
 #include "common/utility.h"
 #include "io/formats/blfhandler.h"
 #include "io/formats/pcaplite.h"
@@ -60,7 +61,7 @@ bool FrameFileIO::saveFrameFile(QString &fileName, const QVector<CANFrame>* fram
     filters.append(QString(tr("CANalyzer Ascii Log (*.asc *.ASC)")));
     filters.append(QString(tr("CARBUS Analyzer (*.trc *.TRC)")));
 
-    dialog.setDirectory(settings.value("FileIO/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value("FileIO/LoadSaveDirectory", SavvyLensPaths::capturesDir()).toString());
     dialog.setFileMode(QFileDialog::AnyFile);
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);
@@ -605,6 +606,10 @@ bool FrameFileIO::loadVehicleSpyFile(QString filename, QVector<CANFrame> *frames
 
     if (inFile->atEnd()) foundErrors = true;
 
+    const int MAX_TOKENS = 25;
+    const char *tokStart[MAX_TOKENS];
+    int tokLen[MAX_TOKENS];
+
     while (!inFile->atEnd()) {
         lineCounter++;
         if (lineCounter > 100)
@@ -612,27 +617,64 @@ bool FrameFileIO::loadVehicleSpyFile(QString filename, QVector<CANFrame> *frames
             qApp->processEvents();
             lineCounter = 0;
         }
-        line = inFile->readLine().simplified().toUpper();
+        line = inFile->readLine();
 
-        QList<QByteArray> tokens = line.split(',');
-        if (tokens.length() > 20)
+        const char *data = line.constData();
+        int len = line.length();
+
+        while (len > 0 && (data[len - 1] == '\r' || data[len - 1] == '\n')) {
+            len--;
+        }
+
+        int tokenCount = 0;
+        int start = 0;
+        for (int i = 0; i <= len; ++i) {
+            if (i == len || data[i] == ',') {
+                if (tokenCount < MAX_TOKENS) {
+                    tokStart[tokenCount] = data + start;
+                    tokLen[tokenCount] = i - start;
+                }
+                tokenCount++;
+                start = i + 1;
+            }
+        }
+
+        if (tokenCount > 20)
         {
             thisFrame.bus = 0;
             thisFrame.setFrameType(QCanBusFrame::DataFrame);
             tempTime = now;
-            tempTime = tempTime.addMSecs(static_cast<int64_t>(tokens[1].toDouble() * 1000.0));
+            double absTime = QByteArray::fromRawData(tokStart[1], tokLen[1]).toDouble();
+            tempTime = tempTime.addMSecs(static_cast<int64_t>(absTime * 1000.0));
             thisFrame.setTimeStamp(QCanBusFrame::TimeStamp(0, static_cast<uint64_t>(tempTime.toMSecsSinceEpoch() * 1000)));
-            if (tokens[5].startsWith("T")) thisFrame.isReceived = false;
-                else thisFrame.isReceived = true;
-            thisFrame.setFrameId(static_cast<uint32_t>(tokens[9].toInt(nullptr, 16)));
-            if (tokens[11].startsWith("T")) thisFrame.setExtendedFrameFormat(true);
-                else thisFrame.setExtendedFrameFormat(false);
+
+            bool tok5StartsWithT = false;
+            for (int k = 0; k < tokLen[5]; ++k) {
+                char c = tokStart[5][k];
+                if (c == ' ' || c == '\t') continue;
+                if (c == 'T' || c == 't') tok5StartsWithT = true;
+                break;
+            }
+            thisFrame.isReceived = !tok5StartsWithT;
+
+            thisFrame.setFrameId(static_cast<uint32_t>(QByteArray::fromRawData(tokStart[9], tokLen[9]).toInt(nullptr, 16)));
+
+            bool tok11StartsWithT = false;
+            for (int k = 0; k < tokLen[11]; ++k) {
+                char c = tokStart[11][k];
+                if (c == ' ' || c == '\t') continue;
+                if (c == 'T' || c == 't') tok11StartsWithT = true;
+                break;
+            }
+            thisFrame.setExtendedFrameFormat(tok11StartsWithT);
+
             QByteArray bytes;
             for (int i = 0; i < 8; i++)
             {
-                if (tokens[12 + i].length() > 0)
+                int tokIdx = 12 + i;
+                if (tokLen[tokIdx] > 0)
                 {
-                    bytes.append(static_cast<char>(tokens[12 + i].toInt(nullptr, 16)));
+                    bytes.append(static_cast<char>(QByteArray::fromRawData(tokStart[tokIdx], tokLen[tokIdx]).toInt(nullptr, 16)));
                 }
                 else break;
             }
@@ -875,6 +917,8 @@ bool FrameFileIO::loadCARBUSAnalyzerFile(QString filename, QVector<CANFrame>* fr
         version = match.captured("version").toInt();
     }
 
+    QRegularExpression spaceRe("\\s+");
+
     while (!txt.atEnd()) {
         lineCounter++;
         if (lineCounter > 100)
@@ -885,7 +929,7 @@ bool FrameFileIO::loadCARBUSAnalyzerFile(QString filename, QVector<CANFrame>* fr
         line = txt.readLine().simplified();
         if (line.length() > 2)
         {
-            QList<QString> tokens = line.split(QRegularExpression("\\s+"));
+            QList<QString> tokens = line.split(spaceRe);
             if (tokens.length() > 3)
             {
                 QString time = tokens[0].replace(",", "");

@@ -37,7 +37,7 @@ FramePlaybackWindow::FramePlaybackWindow(const QVector<CANFrame> *frames, QWidge
     setWindowFlags(Qt::Window);
 
     int numBuses = CANConManager::getInstance()->getNumBuses();
-    for (int n = 0; n < numBuses; n++) ui->comboCANBus->addItem(QString::number(n));
+    for (int n = 0; n < numBuses; n++) ui->comboCANBus->addItem(Utility::getBusName(n));
     ui->comboCANBus->addItem(tr("All"));
     ui->comboCANBus->addItem(tr("From File"));
     ui->comboCANBus->setCurrentIndex(0);
@@ -114,7 +114,7 @@ void FramePlaybackWindow::showEvent(QShowEvent *)
     //any time the view is shown we'll go see how many buses are registered and redo the combobox to match
     int numBuses = CANConManager::getInstance()->getNumBuses();
     ui->comboCANBus->clear();
-    for (int n = 0; n < numBuses; n++) ui->comboCANBus->addItem(QString::number(n));
+    for (int n = 0; n < numBuses; n++) ui->comboCANBus->addItem(Utility::getBusName(n));
     ui->comboCANBus->addItem(tr("All"));
     ui->comboCANBus->addItem(tr("From File"));
     ui->comboCANBus->setCurrentIndex(0);
@@ -360,56 +360,98 @@ void FramePlaybackWindow::calculateWhichBus()
 
 void FramePlaybackWindow::EndOfFrameCache()
 {
+    if (seqItems.isEmpty())
+    {
+        isPlaying = false;
+        wantPlaying = false;
+        haveIncomingTraffic = false;
+        currentSeqNum = -1;
+        currentSeqItem = nullptr;
+        currentPosition = 0;
+
+        playbackObject.setSequenceObject(nullptr);
+        updateFrameLabel();
+
+        return;
+    }
+
     if (forward)
     {
-        currentSeqNum++; //go forward in the sequence
-        if (currentSeqNum == seqItems.count()) //are we at the end of the sequence?
-        {
-            //reset the loop figures for each sequence entry
-            for (int i = 0; i < seqItems.count(); i++) seqItems[i].currentLoopCount = 0;
-            currentSeqNum = 0;
-            if (ui->cbLoop->isChecked()) //go back to beginning if we're looping the sequence
-            {
+        ++currentSeqNum;
 
+        if (currentSeqNum >= seqItems.count())
+        {
+            for (SequenceItem &item : seqItems)
+            {
+                item.currentLoopCount = 0;
             }
-            else //not looping so stop playback entirely
+
+            if (!ui->cbLoop->isChecked())
             {
                 isPlaying = false;
                 wantPlaying = false;
                 haveIncomingTraffic = false;
-                playbackObject.stopPlayback();
+                currentSeqNum = 0;
+                currentSeqItem = &seqItems[currentSeqNum];
+                currentPosition = 0;
+
+                playbackObject.setSequenceObject(currentSeqItem);
+                ui->tblSequence->setCurrentCell(currentSeqNum, 0);
+                updateFrameLabel();
+
+                return;
             }
+
+            currentSeqNum = 0;
         }
-        currentSeqItem = &seqItems[currentSeqNum];
-        playbackObject.setSequenceObject(currentSeqItem);
-        if (isPlaying) playbackObject.startPlaybackForward();
-        ui->tblSequence->setCurrentCell(currentSeqNum, 0);
     }
     else
     {
-        currentSeqNum--; //go backward in the sequence
-        if (currentSeqNum == -1) //are we trying to go past the beginning?
-        {
-            //reset the loop figures for each sequence entry
-            for (int i = 0; i < seqItems.count(); i++) seqItems[i].currentLoopCount = 0;
-            currentSeqNum = seqItems.count() - 1;
-            if (ui->cbLoop->isChecked()) //go back to the last sequence entry if we're looping
-            {
+        --currentSeqNum;
 
+        if (currentSeqNum < 0)
+        {
+            for (SequenceItem &item : seqItems)
+            {
+                item.currentLoopCount = 0;
             }
-            else //not looping so stop playback entirely
+
+            if (!ui->cbLoop->isChecked())
             {
                 isPlaying = false;
                 wantPlaying = false;
                 haveIncomingTraffic = false;
-                playbackObject.stopPlayback();
+                currentSeqNum = seqItems.count() - 1;
+                currentSeqItem = &seqItems[currentSeqNum];
+                currentPosition = 0;
+
+                playbackObject.setSequenceObject(currentSeqItem);
+                ui->tblSequence->setCurrentCell(currentSeqNum, 0);
+                updateFrameLabel();
+
+                return;
             }
+
+            currentSeqNum = seqItems.count() - 1;
         }
-        currentSeqItem = &seqItems[currentSeqNum];
-        playbackObject.setSequenceObject(currentSeqItem);
-        if (isPlaying) playbackObject.startPlaybackBackward();
-        ui->tblSequence->setCurrentCell(currentSeqNum, 0);
     }
+
+    currentSeqItem = &seqItems[currentSeqNum];
+    currentPosition = 0;
+
+    playbackObject.setSequenceObject(currentSeqItem);
+
+    if (forward)
+    {
+        playbackObject.startPlaybackForward();
+    }
+    else
+    {
+        playbackObject.startPlaybackBackward();
+    }
+
+    ui->tblSequence->setCurrentCell(currentSeqNum, 0);
+    updateFrameLabel();
 }
 
 void FramePlaybackWindow::getStatusUpdate(int frameNum)
@@ -496,23 +538,43 @@ void FramePlaybackWindow::useOrigTimingClicked()
 
 void FramePlaybackWindow::btnDeleteCurrSeq()
 {
-    if (currentSeqNum == -1) return;
+    if (currentSeqNum == -1)
+    {
+        return;
+    }
+
+    isPlaying = false;
+    wantPlaying = false;
+    haveIncomingTraffic = false;
 
     playbackObject.stopPlayback();
 
+    // The worker stores a raw pointer into seqItems. Clear that pointer
+    // synchronously before removing or relocating list storage.
+    playbackObject.setSequenceObject(nullptr);
+
     seqItems.removeAt(currentSeqNum);
     ui->tblSequence->removeRow(currentSeqNum);
-    if (seqItems.count() > 0)
+
+    if (!seqItems.isEmpty())
     {
         currentSeqNum = 0;
         currentSeqItem = &seqItems[currentSeqNum];
+
+        playbackObject.setSequenceObject(currentSeqItem);
+
+        ui->tblSequence->setCurrentCell(currentSeqNum, 0);
+        refreshIDList();
     }
     else
     {
         currentSeqNum = -1;
         currentSeqItem = nullptr;
+
+        ui->listID->clear();
     }
-    refreshIDList();
+
+    currentPosition = 0;
     updateFrameLabel();
 }
 
