@@ -4638,18 +4638,6 @@ static int crossIdCandidateIndexFromTable(QTableWidget *table, int visualRow)
     return ok ? idx : -1;
 }
 
-static int analysisOriginalIndexFromTable(QTableWidget *table, int visualRow)
-{
-    if (!table || visualRow < 0) return -1;
-
-    QTableWidgetItem *item = table->item(visualRow, 0);
-    if (!item) return -1;
-
-    bool ok = false;
-    const int originalIndex = item->data(Qt::UserRole + 1).toInt(&ok);
-    return ok ? originalIndex : -1;
-}
-
 int MainWindow::currentEventCorrelationCandidateIndex() const
 {
     if (!ui || !ui->eventCorrelationView)
