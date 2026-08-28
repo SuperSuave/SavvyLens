@@ -18,9 +18,8 @@ do {\
         return false;\
 } while (0)
 
-Q_DECLARE_METATYPE(QVector<CANFlt>);
-
-
+Q_DECLARE_METATYPE(CANConStatus)
+Q_DECLARE_METATYPE(QVector<CANFltObserver>)
 
 TestCanCon::TestCanCon(CANCon::type pType, QString pPortName, int pNbBus):
     mType(pType),
@@ -29,21 +28,24 @@ TestCanCon::TestCanCon(CANCon::type pType, QString pPortName, int pNbBus):
 
 void TestCanCon::create()
 {
-    CANConnection* conn_p;
-    QVERIFY(pCreate(conn_p));
+    CANConnection* conn_p = nullptr;
+    if (!pCreate(conn_p)) {
+        QSKIP("No hardware device available");
+    }
     /* try to get an element from the queue */
     QVERIFY(conn_p->getQueue().get());
 
-    if(conn_p)
-        delete conn_p;
+    delete conn_p;
 }
 
 void TestCanCon::connectToDevice()
 {
-    CANConnection* conn_p;
-    QVERIFY(pCreate(conn_p));
+    CANConnection* conn_p = nullptr;
+    if (!pCreate(conn_p)) {
+        QSKIP("No hardware device available");
+    }
 
-    QSignalSpy spy(conn_p, SIGNAL(status(CANCon::status)));
+    QSignalSpy spy(conn_p, SIGNAL(status(CANConStatus)));
 
     /* start connection */
     conn_p->start();
@@ -56,7 +58,7 @@ void TestCanCon::connectToDevice()
     QCOMPARE(spy.count(), 1); // make sure the signal was emitted exactly one time
     QList<QVariant> arguments = spy.takeFirst(); // take the first signal
 
-    QVERIFY(arguments.at(0).toInt() == CANCon::CONNECTED); // verify the first argument
+    QVERIFY(arguments.at(0).value<CANConStatus>().conStatus == CANCon::CONNECTED); // verify the first argument
 
     /* stop connection */
     conn_p->stop();
@@ -65,8 +67,10 @@ void TestCanCon::connectToDevice()
 
 void TestCanCon::recvFrames()
 {
-    CANConnection* conn_p;
-    QVERIFY(pCreate(conn_p));
+    CANConnection* conn_p = nullptr;
+    if (!pCreate(conn_p)) {
+        QSKIP("No hardware device available");
+    }
 
     /* start connection */
     conn_p->start();
@@ -98,8 +102,10 @@ void TestCanCon::recvFrames()
 
 void TestCanCon::suspend()
 {
-    CANConnection* conn_p;
-    QVERIFY(pCreate(conn_p));
+    CANConnection* conn_p = nullptr;
+    if (!pCreate(conn_p)) {
+        QSKIP("No hardware device available");
+    }
 
     /* start connection */
     conn_p->start();
@@ -139,8 +145,10 @@ void TestCanCon::suspend()
 
 void TestCanCon::filter_data()
 {
-    CANConnection* conn_p;
-    QVERIFY(pCreate(conn_p));
+    CANConnection* conn_p = nullptr;
+    if (!pCreate(conn_p)) {
+        QSKIP("No hardware device available");
+    }
 
     /* start connection */
     conn_p->start();
@@ -161,8 +169,8 @@ void TestCanCon::filter_data()
         CANFrame* canf_p = queue.peek();
         QVERIFY(pValidateFrame(conn_p, canf_p));
 
-        if(!ids.contains(canf_p->ID))
-            ids.append(canf_p->ID);
+        if(!ids.contains(canf_p->frameId()))
+            ids.append(canf_p->frameId());
 
         queue.dequeue();
     }
@@ -175,25 +183,25 @@ void TestCanCon::filter_data()
 
     /* prepare test vector */
 
-    QTest::addColumn<QVector<CANFlt>>("filters");
+    QTest::addColumn<QVector<CANFltObserver>>("filters");
     QTest::addColumn<bool>("filterOut");
     QTest::addColumn<bool>("signalReceived");
     QTest::addColumn<QVector<quint32>>("filtered");
 
-    QVector<CANFlt> filters;
+    QVector<CANFltObserver> filters;
     QVector<quint32> filteredIds;
 
     /* one filter no signal*/
     filters.clear();
     filteredIds.clear();
-    filters.append({ids[0], 0xFFFF, false});
+    filters.append(CANFltObserver{ids[0], 0xFFFF, nullptr});
     filteredIds.append(ids[0]);
     QTest::newRow("1filternosignal")        << filters << false << false << filteredIds;
 
     /* one filter & signal*/
     filters.clear();
     filteredIds.clear();
-    filters.append({ids[0], 0xFFFF, true});
+    filters.append(CANFltObserver{ids[0], 0xFFFF, nullptr});
     filteredIds.append(ids[0]);
     QTest::newRow("1filtersignal")          << filters << false << true << filteredIds;
 
@@ -201,7 +209,7 @@ void TestCanCon::filter_data()
     filters.clear();
     filteredIds.clear();
     foreach(quint32 id, ids) {
-        filters.append({id, 0xFFFF, false});
+        filters.append(CANFltObserver{id, 0xFFFF, nullptr});
         filteredIds.append(id);
     }
     QTest::newRow("3filters")               << filters << false << false << filteredIds;
@@ -210,23 +218,21 @@ void TestCanCon::filter_data()
 
 void TestCanCon::filter()
 {
-    QFETCH(QVector<CANFlt>, filters);
+    CANConnection* conn_p = nullptr;
+    if (!pCreate(conn_p)) {
+        QSKIP("No hardware device available");
+    }
+
+    QFETCH(QVector<CANFltObserver>, filters);
     QFETCH(bool, filterOut);
     QFETCH(bool, signalReceived);
     QFETCH(QVector<quint32>, filtered);
 
-    CANConnection* conn_p;
-    QVERIFY(pCreate(conn_p));
-
     /* start connection */
     conn_p->start();
 
-    /* set filters */
-    for(int i=0 ; i<conn_p->getNumBuses() ; i++)
-        QVERIFY(conn_p->setFilters(i, filters, filterOut));
-
     /* spy signal */
-    QSignalSpy spy(conn_p, SIGNAL(notify()));
+    QSignalSpy spy(conn_p, SIGNAL(targettedFrameReceived(CANFrame)));
 
     /* configure */
     QVERIFY(pConfig(conn_p));
@@ -246,7 +252,7 @@ void TestCanCon::filter()
         QVERIFY(pValidateFrame(conn_p, canf_p));
 
         if(filterOut)
-            QVERIFY(filtered.contains(canf_p->ID));
+            QVERIFY(filtered.contains(canf_p->frameId()));
 
         queue.dequeue();
     }
@@ -260,8 +266,10 @@ void TestCanCon::filter()
 
 void TestCanCon::write()
 {
-    CANConnection* conn_p;
-    QVERIFY(pCreate(conn_p));
+    CANConnection* conn_p = nullptr;
+    if (!pCreate(conn_p)) {
+        QSKIP("No hardware device available");
+    }
 
     /* start connection */
     conn_p->start();
@@ -273,31 +281,18 @@ void TestCanCon::write()
     /* build frames */
     CANFrame frame;
     frame.bus       = 0;
-    frame.ID        = 0x1DE;
-    frame.data[0]   = 0xDE;
-    frame.data[1]   = 0xAD;
-    frame.data[2]   = 0xC0;
-    frame.data[3]   = 0xDE;
-    frame.len       = 4;
+    frame.setFrameId(0x1DE);
+    frame.setPayload(QByteArray::fromHex("DEAD C0DE"));
 
     frames.append(frame);
 
-    frame.data[2]   = 0xBE;
-    frame.data[3]   = 0xEF;
+    frame.setPayload(QByteArray::fromHex("DEAD BEEF"));
     frames.append(frame);
 
-    frame.data[2]   = 0xDE;
-    frame.data[3]   = 0xAD;
-
-
-    /* bad frame length */
-    unsigned int oldVal = frame.len;
-    frame.len = 9;
-    QCOMPARE(conn_p->sendFrame(frame), false);
-    frame.len       = oldVal;
+    frame.setPayload(QByteArray::fromHex("DEAD DEAD"));
 
     /* bad bus id */
-    oldVal = frame.bus;
+    int oldVal = frame.bus;
     frame.bus = 48;
     QCOMPARE(conn_p->sendFrame(frame), false);
     frame.bus       = oldVal;
@@ -326,8 +321,8 @@ void TestCanCon::write()
 
 bool TestCanCon::pCreate(CANConnection*& pConn_p)
 {
-    pConn_p = CanConFactory::create(mType, mPortName);
-    QVERIFYB(pConn_p);
+    pConn_p = CanConFactory::create(mType, mPortName, "", 115200, 500000, false, 0);
+    if (!pConn_p) return false;
 
     QCOMPAREB(pConn_p->getPort(),     mPortName);
     QCOMPAREB(pConn_p->getNumBuses(), mNbBus);
@@ -345,7 +340,7 @@ bool TestCanCon::pConfig(CANConnection* pConn_p)
     for(int i=0 ; i<pConn_p->getNumBuses() ; i++)
     {
         /* TODO: fix configuration */
-        bus.active = true;
+        bus.setActive(true);
         pConn_p->setBusSettings(i, bus);
         QVERIFYB(pConn_p->getBusSettings(i, retBus));
         QCOMPAREB(bus, retBus);
@@ -359,8 +354,8 @@ bool TestCanCon::pValidateFrame(CANConnection* pConn_p, CANFrame* pCan_p)
     QVERIFYB( pCan_p );
     QVERIFYB( (0<=pCan_p->bus) && (pCan_p->bus <= pConn_p->getNumBuses()) );
     QVERIFYB( pCan_p->isReceived);
-    QVERIFYB( pCan_p->len<=8 );
-    QVERIFYB( (0<=pCan_p->ID) && (pCan_p->ID<2048) );
+    QVERIFYB( pCan_p->payload().length()<=8 );
+    QVERIFYB( (0<=pCan_p->frameId()) && (pCan_p->frameId()<2048) );
 
     return true;
 }

@@ -249,7 +249,8 @@ uint32_t DBCMainEditor::getParentMessageID(QTreeWidgetItem *cell)
 {
     if (cell->data(0, Qt::UserRole) == DBCItemTypes::MESG)
     {
-        return static_cast<uint32_t>(Utility::ParseStringToNum(cell->text(0).split(" ")[0]));
+        const QString cellText = cell->text(0);
+        return static_cast<uint32_t>(Utility::ParseStringToNum(cellText.left(cellText.indexOf(' '))));
     }
     else
     {

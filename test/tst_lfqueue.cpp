@@ -34,7 +34,9 @@ void readerThread(LFQueue<int>* pQueue_p, int pSize, bool pSleep) {
     int* val_p;
 
     for(int i=0; i<pSize ; i++) {
-        while(! (val_p = pQueue_p->peek()) );
+        while(! (val_p = pQueue_p->peek()) ) {
+            QThread::yieldCurrentThread();
+        }
         QVERIFY(val_p);
 
         QCOMPARE(*val_p, i);
@@ -71,7 +73,9 @@ void TestLFQueue::exchange()
     QFuture<void> thread = QtConcurrent::run(readerThread, &queue, size, readerSleep);
 
     for(int i=0; i<size ; i++) {
-        while(! (val_p = queue.get()) );
+        while(! (val_p = queue.get()) ) {
+            QThread::yieldCurrentThread();
+        }
         QVERIFY(val_p);
 
         *val_p = i;

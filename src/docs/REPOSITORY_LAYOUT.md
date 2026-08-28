@@ -43,6 +43,18 @@ SavvyLens keeps implementation source under `src/`, Qt Designer forms under `ui/
 | Theme-management implementation | `src/themes/` |
 | Vendored source | `src/third_party/` |
 
+## Reserved Future Domains
+
+| Location | Do not create these directories until their first tested implementation lands |
+|---|---|
+| `src/analysis/` | Shared read-only analysis algorithms and session-level metrics |
+| `src/query/` | Query parser, AST, evaluator, editor, saved-query models |
+| `src/project/` | Vehicle project manifest, findings, persistence, migrations |
+| `src/signals/` | DBC-backed/custom/derived reusable signal definitions |
+| `src/traffic/` | Source → filter → transform → schedule → sink abstractions |
+| `src/automation/` | Rules, trigger conditions, actions, execution/audit log |
+| `src/visualization/` | Shared plot/timeline/dashboard models and views |
+
 ## Include policy
 
 Keep source/header pairs in the same module. Use a source-root include base and module-qualified includes for dependencies outside the current directory:
@@ -65,6 +77,27 @@ For a header in the same directory, use the short local include:
 ```
 
 Do not use `../` include paths. Do not add every module directory separately to `INCLUDEPATH`.
+
+## Dependency rules
+
+```text
+common / utils
+       ↓
+can / frames / query
+       ↓
+analysis / signals / project / traffic / connections
+       ↓
+re workspace controllers and feature-specific adapters
+       ↓
+widgets / windows
+       ↓
+app shell
+```
+
+- `widgets` may be used at any UI level, but should not contain domain logic.
+- Generic reusable widgets belong in `src/widgets`; feature-specific windows/widgets belong beside their feature. All UI depends downward on domain services, never the reverse.
+- `app` composes services/workspaces; lower layers must never include or call `mainwindow`.
+- If it answers “what frames are available?”, it belongs in `frames`. If it answers “what do the frames mean or how did they change?”, it belongs in `analysis`.
 
 ## Adding new files
 

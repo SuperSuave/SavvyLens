@@ -57,7 +57,7 @@ FuzzingWindow::FuzzingWindow(const QVector<CANFrame> *frames, QWidget *parent) :
     fuzzTimer->setInterval(ui->spinTiming->value());
 
     int numBuses = CANConManager::getInstance()->getNumBuses();
-    for (int n = 0; n < numBuses; n++) ui->cbBuses->addItem(QString::number(n));
+    for (int n = 0; n < numBuses; n++) ui->cbBuses->addItem(Utility::getBusName(n));
     ui->cbBuses->addItem(tr("All"));
 
     // Prevent annoying accidental horizontal scrolling when filter list is populated with long interpreted message names
