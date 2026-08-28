@@ -42,6 +42,7 @@ release/
 *.app
 *.user
 SavvyLens
+test/test
 
 # Generated qmake makefiles and scripts
 Makefile*
