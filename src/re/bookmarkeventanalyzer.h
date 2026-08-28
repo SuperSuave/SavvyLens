@@ -116,7 +116,6 @@ public:
 
     QString describeSameIdReason(const FlipCandidate &c) const;
     QString describeCrossIdReason(const CrossIdCandidate &c) const;
-    QString formatBaselineSummary(const QVector<ByteBaselineInfo> &bytes) const;
 
 private:
     struct EventByteStats
