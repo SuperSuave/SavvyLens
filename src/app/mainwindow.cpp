@@ -2,13 +2,18 @@
 #include "ui_mainwindow.h"
 
 // SavvyLens headers
+#include "analysis/selectioncontext.h"
 #include "app/helpwindow.h"
+#include "app/livechangeexplorerhost.h"
+#include "app/studiohost.h"
 #include "bookmarks/bookmarkmanager.h"
 #include "bookmarks/bookmarkmanagerdialog.h"
 #include "can/can_structs.h"
+#include "common/savvylenspaths.h"
 #include "common/utility.h"
 #include "connections/canconmanager.h"
 #include "connections/connectionwindow.h"
+#include "livechangeexplorerhost.h"
 #include "re/bookmarkeventanalyzer.h"
 #include "re/controlanalysisdialog.h"
 #include "re/controlcandidatemodel.h"
@@ -19,6 +24,7 @@
 // Qt headers
 #include <QClipboard>
 #include <QDateTime>
+#include <QDebug>
 #include <QDockWidget>
 #include <QFileDialog>
 #include <QFormLayout>
@@ -26,6 +32,7 @@
 #include <QHeaderView>
 #include <QItemSelectionModel>
 #include <QLabel>
+#include <QMenuBar>
 #include <QMouseEvent>
 #include <QPlainTextEdit>
 #include <QRegularExpression>
@@ -36,6 +43,8 @@
 #include <QSpinBox>
 #include <QTableWidgetItem>
 #include <QtSerialPort/QSerialPortInfo>
+#include <QVariantList>
+#include <QVariantMap>
 #include <QVBoxLayout>
 
 // C++ standard-library headers
@@ -99,6 +108,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    liveChangeExplorerModel = new LiveChangeExplorerModel(analysisSession, this);
     QShortcut *bookmarkShortcut = new QShortcut(QKeySequence(Qt::Key_F2), this);
     bookmarkShortcut->setContext(Qt::WidgetWithChildrenShortcut);
     bookmarkShortcut->setAutoRepeat(false);
@@ -119,12 +129,19 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(controlAnalysisDialog, &ControlAnalysisDialog::bookmarkCandidateRequested,
             this, &MainWindow::bookmarkControlCandidate);
 
+connect(
+    ui->actionLiveChangeExplorer,
+    &QAction::triggered,
+    this,
+    &MainWindow::showLiveChangeExplorer);
+
     setupEmbeddedAnalysisViews();
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     qRegisterMetaTypeStreamOperators<QVector<QString>>();
     qRegisterMetaTypeStreamOperators<QVector<int>>();
 #endif
+    qRegisterMetaType<SelectionContext>("SelectionContext");
 
     useHex = true;
     useColorsByCanId = false;
@@ -243,8 +260,8 @@ MainWindow::MainWindow(QWidget *parent) :
     //handlers for all menu entries
     connect(ui->actionSetup, SIGNAL(triggered(bool)), SLOT(showConnectionSettingsWindow()));
     connect(ui->actionOpen_Log_File, &QAction::triggered, this, &MainWindow::handleLoadFile);
-    connect(ui->actionGraph_Dta, &QAction::triggered, this, &MainWindow::showGraphingWindow);
-    connect(ui->actionFrame_Data_Analysis, &QAction::triggered, this, &MainWindow::showFrameDataAnalysis);
+    connect(ui->actionGraph_Dta, &QAction::triggered, this, static_cast<void (MainWindow::*)()>(&MainWindow::showGraphingWindow));
+    connect(ui->actionFrame_Data_Analysis, &QAction::triggered, this, &MainWindow::analyzeSelectedFrameData);
     connect(ui->actionSave_Log_File, &QAction::triggered, this, &MainWindow::handleSaveFile);
     connect(ui->actionSave_Filtered_Log_File, &QAction::triggered, this, &MainWindow::handleSaveFilteredFile);
     connect(ui->actionLoad_Filter_Definition, &QAction::triggered, this, &MainWindow::handleLoadFilters);
@@ -300,6 +317,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(model, &CANFrameModel::updatedFiltersList, this, &MainWindow::updateFilterList);
     connect(CANConManager::getInstance(), &CANConManager::framesReceived, model, &CANFrameModel::addFrames);
+
+    connect(CANConManager::getInstance(),
+            &CANConManager::framesReceived,
+            this,
+            [this](CANConnection *, QVector<CANFrame> &frames)
+            {
+                for (const CANFrame &frame : frames)
+                {
+                    analysisSession.ingest(frame);
+                }
+            });
 
     //new implementation for continuous logging
     connect(CANConManager::getInstance(), &CANConManager::framesReceived, this, &MainWindow::logReceivedFrame);
@@ -525,6 +553,40 @@ bool MainWindow::getSelectedFrameInfo(CANFrame &outFrame, QModelIndex *outIndex)
     if (outIndex)
         *outIndex = sourceIndex;
     return true;
+}
+
+SelectionContext MainWindow::currentSelectionContext() const
+{
+    SelectionContext context;
+
+    if (ui == nullptr || ui->canFramesView == nullptr)
+        return context;
+
+    QItemSelectionModel *selectionModel =
+        ui->canFramesView->selectionModel();
+
+    if (selectionModel == nullptr)
+        return context;
+
+    const QModelIndexList selectedRows =
+        selectionModel->selectedRows();
+
+    QSet<uint32_t> selectedIds;
+
+    for (const QModelIndex &index : selectedRows)
+    {
+        const QVariant idValue =
+            index.data(CANFrameModel::CanIDRole);
+
+        if (!idValue.isValid())
+            continue;
+
+        selectedIds.insert(
+            static_cast<uint32_t>(idValue.toULongLong()));
+    }
+
+    context.setCanIds(selectedIds);
+    return context;
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
@@ -1161,7 +1223,6 @@ void MainWindow::presistentFiltersToggled(bool state)
 
 void MainWindow::updateFilterList()
 {
-    qDebug() << "updateFilterList called on MainWindow";
     if (model == nullptr)
         return;
 
@@ -1174,9 +1235,14 @@ void MainWindow::updateFilterList()
     if (filters == nullptr || busFilters == nullptr)
         return;
 
-    qDebug() << "updateFilterList called on MainWindow"
-             << "CAN filters:" << filters->count()
-             << "bus filters:" << busFilters->count();
+    if (displayedCanFilters == *filters &&
+        displayedBusFilters == *busFilters)
+    {
+        return;
+    }
+
+    displayedCanFilters = *filters;
+    displayedBusFilters = *busFilters;
 
     inhibitFilterUpdate = true;
 
@@ -1324,42 +1390,13 @@ void MainWindow::actionFilterToSelectedIds()
 {
     qDebug() << "Filter to selected IDs action triggered";
 
-    if (ui->canFramesView == nullptr)
+    const SelectionContext context = currentSelectionContext();
+    const QSet<uint32_t> &selectedIds = context.canIds();
+
+    if (selectedIds.isEmpty())
     {
-        qDebug() << "No canFramesView";
+        qDebug() << "No valid CAN IDs found in selected rows";
         return;
-    }
-
-    QItemSelectionModel *selectionModel =
-        ui->canFramesView->selectionModel();
-
-    if (selectionModel == nullptr)
-    {
-        qDebug() << "No CAN-frame selection model";
-        return;
-    }
-
-    const QModelIndexList selectedRows =
-        selectionModel->selectedRows();
-
-    if (selectedRows.isEmpty())
-    {
-        qDebug() << "No selected CAN frame rows";
-        return;
-    }
-
-    QSet<uint32_t> selectedIds;
-
-    for (const QModelIndex &index : selectedRows)
-    {
-        const QVariant idValue =
-            index.data(CANFrameModel::CanIDRole);
-
-        if (!idValue.isValid())
-            continue;
-
-        selectedIds.insert(
-            static_cast<uint32_t>(idValue.toULongLong()));
     }
 
     qDebug() << "Unique selected CAN IDs:"
@@ -1371,12 +1408,6 @@ void MainWindow::actionFilterToSelectedIds()
                  << QStringLiteral("0x%1")
                         .arg(id, 0, 16)
                         .toUpper();
-    }
-
-    if (selectedIds.isEmpty())
-    {
-        qDebug() << "No valid CAN IDs found in selected rows";
-        return;
     }
 
     filterToFrameIds(selectedIds);
@@ -1476,6 +1507,13 @@ void MainWindow::tickGUIUpdate()
         }
 
         rxFrames = 0;
+
+        if (liveChangeExplorerModel != nullptr &&
+            studioHost_ != nullptr &&
+            studioHost_->isVisible())
+        {
+            liveChangeExplorerModel->refresh();
+        }
     //}
 }
 
@@ -1525,12 +1563,25 @@ void MainWindow::gotCenterTimeID(uint32_t ID, double timestamp)
 void MainWindow::clearFrames()
 {
     ui->canFramesView->scrollToTop();
+
     model->clearFrames();
+    analysisSession.clear();
+
+    if (liveChangeExplorerModel)
+    {
+        liveChangeExplorerModel->refresh();
+    }
+
     CANConManager::getInstance()->resetTimeBasis();
-    ui->lbNumFrames->setText(QString::number(model->rowCount()));
+
+    ui->lbNumFrames->setText(
+        QString::number(model->rowCount()));
+
     bDirty = false;
     loadedFileName = "";
+
     updateFileStatus();
+
     emit framesUpdated(-1);
 }
 
@@ -1680,7 +1731,7 @@ void MainWindow::handleSaveFilters()
     QStringList filters;
     filters.append(QString(tr("Filter list (*.ftl)")));
 
-    dialog.setDirectory(settings.value("Filters/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value("Filters/LoadSaveDirectory", SavvyLensPaths::definitionsDir()).toString());
     dialog.setFileMode(QFileDialog::AnyFile);
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);
@@ -1704,7 +1755,7 @@ void MainWindow::handleLoadFilters()
     QStringList filters;
     filters.append(QString(tr("Filter List (*.ftl)")));
 
-    dialog.setDirectory(settings.value("Filters/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value("Filters/LoadSaveDirectory", SavvyLensPaths::definitionsDir()).toString());
     dialog.setFileMode(QFileDialog::ExistingFile);
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);
@@ -1738,7 +1789,7 @@ void MainWindow::handleSaveDecodedMethod(bool csv)
     if (!csv) filters.append(QString(tr("Text File (*.txt *.TXT)")));
     else filters.append(QString(tr("CSV File (*.csv *.CSV)")));
 
-    dialog.setDirectory(settings.value("FileIO/LoadSaveDirectory", dialog.directory().path()).toString());
+    dialog.setDirectory(settings.value("FileIO/LoadSaveDirectory", SavvyLensPaths::exportsDir()).toString());
     dialog.setFileMode(QFileDialog::AnyFile);
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);
@@ -2061,6 +2112,144 @@ CANFrameModel* MainWindow::getCANFrameModel()
  * All functions past this point set up the various other windows that can be opened
 */
 
+void MainWindow::showLiveChangeExplorer()
+{
+    showStudio();
+
+    if (studioHost_ != nullptr)
+    {
+        studioHost_->openTrafficWorkspace();
+    }
+}
+
+void MainWindow::exploreLiveChangeRowInStateExplorer(int row)
+{
+    if (liveChangeExplorerModel == nullptr)
+    {
+        return;
+    }
+
+    FrameAggregateKey key;
+
+    if (!liveChangeExplorerModel->aggregateKeyForRow(
+            row,
+            &key))
+    {
+        return;
+    }
+
+    const SelectionContext context =
+        liveChangeExplorerModel->selectionContextForRow(row);
+
+    QVector<CANFrame> snapshot;
+
+    if (!analysisSession.stateExplorerSnapshot(
+            key,
+            &snapshot))
+    {
+        return;
+    }
+
+    showStudio();
+
+    if (studioHost_ == nullptr)
+    {
+        return;
+    }
+
+    studioHost_->loadStateExplorerSnapshot(
+        key,
+        snapshot,
+        context);
+}
+
+void MainWindow::refreshStateExplorerSnapshot(const FrameAggregateKey &key)
+{
+    QVector<CANFrame> snapshot;
+
+    if (!analysisSession.stateExplorerSnapshot(
+            key,
+            &snapshot))
+    {
+        return;
+    }
+
+    if (studioHost_ == nullptr)
+    {
+        return;
+    }
+
+    studioHost_->loadStateExplorerSnapshot(
+        key,
+        snapshot);
+}
+
+void MainWindow::showStudio()
+{
+    if (studioHost_ == nullptr)
+    {
+        studioHost_ = new StudioHost(
+            liveChangeExplorerModel,
+            this);
+
+        connect(
+            studioHost_,
+            &StudioHost::exploreLiveChangeRowRequested,
+            this,
+            &MainWindow::exploreLiveChangeRowInStateExplorer);
+
+        connect(
+            studioHost_,
+            &StudioHost::refreshStateExplorerSnapshotRequested,
+            this,
+            &MainWindow::refreshStateExplorerSnapshot);
+
+        connect(
+            studioHost_,
+            &StudioHost::openFrameInfoRequested,
+            this,
+            [this](const SelectionContext &context)
+            {
+                showFrameDataAnalysis();
+                if (frameInfoWindow != nullptr)
+                {
+                    frameInfoWindow->setSelectionContext(context);
+                }
+            });
+
+        connect(
+            studioHost_,
+            &StudioHost::openGraphingRequested,
+            this,
+            static_cast<void (MainWindow::*)(const SelectionContext &)>(&MainWindow::showGraphingWindow));
+
+        connect(
+            studioHost_,
+            &StudioHost::studioClosed,
+            this,
+            [this]()
+            {
+                menuBar()->show();
+            });
+
+        connect(
+            studioHost_,
+            &QObject::destroyed,
+            this,
+            [this]()
+            {
+                studioHost_ = nullptr;
+                menuBar()->show();
+            });
+    }
+
+    menuBar()->hide();
+
+    studioHost_->show();
+    studioHost_->raise();
+    studioHost_->activateWindow();
+}
+
 void MainWindow::showSettingsDialog()
 {
     if (!settingsDialog)
@@ -2071,35 +2260,162 @@ void MainWindow::showSettingsDialog()
     settingsDialog->show();
 }
 
-//always gets unfiltered list. You ask for the graphs so there is no need to send filtered frames
-//now always creates a new window. This allows for multiple independent graphing windows
+void MainWindow::createExplorerMarker(
+    int row,
+    const QString &label)
+{
+    if (liveChangeExplorerModel == nullptr)
+    {
+        return;
+    }
+
+    const SelectionContext context =
+        liveChangeExplorerModel->selectionContextForRow(row);
+
+    if (context.isEmpty())
+    {
+        return;
+    }
+
+    analysisSession.addMarker(context, label);
+}
+
+void MainWindow::showAnalysisMarkers()
+{
+    if (liveChangeExplorerHost_ == nullptr)
+    {
+        return;
+    }
+
+    QVariantList markerRows;
+    const QVector<AnalysisMarker> &markers = analysisSession.markers();
+
+    for (int index = 0; index < markers.size(); ++index)
+    {
+        const AnalysisMarker &marker = markers.at(index);
+
+        QString anchorType = QStringLiteral("Unknown");
+        QString bus = QStringLiteral("—");
+        QString canId = QStringLiteral("—");
+
+        if (marker.hasSelectionContext())
+        {
+            anchorType = QStringLiteral("Selection context");
+
+            const SelectionContext &context = marker.selectionContext();
+
+            if (context.hasBus())
+            {
+                bus = QString::number(context.bus());
+            }
+
+            if (context.hasSingleCanId())
+            {
+                canId = QStringLiteral("0x%1")
+                            .arg(context.canId(), 0, 16)
+                            .toUpper();
+            }
+        }
+        else if (marker.hasFrameIndex())
+        {
+            anchorType = QStringLiteral("Frame index");
+        }
+
+        QVariantMap row;
+        row.insert(QStringLiteral("number"), index + 1);
+        row.insert(QStringLiteral("anchorType"), anchorType);
+        row.insert(QStringLiteral("bus"), bus);
+        row.insert(QStringLiteral("canId"), canId);
+        row.insert(QStringLiteral("label"), marker.label());
+
+        markerRows.append(row);
+    }
+
+    liveChangeExplorerHost_->showAnalysisMarkers(markerRows);
+}
+
+void MainWindow::openExplorerFrameInfo(int row)
+{
+    if (liveChangeExplorerModel == nullptr)
+    {
+        return;
+    }
+
+    const SelectionContext context =
+        liveChangeExplorerModel->selectionContextForRow(row);
+
+    if (context.isEmpty())
+    {
+        return;
+    }
+
+    showFrameDataAnalysis();
+
+    if (frameInfoWindow != nullptr)
+    {
+        frameInfoWindow->setSelectionContext(context);
+    }
+}
+
 void MainWindow::showGraphingWindow()
 {
-/* could only allow the latest window to have these centering signals.
-   if (lastGraphingWindow)
+    showGraphingWindow(currentSelectionContext());
+}
+
+void MainWindow::openExplorerGraphing(int row)
+{
+    if (liveChangeExplorerModel == nullptr)
     {
-        disconnect(lastGraphingWindow, SIGNAL(sendCenterTimeID(uint32_t,double)), this, SLOT(gotCenterTimeID(int32_t,double)));
-        disconnect(this, SIGNAL(sendCenterTimeID(uint32_t,double)), lastGraphingWindow, SLOT(gotCenterTimeID(int32_t,double)));
-        if (flowViewWindow)
-        {
-            disconnect(lastGraphingWindow, SIGNAL(sendCenterTimeID(uint32_t,double)), flowViewWindow, SLOT(gotCenterTimeID(int32_t,double)));
-            disconnect(flowViewWindow, SIGNAL(sendCenterTimeID(uint32_t,double)), lastGraphingWindow, SLOT(gotCenterTimeID(int32_t,double)));
-        }
+        return;
     }
-*/
+
+    const SelectionContext context =
+        liveChangeExplorerModel->selectionContextForRow(row);
+
+    if (context.isEmpty())
+    {
+        return;
+    }
+
+    showGraphingWindow(context);
+}
+
+// always gets unfiltered list. You ask for the graphs so there is no need to send filtered frames
+// now always creates a new window. This allows for multiple independent graphing windows
+void MainWindow::showGraphingWindow(const SelectionContext &context)
+{
+    /* could only allow the latest window to have these centering signals.
+       if (lastGraphingWindow)
+        {
+            disconnect(lastGraphingWindow, SIGNAL(sendCenterTimeID(uint32_t,double)), this, SLOT(gotCenterTimeID(int32_t,double)));
+            disconnect(this, SIGNAL(sendCenterTimeID(uint32_t,double)), lastGraphingWindow, SLOT(gotCenterTimeID(int32_t,double)));
+            if (flowViewWindow)
+            {
+                disconnect(lastGraphingWindow, SIGNAL(sendCenterTimeID(uint32_t,double)), flowViewWindow, SLOT(gotCenterTimeID(int32_t,double)));
+                disconnect(flowViewWindow, SIGNAL(sendCenterTimeID(uint32_t,double)), lastGraphingWindow, SLOT(gotCenterTimeID(int32_t,double)));
+            }
+        }
+    */
     lastGraphingWindow = new GraphingWindow(model->getListReference());
+    lastGraphingWindow->setSelectionContext(context);
     graphWindows.append(lastGraphingWindow);
 
-    connect(lastGraphingWindow, SIGNAL(sendCenterTimeID(uint32_t,double)), this, SLOT(gotCenterTimeID(uint32_t,double)));
-    connect(this, SIGNAL(sendCenterTimeID(uint32_t,double)), lastGraphingWindow, SLOT(gotCenterTimeID(uint32_t,double)));
+    connect(lastGraphingWindow, SIGNAL(sendCenterTimeID(uint32_t, double)),
+            this, SLOT(gotCenterTimeID(uint32_t, double)));
+    connect(this, SIGNAL(sendCenterTimeID(uint32_t, double)),
+            lastGraphingWindow, SLOT(gotCenterTimeID(uint32_t, double)));
 
-    if (flowViewWindow) //connect the two external windows together
+    if (flowViewWindow)
     {
-        connect(lastGraphingWindow, SIGNAL(sendCenterTimeID(uint32_t,double)), flowViewWindow, SLOT(gotCenterTimeID(uint32_t,double)));
-        connect(flowViewWindow, SIGNAL(sendCenterTimeID(uint32_t,double)), lastGraphingWindow, SLOT(gotCenterTimeID(uint32_t,double)));
+        connect(lastGraphingWindow, SIGNAL(sendCenterTimeID(uint32_t, double)),
+                flowViewWindow, SLOT(gotCenterTimeID(uint32_t, double)));
+        connect(flowViewWindow, SIGNAL(sendCenterTimeID(uint32_t, double)),
+                lastGraphingWindow, SLOT(gotCenterTimeID(uint32_t, double)));
     }
 
     lastGraphingWindow->show();
+    lastGraphingWindow->raise();
+    lastGraphingWindow->activateWindow();
 }
 
 void MainWindow::showTemporalGraphWindow()
@@ -2146,9 +2462,28 @@ void MainWindow::showFrameDataAnalysis()
 void MainWindow::analyzeFrameData(QString frameId)
 {
     showFrameDataAnalysis();
-    if (frameInfoWindow) {
+
+    if (frameInfoWindow == nullptr)
+        return;
+
+    if (!frameId.isEmpty())
+    {
         frameInfoWindow->selectID(frameId);
+        return;
     }
+
+    const SelectionContext context = currentSelectionContext();
+    frameInfoWindow->setSelectionContext(context);
+}
+
+void MainWindow::analyzeSelectedFrameData()
+{
+    showFrameDataAnalysis();
+
+    if (frameInfoWindow == nullptr)
+        return;
+
+    frameInfoWindow->setSelectionContext(currentSelectionContext());
 }
 
 FrameInfoWindow* MainWindow::getFrameInfoWindow()

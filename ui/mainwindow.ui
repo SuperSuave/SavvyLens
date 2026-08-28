@@ -967,6 +967,7 @@
     <addaction name="actionCapture_Bisector"/>
     <addaction name="actionSignal_Viewer"/>
     <addaction name="actionTemporal_Graph"/>
+    <addaction name="actionLiveChangeExplorer"/>
    </widget>
    <widget class="QMenu" name="menuSend_Frames">
     <property name="title">
@@ -1243,6 +1244,17 @@
   <action name="analyzeControlSelectedAction">
    <property name="text">
     <string>Analyze Control States (Selected ID)</string>
+   </property>
+  </action>
+  <action name="actionLiveChangeExplorer">
+   <property name="text">
+    <string>SavvyLens Studio</string>
+   </property>
+   <property name="toolTip">
+    <string>Open SavvyLens Studio</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
  </widget>
