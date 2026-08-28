@@ -282,11 +282,11 @@ private:
                                                  quint8 eventAfterValue,
                                                  bool hasEventTransition) const;
 
-    QVector<ByteBaselineInfo> analyzePreEventBaselinesForCrossId(
+    QVector<ByteBaselineInfo> analyzePreEventBaselinesForSameId(
             const QVector<CANFrame> &frames,
             const FrameKey &key,
             int anchorOriginalIndex,
-            const QVector<int> &changedBytes,
+            const QVector<EventByteStats> &eventBytes,
             int lookbackLimit) const;
 };
 

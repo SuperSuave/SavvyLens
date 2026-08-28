@@ -81,25 +81,27 @@ BookmarkEventAnalyzer::ByteBaselineInfo BookmarkEventAnalyzer::analyzePreEventBy
 }
 
 QVector<BookmarkEventAnalyzer::ByteBaselineInfo>
-BookmarkEventAnalyzer::analyzePreEventBaselinesForCrossId(
+BookmarkEventAnalyzer::analyzePreEventBaselinesForSameId(
         const QVector<CANFrame> &frames,
         const FrameKey &key,
         int anchorOriginalIndex,
-        const QVector<int> &changedBytes,
+        const QVector<EventByteStats> &eventBytes,
         int lookbackLimit) const
 {
     QVector<ByteBaselineInfo> out;
 
-    for (int byteIndex : changedBytes)
+    for (const EventByteStats &eb : eventBytes)
     {
+        if (!eb.hasTransition) continue;
+
         out.append(analyzePreEventByteBaseline(frames,
                                                key,
                                                anchorOriginalIndex,
-                                               byteIndex,
+                                               eb.byteIndex,
                                                lookbackLimit,
-                                               0,
-                                               0,
-                                               false));
+                                               eb.beforeValue,
+                                               eb.afterValue,
+                                               eb.hasTransition));
     }
 
     std::sort(out.begin(), out.end(), [](const ByteBaselineInfo &a, const ByteBaselineInfo &b) {
