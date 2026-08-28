@@ -4626,18 +4626,6 @@ void MainWindow::refreshAnalysisTabsForCurrentSelection()
     refreshEmbeddedEventCorrelation(result);
 }
 
-static int crossIdCandidateIndexFromTable(QTableWidget *table, int visualRow)
-{
-    if (!table || visualRow < 0) return -1;
-
-    QTableWidgetItem *item = table->item(visualRow, 0);
-    if (!item) return -1;
-
-    bool ok = false;
-    const int idx = item->data(Qt::UserRole).toInt(&ok);
-    return ok ? idx : -1;
-}
-
 static int analysisOriginalIndexFromTable(QTableWidget *table, int visualRow)
 {
     if (!table || visualRow < 0) return -1;
