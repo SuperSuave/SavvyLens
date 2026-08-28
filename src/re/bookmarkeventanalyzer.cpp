@@ -81,41 +81,6 @@ BookmarkEventAnalyzer::ByteBaselineInfo BookmarkEventAnalyzer::analyzePreEventBy
 }
 
 QVector<BookmarkEventAnalyzer::ByteBaselineInfo>
-BookmarkEventAnalyzer::analyzePreEventBaselinesForSameId(
-        const QVector<CANFrame> &frames,
-        const FrameKey &key,
-        int anchorOriginalIndex,
-        const QVector<EventByteStats> &eventBytes,
-        int lookbackLimit) const
-{
-    QVector<ByteBaselineInfo> out;
-
-    for (const EventByteStats &eb : eventBytes)
-    {
-        if (!eb.hasTransition) continue;
-
-        out.append(analyzePreEventByteBaseline(frames,
-                                               key,
-                                               anchorOriginalIndex,
-                                               eb.byteIndex,
-                                               lookbackLimit,
-                                               eb.beforeValue,
-                                               eb.afterValue,
-                                               eb.hasTransition));
-    }
-
-    std::sort(out.begin(), out.end(), [](const ByteBaselineInfo &a, const ByteBaselineInfo &b) {
-        if (a.dominantIsIdleSentinel != b.dominantIsIdleSentinel)
-            return a.dominantIsIdleSentinel > b.dominantIsIdleSentinel;
-        if (!qFuzzyCompare(a.dominance, b.dominance))
-            return a.dominance > b.dominance;
-        return a.byteIndex < b.byteIndex;
-    });
-
-    return out;
-}
-
-QVector<BookmarkEventAnalyzer::ByteBaselineInfo>
 BookmarkEventAnalyzer::analyzePreEventBaselinesForCrossId(
         const QVector<CANFrame> &frames,
         const FrameKey &key,
