@@ -37,7 +37,7 @@ FramePlaybackWindow::FramePlaybackWindow(const QVector<CANFrame> *frames, QWidge
     setWindowFlags(Qt::Window);
 
     int numBuses = CANConManager::getInstance()->getNumBuses();
-    for (int n = 0; n < numBuses; n++) ui->comboCANBus->addItem(QString::number(n));
+    for (int n = 0; n < numBuses; n++) ui->comboCANBus->addItem(Utility::getBusName(n));
     ui->comboCANBus->addItem(tr("All"));
     ui->comboCANBus->addItem(tr("From File"));
     ui->comboCANBus->setCurrentIndex(0);
@@ -114,7 +114,7 @@ void FramePlaybackWindow::showEvent(QShowEvent *)
     //any time the view is shown we'll go see how many buses are registered and redo the combobox to match
     int numBuses = CANConManager::getInstance()->getNumBuses();
     ui->comboCANBus->clear();
-    for (int n = 0; n < numBuses; n++) ui->comboCANBus->addItem(QString::number(n));
+    for (int n = 0; n < numBuses; n++) ui->comboCANBus->addItem(Utility::getBusName(n));
     ui->comboCANBus->addItem(tr("All"));
     ui->comboCANBus->addItem(tr("From File"));
     ui->comboCANBus->setCurrentIndex(0);

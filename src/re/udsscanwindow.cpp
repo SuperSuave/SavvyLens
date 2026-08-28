@@ -87,7 +87,7 @@ UDSScanWindow::UDSScanWindow(const QVector<CANFrame> *frames, QWidget *parent) :
     connect(ui->cbSessType, &QComboBox::currentTextChanged, this, &UDSScanWindow::setSessType);
 
     int numBuses = CANConManager::getInstance()->getNumBuses();
-    for (int n = 0; n < numBuses; n++) ui->cbBuses->addItem(QString::number(n));
+    for (int n = 0; n < numBuses; n++) ui->cbBuses->addItem(Utility::getBusName(n));
 
     connect(ui->cbBuses, &QComboBox::currentTextChanged, this, &UDSScanWindow::setBusToScan);
 
@@ -806,7 +806,7 @@ void UDSScanWindow::openAndConfigure(int startId, int endId, int bus, int scanTy
     if (!isVisible()) show();
     ui->spinStartID->setValue(startId);
     ui->spinEndID->setValue(endId);
-    int busIdx = ui->cbBuses->findText(QString::number(bus));
+    int busIdx = ui->cbBuses->findText(Utility::getBusName(bus));
     if (busIdx >= 0) ui->cbBuses->setCurrentIndex(busIdx);
     if (scanType >= 0 && scanType < ui->cbScanType->count()) {
         ui->cbScanType->setCurrentIndex(scanType);
