@@ -3,6 +3,7 @@
 #include "tst_cancon.h"
 #include "tst_candidateanalysis.h"
 #include "tst_canquerylexer.h"
+#include "tst_commandregistry.h"
 #include "tst_discretestateanalysis.h"
 #include "tst_frameaggregatestore.h"
 #include "tst_framecomparison.h"
@@ -44,6 +45,7 @@ int main(int argc, char **argv)
     ASSERT_TEST(new TestStateExplorerPresentation());
     ASSERT_TEST(new TestTemporalAnalysis());
     ASSERT_TEST(new TestTransitionAnalysis());
+    ASSERT_TEST(new TestCommandRegistry());
 
     return status;
 }

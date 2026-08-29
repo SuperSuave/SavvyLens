@@ -133,6 +133,7 @@ SOURCES += \
     src/analysis/selectioncontext.cpp \
     src/analysis/temporalanalysis.cpp \
     src/analysis/transitionanalysis.cpp \
+    src/app/commandregistry.cpp \
     src/app/helpwindow.cpp \
     src/app/livechangeexplorerhost.cpp \
     src/app/main.cpp \
@@ -255,6 +256,7 @@ HEADERS += \
     src/analysis/selectioncontext.h \
     src/analysis/temporalanalysis.h \
     src/analysis/transitionanalysis.h \
+    src/app/commandregistry.h \
     src/app/helpwindow.h \
     src/app/livechangeexplorerhost.h \
     src/app/mainsettingsdialog.h \

@@ -2,10 +2,6 @@ QT += core gui serialbus serialport widgets testlib network
 
 CONFIG += c++17
 
-SOURCES += \
-
-HEADERS += \
-
 target.path = .
 INSTALLS += target
 PROJECT_ROOT = $$clean_path($$PWD/..)
@@ -22,6 +18,7 @@ SOURCES += \
     tst_cancon.cpp \
     tst_candidateanalysis.cpp \
     tst_canquerylexer.cpp \
+    tst_commandregistry.cpp \
     tst_discretestateanalysis.cpp \
     tst_frameaggregatestore.cpp \
     tst_framecomparison.cpp \
@@ -47,6 +44,7 @@ SOURCES += \
     $$PROJECT_ROOT/src/analysis/selectioncontext.cpp \
     $$PROJECT_ROOT/src/analysis/temporalanalysis.cpp \
     $$PROJECT_ROOT/src/analysis/transitionanalysis.cpp \
+    $$PROJECT_ROOT/src/app/commandregistry.cpp \
     $$PROJECT_ROOT/src/app/stateexplorerpresentation.cpp \
     $$PROJECT_ROOT/src/bookmarks/bookmarkmanager.cpp \
     $$PROJECT_ROOT/src/can/canfilter.cpp \
@@ -89,6 +87,7 @@ HEADERS += \
     tst_cancon.h \
     tst_candidateanalysis.h \
     tst_canquerylexer.h \
+    tst_commandregistry.h \
     tst_discretestateanalysis.h \
     tst_frameaggregatestore.h \
     tst_framecomparison.h \
@@ -115,6 +114,7 @@ HEADERS += \
     $$PROJECT_ROOT/src/analysis/selectioncontext.h \
     $$PROJECT_ROOT/src/analysis/temporalanalysis.h \
     $$PROJECT_ROOT/src/analysis/transitionanalysis.h \
+    $$PROJECT_ROOT/src/app/commandregistry.h \
     $$PROJECT_ROOT/src/app/stateexplorerpresentation.h \
     $$PROJECT_ROOT/src/bookmarks/bookmarkmanager.h \
     $$PROJECT_ROOT/src/can/can_structs.h \
