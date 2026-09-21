@@ -1,0 +1,6 @@
+{
+  "name": "SavvyLens Web",
+  "description": "Professional CAN bus analyzer, sniffer, DBC manager, and reverse engineering suite migrated to the web",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
