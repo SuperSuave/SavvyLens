@@ -116,7 +116,7 @@ void CANScriptHelper::gotTargettedFrame(const CANFrame &frame)
         QJSValueList args;
         args << QJSValue(static_cast<int>(frame.bus));
         args << QJSValue(static_cast<double>(frame.frameId()));
-        args << QJSValue(payload.length());
+        args << QJSValue(static_cast<int>(payload.length()));
         args << dataBytes;
 
         const QJSValue result = gotFrameFunction.call(args);
@@ -248,7 +248,7 @@ void ISOTPScriptHelper::newISOMessage(ISOTP_MESSAGE msg)
     QJSValueList args;
     args << QJSValue(static_cast<int>(msg.bus));
     args << QJSValue(static_cast<double>(msg.frameId()));
-    args << QJSValue(payload.length());
+    args << QJSValue(static_cast<int>(payload.length()));
     args << dataBytes;
 
     const QJSValue result = gotFrameFunction.call(args);
@@ -384,7 +384,7 @@ void UDSScriptHelper::newUDSMessage(UDS_MESSAGE msg)
     args << QJSValue(static_cast<double>(msg.frameId()));
     args << QJSValue(static_cast<int>(msg.service));
     args << QJSValue(static_cast<int>(msg.subFunc));
-    args << QJSValue(payload.length());
+    args << QJSValue(static_cast<int>(payload.length()));
     args << dataBytes;
 
     const QJSValue result = gotFrameFunction.call(args);

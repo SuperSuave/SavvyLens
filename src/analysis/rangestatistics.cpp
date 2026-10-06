@@ -290,7 +290,7 @@ QVector<ByteRangeStats> RangeStatistics::computeAllByteStats(const QVector<CANFr
     int maxLen = 0;
     for (const CANFrame &frame : frames) {
         if (frame.frameId() == canId) {
-            maxLen = std::max(maxLen, frame.payload().size());
+            maxLen = std::max(maxLen, static_cast<int>(frame.payload().size()));
         }
     }
 

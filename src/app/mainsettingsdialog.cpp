@@ -12,7 +12,7 @@
 #include <QDir>
 #include <QEvent>
 #include <QKeyEvent>
-#include <QRegExp>
+#include <QRegularExpression>
 
 //using this simple encryption library to obfuscate stored password a bit. It's not super secure but better than
 //storing a password in straight plaintext. You have the source to this application anyway, whatever algorithm used,
@@ -30,9 +30,10 @@ static QStringList availableLanguageCodes()
         list = transDir.entryList(QStringList() << "SavvyLens_*.ts");
     }
     for (QString file : list) {
-        QRegExp re("SavvyLens_(.*)\\.(qm|ts)");
-        if (re.indexIn(file) != -1) {
-            codes << re.cap(1);
+        static const QRegularExpression re("SavvyLens_(.*)\\.(qm|ts)");
+        QRegularExpressionMatch match = re.match(file);
+        if (match.hasMatch()) {
+            codes << match.captured(1);
         }
     }
     return codes;
