@@ -545,7 +545,8 @@ void FlowViewWindow::updatedFrames(int numFrames)
         {
             thisFrame = &modelFrames->at(i);
             data = reinterpret_cast<const unsigned char *>(thisFrame->payload().constData());
-            dataLen = thisFrame->payload().length();
+            //only the first 8 bytes have graphs, CAN FD frames can carry up to 64
+            dataLen = qMin(static_cast<int>(thisFrame->payload().length()), 8);
 
             if (!foundID.contains(thisFrame->frameId()))
             {
@@ -908,8 +909,8 @@ void FlowViewWindow::updatePosition(bool forward)
     {
         uint64_t changedBits = 0;
         uint8_t cngByte;
-        int maxVal = qMin(chunk * 8 + 8, frameCache.at(currentPosition).payload().length());
-        for (int i = chunk * 8; i < maxVal; i++)
+        int maxVal = qMin(chunk + 8, static_cast<int>(frameCache.at(currentPosition).payload().length()));
+        for (int i = chunk; i < maxVal; i++)
         {
             unsigned char thisByte = static_cast<unsigned char>(frameCache.at(currentPosition).payload()[i]);
             cngByte = currBytes[i] ^ thisByte;

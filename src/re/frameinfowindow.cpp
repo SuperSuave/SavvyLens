@@ -10,6 +10,8 @@
 #include "widgets/plotting/qcpaxistickerhex.h"
 
 // QT headers
+#include <algorithm>
+#include <array>
 #include <limits>
 #include <QtDebug>
 #include <vector>
@@ -532,22 +534,25 @@ void FrameInfoWindow::updateDetailsWindow(QString newID)
     int64_t minInterval;
     int64_t maxInterval;
     int64_t thisInterval;
-    int minData[8];
-    int maxData[8];
-    int dataHistogram[256][8];
-    int bitfieldHistogram[64];
+    //sized for the largest CAN FD payload
+    constexpr int maxPayloadBytes = 64;
+    constexpr int maxPayloadBits = maxPayloadBytes * 8;
+    int minData[maxPayloadBytes];
+    int maxData[maxPayloadBytes];
+    std::vector<std::array<int, maxPayloadBytes>> dataHistogram(256);
+    int bitfieldHistogram[maxPayloadBits];
     QVector<double> histGraphX, histGraphY;
-    QVector<double> byteGraphX, byteGraphY[8];
+    QVector<double> byteGraphX, byteGraphY[maxPayloadBytes];
     QVector<double> timeGraphX, timeGraphY;
     QHash<QString, QHash<QString, int>> signalInstances;
     double maxY = -1000.0;
-    uint8_t changedBits[8];
-    uint8_t referenceBits[8];
-    uint8_t heatVals[512];
+    uint8_t changedBits[maxPayloadBytes];
+    uint8_t referenceBits[maxPayloadBytes];
+    uint8_t heatVals[maxPayloadBits];
 
     //these two used by bitflip heatmap functionality
-    uint8_t refByte[8];
-    double bitFlipHeat[64];
+    uint8_t refByte[maxPayloadBytes];
+    double bitFlipHeat[maxPayloadBits];
 
     QTreeWidgetItem *baseNode, *dataBase, *histBase, *tempItem;
 
@@ -667,17 +672,17 @@ void FrameInfoWindow::updateDetailsWindow(QString newID)
         baseNode->addChild(tempItem);
 
         //clear out all the counters and accumulators
-        minLen = 8;
+        minLen = maxPayloadBytes;
         maxLen = 0;
         minInterval = 0x7FFFFFFF;
         maxInterval = 0;
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < maxPayloadBytes; i++)
         {
             minData[i] = 256;
             maxData[i] = -1;
             for (int k = 0; k < 256; k++) dataHistogram[k][i] = 0;
         }
-        for (int j = 0; j < 64; j++)
+        for (int j = 0; j < maxPayloadBits; j++)
         {
             bitfieldHistogram[j] = 0;
             bitFlipHeat[j] = 0;
@@ -685,11 +690,16 @@ void FrameInfoWindow::updateDetailsWindow(QString newID)
         signalInstances.clear();
 
         data = reinterpret_cast<const unsigned char *>(frameCache.at(0).payload().constData());
-        dataLen = frameCache.at(0).payload().length();
+        dataLen = std::min(static_cast<int>(frameCache.at(0).payload().length()), maxPayloadBytes);
 
-        for (int c = 0; c < dataLen; c++)
+        for (int c = 0; c < maxPayloadBytes; c++)
         {
             changedBits[c] = 0;
+            referenceBits[c] = 0;
+            refByte[c] = 0;
+        }
+        for (int c = 0; c < dataLen; c++)
+        {
             referenceBits[c] = data[c];
             refByte[c] = data[c];
             //qDebug() << referenceBits[c];
@@ -704,7 +714,7 @@ void FrameInfoWindow::updateDetailsWindow(QString newID)
         for (int j = 0; j < frameCache.count(); j++)
         {
             data = reinterpret_cast<const unsigned char *>(frameCache.at(j).payload().constData());
-            dataLen = frameCache.at(j).payload().length();
+            dataLen = std::min(static_cast<int>(frameCache.at(j).payload().length()), maxPayloadBytes);
 
             const int64_t thisTimestamp = frameCache.at(j).timeStamp().seconds() * 1000000ll + frameCache.at(j).timeStamp().microSeconds();
             switch (timeStyle)
@@ -796,7 +806,7 @@ void FrameInfoWindow::updateDetailsWindow(QString newID)
         }
 
         //Divide all the bit flip heat values by the number of frames to get a ratio
-        for (int j = 0; j < 64; j++) bitFlipHeat[j] /= (double)frameCache.count();
+        for (int j = 0; j < maxPayloadBits; j++) bitFlipHeat[j] /= (double)frameCache.count();
 
         std::sort(sortedIntervals.begin(), sortedIntervals.end());
         int64_t intervalStdDiv = 0, intervalPctl5 = 0, intervalPctl95 = 0, intervalMean = 0, intervalVariance = 0;
@@ -956,7 +966,7 @@ void FrameInfoWindow::updateDetailsWindow(QString newID)
         //heat map output
         dataBase = new QTreeWidgetItem();
         dataBase->setText(0, tr("Bitchange Heatmap"));
-        memset(heatVals, 0, 512); //always clear the array before populating it.
+        memset(heatVals, 0, sizeof(heatVals)); //always clear the array before populating it.
         for (int c = 0; c < 8 * maxLen; c++)
         {
             tempItem = new QTreeWidgetItem();

@@ -130,7 +130,6 @@ void FileComparatorWindow::calculateDetails()
     QMap<uint32_t, FrameData> referenceIDs;
     QTreeWidgetItem *interestedOnlyBase, *referenceOnlyBase = nullptr, *sharedBase, *bitmapBaseInterested, *bitmapBaseReference = nullptr;
     QTreeWidgetItem *valuesBase, *detail, *sharedItem, *valuesInterested, *valuesReference = nullptr;
-    uint64_t tmp;
     const unsigned char *data;
     int dataLen;
 
@@ -168,14 +167,7 @@ void FileComparatorWindow::calculateDetails()
 
         if (interestedIDs.contains(frame.frameId())) //if we saw this ID before then add to the QList in there
         {
-            for (int y = 0; y < dataLen; y++)
-            {
-                interestedIDs[frame.frameId()].values[y][data[y]]++;
-                tmp = data[y];
-                tmp = tmp << (8 * y);
-                interestedIDs[frame.frameId()].bitmap |= tmp;
-                //qDebug() << "bitmap: " << QString::number(interestedIDs[frame.frameId()].bitmap, 16);
-            }            
+            interestedIDs[frame.frameId()].accumulate(data, dataLen);            
             if (msg)
             {
                 int numSignals = msg->sigHandler->getCount();
@@ -203,26 +195,7 @@ void FileComparatorWindow::calculateDetails()
         {
             FrameData *newData = new FrameData();
             newData->ID = frame.frameId();
-            newData->dataLen = dataLen;
-            //it would be possible to implement a constructor for FrameData
-            //that sets the bitmap and values to zero. That would be cleaner and better.
-            newData->bitmap = 0;
-            for (int x = 0; x < 8; x++)
-            {
-                for (int y = 0; y < 256; y++)
-                {
-                    newData->values[x][y] = 0;
-                }
-            }
-            //memset(newData->values, 0, 256 * 8);
-            for (int y = 0; y < dataLen; y++)
-            {
-                newData->values[y][data[y]] = 1;
-                tmp = data[y];
-                tmp = tmp << (8 * y);
-                newData->bitmap |= tmp;
-                //qDebug() << "bitmap: " << QString::number(newData->bitmap, 16);
-            }
+            newData->accumulate(data, dataLen);
             if (msg)
             {
                 int numSignals = msg->sigHandler->getCount();
@@ -260,14 +233,7 @@ void FileComparatorWindow::calculateDetails()
 
         if (referenceIDs.contains(frame.frameId())) //if we saw this ID before then add to the QList in there
         {
-            for (int y = 0; y < dataLen; y++)
-            {
-                referenceIDs[frame.frameId()].values[y][data[y]]++;
-                tmp = data[y];
-                tmp = tmp << (8 * y);
-                referenceIDs[frame.frameId()].bitmap |= tmp;
-                //qDebug() << "bitmap: " << QString::number(referenceIDs[frame.frameId()].bitmap, 16);
-            }
+            referenceIDs[frame.frameId()].accumulate(data, dataLen);
             if (msg)
             {
                 int numSignals = msg->sigHandler->getCount();
@@ -294,24 +260,7 @@ void FileComparatorWindow::calculateDetails()
         {
             FrameData *newData = new FrameData();
             newData->ID = frame.frameId();
-            newData->dataLen = dataLen;
-            newData->bitmap = 0;
-            for (int x = 0; x < 8; x++)
-            {
-                for (int y = 0; y < 256; y++)
-                {
-                    newData->values[x][y] = 0;
-                }
-            }
-            //memset(newData->values, 0, 256 * 8);
-            for (int y = 0; y < dataLen; y++)
-            {
-                newData->values[y][data[y]] = 1;
-                tmp = data[y];
-                tmp = tmp << (8 * y);
-                newData->bitmap |= tmp;
-                //qDebug() << "bitmap: " << QString::number(newData->bitmap, 16);
-            }
+            newData->accumulate(data, dataLen);
             if (msg)
             {
                 int numSignals = msg->sigHandler->getCount();
@@ -378,8 +327,8 @@ void FileComparatorWindow::calculateDetails()
             //if the ID was in both files then we can use the data accumulated above in bitmap
             //and values to figure out what has changed between the two files
 
-            FrameData interested = interestedIDs[keyone];
-            FrameData reference = referenceIDs[keyone];
+            const FrameData &interested = interestedIDs[keyone];
+            const FrameData &reference = referenceIDs[keyone];
 
             bitmapBaseInterested = new QTreeWidgetItem();
             bitmapBaseInterested->setText(0, "Bits set only in " + interestedFilename);
@@ -391,26 +340,22 @@ void FileComparatorWindow::calculateDetails()
             sharedItem->addChild(bitmapBaseInterested);
             if (!uniqueInterested) sharedItem->addChild(bitmapBaseReference);
 
-            uint64_t interestedBits = interested.bitmap;
-            uint64_t referenceBits = reference.bitmap;
-
             //first up, which bits were set in one file but not the other
             for (int b = 0; b < (8 * interested.dataLen); b++)
             {
                 detail = new QTreeWidgetItem();
                 detail->setText(0, QString::number(b) + " (" + QString::number(b / 8) + ":" + QString::number(b % 8) + ")");
-                if ( (interestedBits & 1) && !(referenceBits & 1) )
+                const bool interestedBit = interested.bitSet(b);
+                const bool referenceBit = reference.bitSet(b);
+                if (interestedBit && !referenceBit)
                 {
                     bitmapBaseInterested->addChild(detail);
                     interestedHadUnique = true;
                 }
-                else if ( !(interestedBits & 1) && (referenceBits & 1) )
+                else if (!interestedBit && referenceBit)
                 {
                     if (!uniqueInterested) bitmapBaseReference->addChild(detail);
                 }
-                //qDebug() << b << "  " << QString::number(interestedBits, 16) << "  " << QString::number(referenceBits, 16);
-                interestedBits = interestedBits >> 1;
-                referenceBits = referenceBits >> 1;
             }
 
             for (int i = 0; i < qMax(interested.dataLen, reference.dataLen); i++)
@@ -431,12 +376,12 @@ void FileComparatorWindow::calculateDetails()
                 {
                     detail = new QTreeWidgetItem();
                     detail->setText(0, Utility::formatHexNum(static_cast<unsigned int>(j)));
-                    if ((interested.values[i][j] > 0) && (reference.values[i][j] == 0) )
+                    if ((interested.valueCount(i, j) > 0) && (reference.valueCount(i, j) == 0) )
                     {
                         valuesInterested->addChild(detail);
                         interestedHadUnique = true;
                     }
-                    if ((reference.values[i][j] > 0) && (interested.values[i][j] == 0) )
+                    if ((reference.valueCount(i, j) > 0) && (interested.valueCount(i, j) == 0) )
                     {
                         if (!uniqueInterested) valuesReference->addChild(detail);
                     }

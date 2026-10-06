@@ -33,6 +33,7 @@ int main(int argc, char **argv)
     ASSERT_TEST(new TestDiscreteStateAnalysis());
     ASSERT_TEST(new TestFrameAggregateStore());
     ASSERT_TEST(new TestFrameComparison());
+    ASSERT_TEST(new TestFrameFileIO());
     ASSERT_TEST(new TestFrameHistory());
     ASSERT_TEST(new TestLFQueue());
     ASSERT_TEST(new TestPayloadDiff());

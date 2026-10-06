@@ -16,6 +16,7 @@
 #include <QtEndian>
 
 // C++ standard-library headers
+#include <cctype>
 #include <iostream>
 #include <memory>
 
@@ -3632,6 +3633,132 @@ bool FrameFileIO::saveTraceFile(QString filename, const QVector<CANFrame> * fram
     return true;
 }
 
+namespace {
+
+//flags nibble that follows "##" in candump CAN FD lines (see linux/can.h)
+constexpr int CANDUMP_FD_FLAG_BRS = 0x1;
+constexpr int CANDUMP_FD_FLAG_ESI = 0x2;
+constexpr int CANDUMP_FD_FLAG_FDF = 0x4;
+
+bool isValidCanFdLength(int len)
+{
+    if (len <= 8) return len >= 0;
+    return len == 12 || len == 16 || len == 20 || len == 24 || len == 32 || len == 48 || len == 64;
+}
+
+bool parseHexPayload(const QByteArray &hex, QByteArray &bytes)
+{
+    if (hex.length() % 2 != 0) return false;
+    for (char c : hex)
+    {
+        if (!isxdigit(static_cast<unsigned char>(c))) return false;
+    }
+    bytes = QByteArray::fromHex(hex);
+    return true;
+}
+
+/*
+   Parses the ID and data token of a candump line into frame:
+       123#11223344            classic data frame
+       123#R / 123#R4          classic remote frame
+       12345678#...            extended ID (8 hex digits)
+       123##511223344...       CAN FD frame, the nibble after ## holds the BRS/ESI/FDF flags
+*/
+bool parseCanDumpCompactToken(const QByteArray &token, CANFrame &frame)
+{
+    const int sep = token.indexOf('#');
+    if (sep <= 0) return false;
+
+    const QByteArray idStr = token.left(sep);
+    bool ok = false;
+    const uint32_t id = idStr.toUInt(&ok, 16);
+    if (!ok || id > 0x1FFFFFFF) return false;
+
+    QByteArray rest = token.mid(sep + 1);
+    QByteArray bytes;
+    bool isFD = false;
+    int fdFlags = 0;
+
+    if (rest.startsWith('#'))
+    {
+        if (rest.length() < 2) return false;
+        fdFlags = QByteArray(1, rest.at(1)).toInt(&ok, 16);
+        if (!ok) return false;
+        if (!parseHexPayload(rest.mid(2), bytes)) return false;
+        if (!isValidCanFdLength(bytes.length())) return false;
+        isFD = true;
+    }
+    else if (rest.startsWith('R'))
+    {
+        int len = 0;
+        if (rest.length() > 1)
+        {
+            if (!isdigit(static_cast<unsigned char>(rest.at(1)))) return false;
+            len = rest.at(1) - '0';
+            if (len > 8) return false;
+        }
+        frame.setFrameId(id);
+        frame.setExtendedFrameFormat(idStr.length() > 3 || id > 0x7FF);
+        frame.setFrameType(QCanBusFrame::RemoteRequestFrame);
+        frame.setPayload(QByteArray(len, 0));
+        return true;
+    }
+    else
+    {
+        //classic frames may carry a raw DLC 9..F after an underscore (len8_dlc), ignore it
+        const int dlcSep = rest.indexOf('_');
+        if (dlcSep >= 0) rest.truncate(dlcSep);
+        if (!parseHexPayload(rest, bytes)) return false;
+        if (bytes.length() > 8) return false;
+    }
+
+    frame.setFrameId(id);
+    frame.setExtendedFrameFormat(idStr.length() > 3 || id > 0x7FF);
+    frame.setFrameType(QCanBusFrame::DataFrame);
+    frame.setPayload(bytes);
+    frame.setFlexibleDataRateFormat(isFD);
+    frame.setBitrateSwitch(isFD && (fdFlags & CANDUMP_FD_FLAG_BRS));
+    frame.setErrorStateIndicator(isFD && (fdFlags & CANDUMP_FD_FLAG_ESI));
+    return true;
+}
+
+/*
+   Parses the expanded candump format, tokens[2] onward:
+       (1551774790.942758) can1 7A8 [8] F4 DC D1 83 0E 02 00 00
+       (1551774790.942758) can1 7A8 [32] F4 DC ...                CAN FD
+*/
+bool parseCanDumpExpandedTokens(const QList<QByteArray> &tokens, CANFrame &frame)
+{
+    if (tokens.count() < 4) return false;
+
+    bool ok = false;
+    const uint32_t id = tokens[2].toUInt(&ok, 16);
+    if (!ok || id > 0x1FFFFFFF) return false;
+
+    const QByteArray &lenTok = tokens[3];
+    if (lenTok.length() < 3 || !lenTok.startsWith('[') || !lenTok.endsWith(']')) return false;
+    const int numBytes = lenTok.mid(1, lenTok.length() - 2).toInt(&ok);
+    if (!ok || !isValidCanFdLength(numBytes)) return false;
+    if (tokens.count() < 4 + numBytes) return false;
+
+    QByteArray bytes(numBytes, 0);
+    for (int c = 0; c < numBytes; c++)
+    {
+        const int val = tokens[4 + c].toInt(&ok, 16);
+        if (!ok || val < 0 || val > 0xFF) return false;
+        bytes[c] = static_cast<char>(val);
+    }
+
+    frame.setFrameId(id);
+    frame.setExtendedFrameFormat(tokens[2].length() > 3 || id > 0x7FF);
+    frame.setFrameType(QCanBusFrame::DataFrame);
+    frame.setPayload(bytes);
+    frame.setFlexibleDataRateFormat(numBytes > 8);
+    return true;
+}
+
+} // namespace
+
 bool FrameFileIO::saveCanDumpFile(QString filename, const QVector<CANFrame> * frames)
 {
     QFile *outFile = new QFile(filename);
@@ -3677,7 +3804,18 @@ bool FrameFileIO::saveCanDumpFile(QString filename, const QVector<CANFrame> * fr
 
         outFile->write("#");
 
-        if (frame->frameType() == QCanBusFrame::RemoteRequestFrame) {
+        if (frame->hasFlexibleDataRateFormat()) {
+            //CAN FD frames are written as ID##<flags><data>, flags is one hex nibble
+            int flags = CANDUMP_FD_FLAG_FDF;
+            if (frame->hasBitrateSwitch()) flags |= CANDUMP_FD_FLAG_BRS;
+            if (frame->hasErrorStateIndicator()) flags |= CANDUMP_FD_FLAG_ESI;
+            outFile->write("#");
+            outFile->write(QString::number(flags, 16).toUpper().toUtf8());
+            for (int temp = 0; temp < dataLen; temp++)
+            {
+                outFile->write(QString::number(data[temp], 16).rightJustified(2,'0').toUpper().toUtf8());
+            }
+        } else if (frame->frameType() == QCanBusFrame::RemoteRequestFrame) {
             outFile->write("R");
             outFile->write(QString::number(dataLen).toUtf8());
         } else {
@@ -3697,128 +3835,41 @@ bool FrameFileIO::saveCanDumpFile(QString filename, const QVector<CANFrame> * fr
 
 bool FrameFileIO::isCanDumpFile(QString filename)
 {
-    QFile *inFile = new QFile(filename);
+    QFile inFile(filename);
     QByteArray line;
-    QList<QByteArray> tokens;
     QRegularExpression timeExp(QRegularExpression::anchoredPattern("^\\((\\S+)\\)$")); //anchored pattern causes exact match
-    QRegularExpression IdValExp(QRegularExpression::anchoredPattern("^(\\S+)#(\\S+)$"));
-    QRegularExpression valExp("(\\S{2})");
     int lineCounter = 0;
-    int pos = 0;
-    bool isMatch = true;
-    bool ret;
+    int matchedLines = 0;
 
-    if (!inFile->open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        delete inFile;
-        return false;
-    }
+    if (!inFile.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
 
-    try
-    {
-        while (!inFile->atEnd() && lineCounter < 100) {
-            lineCounter++;
+    while (!inFile.atEnd() && lineCounter < 100) {
+        lineCounter++;
 
-            line = inFile->readLine().toUpper();
-            if (line.length() > 1)
-            {
-                /* tokenize */
-                tokens.clear();
-                tokens = line.simplified().split(' ');
-                if(tokens.count() < 3) isMatch = false;
+        line = inFile.readLine().toUpper();
+        if (line.length() <= 1) continue;
 
-                /* timestamp */                
-                QRegularExpressionMatch timeExpMatched = timeExp.match(tokens[0]);
-                if(!timeExpMatched.hasMatch()) {
-                    isMatch = false;
-                }
+        const QList<QByteArray> tokens = line.simplified().split(' ');
+        if (tokens.count() < 3) return false;
 
-                /*uint64_t timestamp = (uint64_t)*/(timeExpMatched.captured(1).toDouble(&ret) /** (double)1000000.0*/);
-                if(!ret) isMatch = false;
+        QRegularExpressionMatch timeExpMatched = timeExp.match(QString::fromLatin1(tokens[0]));
+        if (!timeExpMatched.hasMatch()) return false;
+        bool ok = false;
+        timeExpMatched.captured(1).toDouble(&ok);
+        if (!ok) return false;
 
-                if (line.contains('[')) //the expanded format
-                {
-                    //(1551774790.942758) can1 7A8 [8] F4 DC D1 83 0E 02 00 00
-                    //     0               1     2   3  4 5  6  7  8  9  10 11
-                    if (tokens.count() < 4)
-                    {
-                        isMatch = false;
-                        continue;
-                    }
-                    int ID = tokens[2].toULong(nullptr, 16);
-                    if (ID > 0x1FFFFFFF || ID == 0) isMatch = false;
-                    if (tokens[3].size() < 2) {
-                        isMatch = false;
-                        continue;
-                    }
-                    int len = tokens[3].at(1) - '0';
-                    if (len < 0 || len > 8) isMatch = false;
-                }
-                else  //the more concise format
-                {
-                    /* ID & value */
-                    //qDebug() << tokens[2];
-                    if (tokens.count() < 3)
-                    {
-                        isMatch = false;
-                        continue;
-                    }
-
-
-                    QRegularExpressionMatch IdValExpMatched = IdValExp.match(tokens[2]);
-                    if(!IdValExpMatched.hasMatch())
-                    {
-                        isMatch = false;
-                        continue;
-                    }
-
-                    /* ID */
-                    /*int ID = */IdValExpMatched.captured(1).toInt(&ret, 16);
-
-                    QString val= IdValExpMatched.captured(2);
-
-                    pos = 0;
-                    int len = 0;
-                    if (val.startsWith("R") && val.at(1).isDigit()) {
-                        len = val.at(1).toLatin1() - '0';
-                        if (len < 0 || len > 8)
-                        {
-                            isMatch = false;
-                            continue;
-                        }
-                    } else {
-                        /* val byte per byte */
-                        int lng = 0;
-                        QRegularExpressionMatch valExpMatch;
-                        QRegularExpressionMatchIterator i = valExp.globalMatch(val);
-                        while (i.hasNext()) {
-                            valExpMatch = i.next();
-                            lng++;
-                            if (lng > 8)
-                            {
-                                isMatch = false;
-                                break;
-                            }
-                            /*int data = */valExpMatch.captured(1).toInt(&ret, 16);
-                            if(!ret)
-                            {
-                                isMatch = false;
-                                break;
-                            }
-
-                        }
-                    }
-                }
-            }
+        CANFrame probe;
+        if (line.contains('[')) //the expanded format
+        {
+            if (!parseCanDumpExpandedTokens(tokens, probe)) return false;
         }
+        else if (!parseCanDumpCompactToken(tokens[2], probe)) //the more concise format
+        {
+            return false;
+        }
+        matchedLines++;
     }
-    catch (...)
-    {
-        isMatch = false;
-    }
-    inFile->close();
-    delete inFile;
-    return isMatch;
+    return matchedLines > 0;
 }
 
 /*
@@ -3828,23 +3879,14 @@ bool FrameFileIO::isCanDumpFile(QString filename)
 */
 bool FrameFileIO::loadCanDumpFile(QString filename, QVector<CANFrame>* frames)
 {
-    QFile *inFile = new QFile(filename);
-    CANFrame thisFrame;
+    QFile inFile(filename);
     QByteArray line;
-    QList<QByteArray> tokens;
     QRegularExpression timeExp(QRegularExpression::anchoredPattern("^\\((\\S+)\\)$")); //anchored pattern causes exact match
-    QRegularExpression IdValExp(QRegularExpression::anchoredPattern("^(\\S+)#(\\S+)$"));
-    QRegularExpression valExp("(\\S{2})");
     int lineCounter = 0;
-    bool ret;
 
-    if (!inFile->open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        delete inFile;
-        return false;
-    }
+    if (!inFile.open(QIODevice::ReadOnly | QIODevice::Text)) return false;
 
-    while (!inFile->atEnd()) {
+    while (!inFile.atEnd()) {
         lineCounter++;
         if (lineCounter > 100)
         {
@@ -3852,111 +3894,43 @@ bool FrameFileIO::loadCanDumpFile(QString filename, QVector<CANFrame>* frames)
             lineCounter = 0;
         }
 
-        line = inFile->readLine().toUpper();
-        if (line.length() > 1)
+        line = inFile.readLine().toUpper();
+        if (line.length() <= 1) continue;
+
+        /* tokenize */
+        const QList<QByteArray> tokens = line.simplified().split(' ');
+        if (tokens.count() < 3) continue;
+
+        /* timestamp */
+        QRegularExpressionMatch timeExpMatched = timeExp.match(QString::fromLatin1(tokens[0]));
+        if (!timeExpMatched.hasMatch()) continue;
+        bool ok = false;
+        const double seconds = timeExpMatched.captured(1).toDouble(&ok);
+        if (!ok) continue;
+
+        CANFrame thisFrame;
+        thisFrame.setTimeStamp(QCanBusFrame::TimeStamp(0, static_cast<uint64_t>(qRound64(seconds * 1000000.0))));
+
+        //Sort out the bus, skipping the can or vcan text before the bus number
+        const QByteArray &busString = tokens[1];
+        int digitStart = 0;
+        while (digitStart < busString.length() && !isdigit(static_cast<unsigned char>(busString.at(digitStart)))) digitStart++;
+        int digitEnd = digitStart;
+        while (digitEnd < busString.length() && isdigit(static_cast<unsigned char>(busString.at(digitEnd)))) digitEnd++;
+        thisFrame.bus = busString.mid(digitStart, digitEnd - digitStart).toInt();
+
+        bool parsed;
+        if (line.contains('[')) parsed = parseCanDumpExpandedTokens(tokens, thisFrame);
+        else parsed = parseCanDumpCompactToken(tokens[2], thisFrame);
+        if (!parsed)
         {
-            /* tokenize */
-            tokens.clear();
-            tokens = line.simplified().split(' ');
-            if(tokens.count()<3) continue;
+            qDebug() << "Skipping unparseable candump line:" << line.trimmed();
+            continue;
+        }
 
-            /* timestamp */
-            QRegularExpressionMatch timeExpMatched = timeExp.match(tokens[0]);
-            if(!timeExpMatched.hasMatch()) continue;
-            
-            //Sort out the bus
-            std::string busString = tokens[1].toStdString();
-            const char* busStringPtr = busString.c_str();
-            
-            int busNum = 0;
-            
-            //Search for where we have a bus number (skipping the can or vcan text)
-            for (unsigned int i = 0; i < busString.length(); i++)
-            {
-                if (busStringPtr[i] >= '0' && busStringPtr[i] <= '9')
-                {
-                    //Found where the number starts
-                    busNum = atoi(busStringPtr + i);
-                    break;
-                }
-            }
-            
-            thisFrame.bus = busNum;
-            
-            thisFrame.setTimeStamp(QCanBusFrame::TimeStamp(0, (uint64_t)(timeExpMatched.captured(1).toDouble(&ret) * (double)1000000.0)));
-            if(!ret) continue;
-
-            if (line.contains('[')) //the expanded format (second one from the above list)
-            {
-                //(1551774790.942758) can1 7A8 [8] F4 DC D1 83 0E 02 00 00
-                //(1551774790.942758) can1 7A8 [08] F4 DC D1 83 0E 02 00 00
-                //     0               1     2   3  4 5  6  7  8  9  10 11
-                thisFrame.setFrameId(tokens[2].toLong(nullptr, 16));
-                if (thisFrame.frameId() > 0x7FF) thisFrame.setExtendedFrameFormat(true);
-                else thisFrame.setExtendedFrameFormat(false);
-                thisFrame.setFrameType(QCanBusFrame::DataFrame);
-                int numBytes;
-		if (tokens[3].at(2) == ']')
-		    numBytes = tokens[3].at(1) - '0';
-		else
-		    numBytes = (tokens[3].at(1) - '0')*10 + (tokens[3].at(2) - '0');
-                QByteArray bytes(numBytes, 0);
-                for (int c = 0; c < numBytes; c++)
-                {
-                    if ((4 + c) < tokens.size()) bytes[c] = static_cast<char>(tokens[4 + c].toInt(nullptr, 16));
-                }
-                thisFrame.setPayload(bytes);
-            }
-            else  //the more concise format (first one from list above)
-            {
-                /* ID & value */
-                //qDebug() << tokens[2];
-                QRegularExpressionMatch IdValExpMatched = IdValExp.match(tokens[2]);
-                if(!IdValExpMatched.hasMatch())
-                {
-                    qDebug() << "ID regex didn't match!";
-                    continue;
-                }
-
-                /* ID */
-                thisFrame.setFrameId(static_cast<uint32_t>(IdValExpMatched.captured(1).toInt(&ret, 16)));
-                if (IdValExpMatched.captured(1).length() > 3)
-                {
-                    thisFrame.setExtendedFrameFormat(true);
-                }
-                else
-                {
-                    thisFrame.setExtendedFrameFormat(false);
-                }
-
-                QString val = IdValExpMatched.captured(2);
-
-                QByteArray bytes;
-                if (val.startsWith("R") && val.at(1).isDigit()) {
-                    thisFrame.payload().resize( val.at(1).toLatin1() - '0' );
-                    thisFrame.setFrameType(QCanBusFrame::RemoteRequestFrame);
-                } else {
-                    thisFrame.setFrameType(QCanBusFrame::DataFrame);
-                    /* val byte per byte */
-                    QRegularExpressionMatch valExpMatch;
-                    QRegularExpressionMatchIterator i = valExp.globalMatch(val);
-                    while (i.hasNext())
-                    {
-                        valExpMatch = i.next();
-                        bytes.append((char)valExpMatch.captured(1).toInt(&ret, 16));
-                        if(!ret) continue;
-                    }
-                }
-                thisFrame.setPayload(bytes);
-            }
-
-            /*NB: should we make sure len <= 8? */
-            thisFrame.isReceived = true;
-       }
-       frames->append(thisFrame);
+        thisFrame.isReceived = true;
+        frames->append(thisFrame);
     }
-    inFile->close();
-    delete inFile;
     return true;
 }
 

@@ -8,9 +8,10 @@ SnifferItem::SnifferItem(const CANFrame& pFrame, quint32 seq):
     mID(pFrame.frameId())
 {
     const unsigned char *data = reinterpret_cast<const unsigned char *>(pFrame.payload().constData());
-    int dataLen = pFrame.payload().length();
+    //the sniffer tracks only the first 8 bytes, CAN FD frames can carry up to 64
+    int dataLen = qMin(static_cast<int>(pFrame.payload().length()), 8);
 
-    for (int i = 0; i < dataLen; i++) {
+    for (int i = 0; i < 8; i++) {
         mNotch[i] = 0;
         mMarker.data[i] = 0;
         mMarker.dataTimestamp[i] = 0;
@@ -116,7 +117,7 @@ void SnifferItem::update(const CANFrame& pFrame, quint32 timeSeq, bool mute)
     mCurrSeqVal = timeSeq;
 
     const unsigned char *data = reinterpret_cast<const unsigned char *>(pFrame.payload().constData());
-    int dataLen = pFrame.payload().length();
+    int dataLen = qMin(static_cast<int>(pFrame.payload().length()), 8);
 
     /* copy new value */
     for (int i = 0; i < dataLen; i++)
